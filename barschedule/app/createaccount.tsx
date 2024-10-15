@@ -1,8 +1,9 @@
-import { Link, router, Stack, useNavigation } from "expo-router";
+import { Link, router, Stack, useNavigation, useRouter } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
-import app from "../firebaseConfig"
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, sendEmailVerification } from "firebase/auth"
+import {app} from "../firebaseConfig"
+import { useAuth } from "@/AuthContext";
 
 //Here we define what will be shown on this page
 export default function CreateAccount(): JSX.Element{
@@ -10,29 +11,30 @@ export default function CreateAccount(): JSX.Element{
     const [userEmail, setUserEmail] = useState<string>("");
     const [userPassword, setUserPassword] = useState<string>("");
     const [confirmPass, setConfirmPass] = useState<string>("");
-    const [adminAttemptPass, setAdminAttempt] = useState<string>("");
-    const adminPassword = "12345";
     //Here we create our navigation variable so we can move around
     const navigation = useNavigation();
+    const { user, loading } = useAuth();
     //We use this to get rid of the header
     useEffect(() => {
       navigation.setOptions({ headerShown: false});
     } ,[navigation]);
     //create a function to handle the account submissions
+    const auth = getAuth(app);
     const handleSubmission = async () => { 
       //If the passwords match then you can continue
       if (userPassword == confirmPass){
         //We surround our firebase app in a try catch that way if any error pops up we can tack it
           try{
-            //Here we get the auth path for the app to be used in the create user function
-            const auth = getAuth(app);
-            //We use await here to wait for the function to finish fully executing before being able to be used
-            const userInfo = await createUserWithEmailAndPassword(auth,userEmail, userPassword);
-            //Here we get the user
-            const user = userInfo.user;
-            Alert.alert("Success", "User Created");
-            //Route back to the login
-            router.back();
+            //We use await here to wait for the user creation to finish
+            await createUserWithEmailAndPassword(auth, userEmail, userPassword);
+            console.log("User Created");
+            //Here we check the platform
+            if (Platform.OS === "web"){
+              router.replace("/website");
+            }
+            else{
+              router.replace("/app");
+            }
           }
           //Here we check for any error
           catch(error:any){
@@ -55,7 +57,7 @@ export default function CreateAccount(): JSX.Element{
             placeholder="name@example.com"
             value={userEmail}
             onChangeText={setUserEmail}
-            keyboardType="email-address"
+            inputMode="email"
         />
         <TextInput
             style={styles.input}
@@ -71,15 +73,8 @@ export default function CreateAccount(): JSX.Element{
             onChangeText={setConfirmPass}
             secureTextEntry
         />
-        <TextInput
-            style={styles.input}
-            placeholder="Admin Password (Optional)"
-            value={adminAttemptPass}
-            onChangeText={setAdminAttempt}
-            secureTextEntry
-        />
         <View style={styles.buttonContainer}>
-            <Pressable style={styles.buttonDesign} onPress={handleSubmission} accessibilityRole="button">
+            <Pressable style={styles.buttonDesign} onPress={handleSubmission} role="button">
                 <Text style={styles.buttonText}>Submit</Text>
             </Pressable>
         </View>

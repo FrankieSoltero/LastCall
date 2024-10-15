@@ -8,8 +8,6 @@ import React from "react";
 export default function RootLayout() {
   
   return (
-    <AuthProvider>
-      <Slot />
-    </AuthProvider>
+    <Slot />
   );
 }

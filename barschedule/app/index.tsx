@@ -1,38 +1,45 @@
 import { Link, router, Stack, useNavigation } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
-import app from "../firebaseConfig";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
+import { app } from "../firebaseConfig";
 //This function here exports the User Login Text by using the styles variable
 export default function UserLogin(): JSX.Element{
   //Here we use a state variable to store emails and have a setEmail function to go with it
   const [email, setEmail] = useState<string>("");
   //We do the same as above here but for passwords
   const [password, setPassword] = useState<string>("");
-  //Here we create a state array that will store all our users and passwords
-  const [userLogin, setUserLogin] = useState<Array<{ email: String; password: string}>>([]);
   //This is used to get rid of the header so that it doesn't show up
+  const [user, setUser] = useState(null);
   const navigation = useNavigation();
-//This function is to handle what happens when a user submits their login information
+  //This function is to handle what happens when a user submits their login information
+  const auth = getAuth(app);
+  
   const handleSubmit = async (): Promise<void> => {
     //If both email and password are not null
     if (email && password){
       //Set the user login
       try{
-        const auth = getAuth(app);
-        setUserLogin([...userLogin, {email, password}]);
-        const userCred = await signInWithEmailAndPassword(auth, email,password);
-        const user = userCred.user;
+        //Wait for the userlogin to complete
+        await signInWithEmailAndPassword(auth, email,password);
         //Alert the user that the user login was saved 
-        Alert.alert("Success", "User Login");
+        console.log("User Signed In");
+        //Here we check the platform
+        if (Platform.OS === "web"){
+          router.replace("/website");
+        }
+        else {
+          router.replace("/app");
+        }
       }
+      //Here we catch any errors
       catch (error:any){
         const errorCode = error.code;
         const errorMessage = error.message;
         Alert.alert("Error", errorMessage);
       }
     }
-    //Alert the devs of error
+    //Alert the user of error
     else{
       Alert.alert("Error", "Please fill both");
     }
@@ -41,10 +48,6 @@ export default function UserLogin(): JSX.Element{
   useEffect(() => {
     navigation.setOptions({ headerShown: false});
   } ,[navigation]);
-  //We use this to debug the user login attempt
-  useEffect(() => {
-    console.log("User Login Attempt: ", userLogin)
-  }, [userLogin]);
 //Here we design the components seen in the app
   return (
     //below we set the text box for email and password and allow input to be stored in the array
@@ -55,7 +58,7 @@ export default function UserLogin(): JSX.Element{
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
+        inputMode="email"
         />
       <TextInput
         style={styles.input}
@@ -68,10 +71,10 @@ export default function UserLogin(): JSX.Element{
         <Pressable 
           style={styles.buttonDesign}
           onPress={handleSubmit}
-          accessibilityRole="button"
+          role="button"
           >
             <Text style={styles.buttonText}>Login</Text>
-          </Pressable>
+        </Pressable>
         <Link style={styles.buttonDesign} push href='./createaccount' asChild>
           <Pressable>
             <Text style={styles.buttonText}>Create Account</Text>
@@ -81,7 +84,6 @@ export default function UserLogin(): JSX.Element{
     </View>
   );
 }
-const { width } = Dimensions.get('window');
 //This variable creates all the possible different styles we want to incorporate by defining
 //multiple variables within it
 const styles = StyleSheet.create({
@@ -101,7 +103,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     width:"60%",
     marginTop: 10,
   },
