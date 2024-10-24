@@ -2,14 +2,20 @@ import { Link, router, Stack, useNavigation } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "@/AuthContext";
 
-
+//If someone could make the dashboard for the app that would be lit
 export default function HomeScreen(): JSX.Element {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.buttonText}>App Dashboard</Text>
-        </View>
-    );
+  const { user, loading } = useAuth();
+  
+  return (
+    <View style={styles.container}>
+    <Text style={styles.buttonText}>App Dashboard</Text>
+    <View style={styles.buttonContainer}>
+      <Button title="Create Organization" onPress={() => router.push("/app/modals/createOrg")}/>
+    </View>
+</View>
+  );
 }
 const styles = StyleSheet.create({
     container: {

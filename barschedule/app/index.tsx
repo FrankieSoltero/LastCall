@@ -10,7 +10,6 @@ export default function UserLogin(): JSX.Element{
   //We do the same as above here but for passwords
   const [password, setPassword] = useState<string>("");
   //This is used to get rid of the header so that it doesn't show up
-  const [user, setUser] = useState(null);
   const navigation = useNavigation();
   //This function is to handle what happens when a user submits their login information
   const auth = getAuth(app);

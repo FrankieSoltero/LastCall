@@ -2,8 +2,9 @@ import { Link, router, Stack, useNavigation, useRouter } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, sendEmailVerification } from "firebase/auth"
-import {app} from "../firebaseConfig"
+import {app, db } from "../firebaseConfig"
 import { useAuth } from "@/AuthContext";
+import { addDoc, collection } from "firebase/firestore";
 
 //Here we define what will be shown on this page
 export default function CreateAccount(): JSX.Element{
@@ -11,9 +12,14 @@ export default function CreateAccount(): JSX.Element{
     const [userEmail, setUserEmail] = useState<string>("");
     const [userPassword, setUserPassword] = useState<string>("");
     const [confirmPass, setConfirmPass] = useState<string>("");
+    const [userName, setUserName] = useState<string>("");
+    const [userLastName, setLastName] = useState<string>("");
+    
+    const randEmployeeNum = async () => {
+
+    }
     //Here we create our navigation variable so we can move around
     const navigation = useNavigation();
-    const { user, loading } = useAuth();
     //We use this to get rid of the header
     useEffect(() => {
       navigation.setOptions({ headerShown: false});
@@ -22,27 +28,36 @@ export default function CreateAccount(): JSX.Element{
     const auth = getAuth(app);
     const handleSubmission = async () => { 
       //If the passwords match then you can continue
-      if (userPassword == confirmPass){
+      if (userLastName != null && userName != null && userPassword == confirmPass){
         //We surround our firebase app in a try catch that way if any error pops up we can tack it
-          try{
-            //We use await here to wait for the user creation to finish
-            await createUserWithEmailAndPassword(auth, userEmail, userPassword);
-            console.log("User Created");
-            //Here we check the platform
-            if (Platform.OS === "web"){
-              router.replace("/website");
-            }
-            else{
-              router.replace("/app");
-            }
+        try{
+          //We use await here to wait for the user creation to finish
+          const userCret = await createUserWithEmailAndPassword(auth, userEmail, userPassword);
+          const user = userCret.user;
+          const userId = user.uid;
+          //This is where we use addDoc to add the users first and last name to their account data
+          await addDoc(collection(db, "Users"), {
+            FirstName: userName,
+            LastName: userLastName,
+            userID: [userId]
+          });
+          console.log("User Created");
+
+          //Here we check the platform
+          if (Platform.OS === "web"){
+            router.replace("/website");
           }
-          //Here we check for any error
-          catch(error:any){
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            Alert.alert("Error", errorMessage);
+          else{
+            router.replace("/app");
           }
         }
+          //Here we check for any error
+        catch(error:any){
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log("Error", errorMessage);
+        }
+      }
         //If the passwords don't match then it sends an alert to redo it 
       else{
         Alert.alert("Error", "Your Passwords Must Match")
@@ -52,6 +67,18 @@ export default function CreateAccount(): JSX.Element{
     return (
        <View style={styles.container}>
         <Text>Create Your Account</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="First Name"
+          value={userName}
+          onChangeText={setUserName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Last Name"
+          value={userLastName}
+          onChangeText={setLastName}
+        />
         <TextInput
             style={styles.input}
             placeholder="name@example.com"
@@ -86,7 +113,7 @@ const styles = StyleSheet.create({
     container: {
       flex:1,
       justifyContent: `center`,
-      alignItems: `center`,
+      alignItems: `center`, 
       padding: 16,
     }, 
     input: {
