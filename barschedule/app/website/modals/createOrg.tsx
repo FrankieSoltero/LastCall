@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { auth, db } from "@/firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { useRoute } from "@react-navigation/native";
 
 
 export default function HomeScreen(): JSX.Element {
@@ -13,6 +14,7 @@ export default function HomeScreen(): JSX.Element {
   const [orgDescription, setorgDescription] = useState("");
   const [creating, setCreating] = useState(false);
   const router = useRouter();
+
 
   const handleOrgCreate = async () => {
     //Here we do our first check when we call org create to make sure everything is filled out
@@ -24,24 +26,41 @@ export default function HomeScreen(): JSX.Element {
     //Here we set the creating state to true to allow a loading animation
     setCreating(true);
     try {
-      //We get the userId to attatch the organization to it
-      const userId = user?.uid;
       //if there is no user id the user is not authenticated
-      if (!userId){
+      if (!user){
         console.log("Error User not Authenticated");
         //Send them back to the login
-        router.push("/");
+        return;
       }
+      const userId = user?.uid;
+      const userDocReference = doc(db, "Users", userId);
       //Here we initialize a doc at the Organizations Rules
+      const userDoc = await getDoc(userDocReference);
+      if (!userDoc.exists()){
+        console.log("No document was found");
+        return;
+      }
+      const userData = userDoc.data();
+      const userName = userData.FirstName + " " + userData.lastName;
       //A user needs to be authenticated and make sure they are in the admins data section to create one
-      await addDoc(collection(db, "Organizations"), {
+      const orgRef = await addDoc(collection(db, "Organizations"), {
         name: orgName,
         descritpion: orgDescription,
-        members: [userId],
-        admins: [userId],
+        memberIds: [userId],
+        admins: [userName],
+        adminIds: [userId],
+        memberNames: [userName]
+      });
+      const orgID = orgRef.id;
+      
+      await updateDoc(userDocReference, {
+        OgrnaizationsIDs: arrayUnion(orgID),
+        Organizations: arrayUnion(orgName),
+        AdminOrgs: arrayUnion(orgName)
       });
       Alert.alert("Organization created successfully!");
       router.push("/website");
+      return orgID;
     }
     //Here we catch an error
     catch (error:any){

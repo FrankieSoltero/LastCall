@@ -27,6 +27,16 @@ const auth = initializeAuth(app);
 
 const db = getFirestore(app);
 
+interface OrgSetUp {
+  id: string;
+  name: string;
+  description: string;
+  adminIds: string[];
+  memberIds: string[];
+  memberNames: string[];
+  admins: string[];
+}
 
-export { app, auth, db};
+
+export { app, auth, db, OrgSetUp};
 

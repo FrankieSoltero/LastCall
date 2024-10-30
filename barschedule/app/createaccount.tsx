@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, sendEmailVerification } from "firebase/auth"
 import {app, db } from "../firebaseConfig"
 import { useAuth } from "@/AuthContext";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
 //Here we define what will be shown on this page
 export default function CreateAccount(): JSX.Element{
@@ -15,9 +15,6 @@ export default function CreateAccount(): JSX.Element{
     const [userName, setUserName] = useState<string>("");
     const [userLastName, setLastName] = useState<string>("");
     
-    const randEmployeeNum = async () => {
-
-    }
     //Here we create our navigation variable so we can move around
     const navigation = useNavigation();
     //We use this to get rid of the header
@@ -36,11 +33,14 @@ export default function CreateAccount(): JSX.Element{
           const user = userCret.user;
           const userId = user.uid;
           //This is where we use addDoc to add the users first and last name to their account data
-          await addDoc(collection(db, "Users"), {
+          const userDocReference = doc(db, "Users", userId);
+          const userData = {
             FirstName: userName,
-            LastName: userLastName,
-            userID: [userId]
-          });
+            lastName: userLastName,
+            email: user.email,
+          };
+          //This allows for us to set the user Document to the user ID to make it easier to query for
+          await setDoc(userDocReference, userData, { merge: true});
           console.log("User Created");
 
           //Here we check the platform
