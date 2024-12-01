@@ -6,10 +6,7 @@ import React from "react";
 //You absolutely need an index in every folder including tabs it can be renamed through styling
 
 export default function RootLayout() {
-  
-  return ( 
-    <AuthProvider>
-      <Slot />
-    </AuthProvider>
+  return (
+    <Slot />
   );
 }

@@ -36,8 +36,9 @@ export default function CreateAccount(): JSX.Element{
           const userDocReference = doc(db, "Users", userId);
           const userData = {
             FirstName: userName,
-            lastName: userLastName,
+            LastName: userLastName,
             email: user.email,
+            employeeID: user.uid,
           };
           //This allows for us to set the user Document to the user ID to make it easier to query for
           await setDoc(userDocReference, userData, { merge: true});

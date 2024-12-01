@@ -1,8 +1,9 @@
-import { Link, router, Stack, useNavigation } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import { app } from "../firebaseConfig";
+
 //This function here exports the User Login Text by using the styles variable
 export default function UserLogin(): JSX.Element{
   //Here we use a state variable to store emails and have a setEmail function to go with it
@@ -13,7 +14,8 @@ export default function UserLogin(): JSX.Element{
   const navigation = useNavigation();
   //This function is to handle what happens when a user submits their login information
   const auth = getAuth(app);
-  
+  const params = useLocalSearchParams();
+  const redirect = params.redirect as unknown as string;
   const handleSubmit = async (): Promise<void> => {
     //If both email and password are not null
     if (email && password){
@@ -25,7 +27,12 @@ export default function UserLogin(): JSX.Element{
         console.log("User Signed In");
         //Here we check the platform
         if (Platform.OS === "web"){
-          router.replace("/website");
+          if (redirect != null){
+            router.replace(redirect);
+          }
+          else {
+            router.replace("/website");
+          }
         }
         else {
           router.replace("/app");

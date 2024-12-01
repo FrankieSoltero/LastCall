@@ -1,11 +1,10 @@
 import { Link, router, Stack, useNavigation, useRouter } from "expo-router";
-import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
+import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, ScrollView } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db, OrgSetUp } from "@/firebaseConfig";
-import { ScrollView } from "react-native-gesture-handler";
 
 
 export default function HomeScreen() {
@@ -53,7 +52,6 @@ export default function HomeScreen() {
   if (loading){
     return <Text>Loading Organizations...</Text>
   }
-
     return (
       <>
         <View style={styles.container}>
@@ -65,9 +63,6 @@ export default function HomeScreen() {
               {/**Create a new view for every new button and use the button wrap to put space in between them */}
               <View style={styles.buttonWrap}>
                 <Button title="Create Organization" onPress={() => router.push("/website/modals/createOrg")} />
-              </View>
-              <View style={styles.buttonWrap}>
-                <Button title="Join Organization" onPress={() => router.push("/website/organizationJoin")} />
               </View>
             </View>
           </View>
@@ -85,7 +80,7 @@ export default function HomeScreen() {
                 <Text style={styles.cardTitle}>{org.name}</Text>
                 <Text style={styles.cardDescription}>{org.description}</Text>
                 <View style={styles.cardActions}>
-                  <Button title="Manage" onPress={() => router.push(`/website/organization/${org.id}/manage`)}/>
+                  <Button title="Manage" onPress={() => router.push(`/website/adminOrganization/${org.id}`)}/>
                 </View>
               </View>
             ))
@@ -100,7 +95,7 @@ export default function HomeScreen() {
                 <Text style={styles.cardTitle}>{org.name}</Text>
                 <Text style={styles.cardDescription}>{org.description}</Text>
                 <View style={styles.cardActions}>
-                <Button title="View Organization" onPress={() => router.push(`/website/organization/${org.id}/manage`)}/>
+                <Button title="View Organization" onPress={() => router.push(`/website/memberOrganizations/${org.id}`)}/>
                 </View>
               </View>
             ))

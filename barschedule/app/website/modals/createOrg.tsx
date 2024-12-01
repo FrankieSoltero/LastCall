@@ -13,7 +13,6 @@ export default function HomeScreen(): JSX.Element {
   const [orgName, setOrgName] = useState("");
   const [orgDescription, setorgDescription] = useState("");
   const [creating, setCreating] = useState(false);
-  const router = useRouter();
 
 
   const handleOrgCreate = async () => {
@@ -41,26 +40,24 @@ export default function HomeScreen(): JSX.Element {
         return;
       }
       const userData = userDoc.data();
-      const userName = userData.FirstName + " " + userData.lastName;
+      const userName = userData.FirstName + " " + userData.LastName;
       //A user needs to be authenticated and make sure they are in the admins data section to create one
       const orgRef = await addDoc(collection(db, "Organizations"), {
         name: orgName,
-        descritpion: orgDescription,
+        description: orgDescription,
         memberIds: [userId],
         admins: [userName],
         adminIds: [userId],
         memberNames: [userName]
       });
       const orgID = orgRef.id;
-      
       await updateDoc(userDocReference, {
         OgrnaizationsIDs: arrayUnion(orgID),
         Organizations: arrayUnion(orgName),
         AdminOrgs: arrayUnion(orgName)
       });
       Alert.alert("Organization created successfully!");
-      router.push("/website");
-      return orgID;
+      router.replace("/website");
     }
     //Here we catch an error
     catch (error:any){

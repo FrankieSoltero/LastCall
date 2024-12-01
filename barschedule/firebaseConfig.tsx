@@ -27,16 +27,30 @@ const auth = initializeAuth(app);
 
 const db = getFirestore(app);
 
+type RouteParams ={
+  orgId: string;
+};
 interface OrgSetUp {
-  id: string;
+  id?: string;
   name: string;
   description: string;
-  adminIds: string[];
   memberIds: string[];
-  memberNames: string[];
   admins: string[];
+  adminIds: string[];
+  memberNames: string[];
+  inviteLinks: {
+    token: string;
+    createdAt: Date;
+    expiresAt: Date;
+  }[];
+}
+interface Employee {
+  FirstName: string,
+  LastName: string,
+  email: string,
+  employeeID: string,
+  role?: string,
 }
 
-
-export { app, auth, db, OrgSetUp};
+export { app, auth, db, OrgSetUp, RouteParams, Employee};
 
