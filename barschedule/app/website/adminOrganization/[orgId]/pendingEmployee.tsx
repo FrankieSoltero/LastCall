@@ -83,7 +83,6 @@ export default function pendingEmployee() {
             </View>
         )
     }
-    const approveEmployee = 
 }
 
 const styles = StyleSheet.create({
