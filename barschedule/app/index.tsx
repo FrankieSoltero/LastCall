@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 3,
+    backgroundColor: "white"
   },
   buttonContainer: {
     flexDirection: "row",
