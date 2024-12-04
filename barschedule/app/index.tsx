@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
     justifyContent: `center`,
     alignItems: `center`,
     padding: 16,
+    backgroundColor: "#d4f4b3"
   }, 
   input: {
     width: Platform.OS === "web" ? "50%" : "100%",
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   buttonDesign:{
-    backgroundColor: "#007BFF",
+    backgroundColor: "#111d3e",
     padding: 10,
     borderRadius: 2,
     marginHorizontal: 10,
