@@ -42,7 +42,6 @@ export default function CreateAccount(): JSX.Element{
           };
           //This allows for us to set the user Document to the user ID to make it easier to query for
           await setDoc(userDocReference, userData, { merge: true});
-          console.log("User Created");
 
           //Here we check the platform
           if (Platform.OS === "web"){
