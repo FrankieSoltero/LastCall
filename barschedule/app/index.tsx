@@ -1,5 +1,5 @@
 import { Link, router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
-import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
+import { Image, Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import { app } from "../firebaseConfig";
@@ -58,6 +58,10 @@ export default function UserLogin(): JSX.Element{
   return (
     //below we set the text box for email and password and allow input to be stored in the array
     <View style={styles.container}>
+      <Image
+       source={require('../assets/images/LC-logo.png')}
+       style={{ width: 300, height: 300, marginBottom: 20 }}
+     />
       <Text>User Login</Text>
       <TextInput 
         style={styles.input}
