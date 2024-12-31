@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import AsyncStorage  from '@react-native-async-storage/async-storage';
 import { initializeAuth, getAuth } from "firebase/auth";
 import { getReactNativePersistence } from "firebase/auth/react-native";
-import { getFirestore } from "firebase/firestore";
+import { doc, Firestore, getDoc, getFirestore, Timestamp } from "firebase/firestore";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -34,23 +34,22 @@ interface OrgSetUp {
   id?: string;
   name: string;
   description: string;
-  memberIds: string[];
-  admins: string[];
-  adminIds: string[];
-  memberNames: string[];
-  inviteLinks: {
+  inviteLinks?: {
     token: string;
     createdAt: Date;
     expiresAt: Date;
   }[];
+  role?: string;
 }
 interface Employee {
   FirstName: string,
   LastName: string,
   email: string,
-  employeeID: string,
+  userId: string,
   role?: string,
+  requestedAt?: Timestamp,
+  status?: string,
+  name?: string
 }
-
 export { app, auth, db, OrgSetUp, RouteParams, Employee};
 

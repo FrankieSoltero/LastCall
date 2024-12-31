@@ -1,8 +1,9 @@
-import { Link, router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
+
+import { Href, Link, router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { Image, Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
-import { app } from "../firebaseConfig";
+import { auth } from "../firebaseConfig";
 
 //This function here exports the User Login Text by using the styles variable
 export default function UserLogin(): JSX.Element{
@@ -13,9 +14,9 @@ export default function UserLogin(): JSX.Element{
   //This is used to get rid of the header so that it doesn't show up
   const navigation = useNavigation();
   //This function is to handle what happens when a user submits their login information
-  const auth = getAuth(app);
   const params = useLocalSearchParams();
   const redirect = params.redirect as unknown as string;
+  console.log(redirect);
   const handleSubmit = async (): Promise<void> => {
     //If both email and password are not null
     if (email && password){
@@ -28,19 +29,18 @@ export default function UserLogin(): JSX.Element{
         //Here we check the platform
         if (Platform.OS === "web"){
           if (redirect != null){
-            router.replace(redirect);
+            router.replace(redirect as Href<string>);
           }
           else {
-            router.replace("/website");
+            router.replace("/(website)/dashboard" as Href);
           }
         }
         else {
-          router.replace("/app");
+          router.replace("/(app)/");
         }
       }
       //Here we catch any errors
       catch (error:any){
-        const errorCode = error.code;
         const errorMessage = error.message;
         Alert.alert("Error", errorMessage);
       }
@@ -54,6 +54,14 @@ export default function UserLogin(): JSX.Element{
   useEffect(() => {
     navigation.setOptions({ headerShown: false});
   } ,[navigation]);
+  const handleNavigate = () => {
+    if (redirect != null){
+      router.push(`./createaccount?redirect=${encodeURIComponent(redirect)}`);
+    }
+    else {
+      router.push("./createaccount");
+    }
+  }
 //Here we design the components seen in the app
   return (
     //below we set the text box for email and password and allow input to be stored in the array
@@ -85,11 +93,13 @@ export default function UserLogin(): JSX.Element{
           >
             <Text style={styles.buttonText}>Login</Text>
         </Pressable>
-        <Link style={styles.buttonDesign} push href='./createaccount' asChild>
-          <Pressable>
-            <Text style={styles.buttonText}>Create Account</Text>
-          </Pressable>
-        </Link>
+        
+        <Pressable
+        style={styles.buttonDesign}
+        onPress={handleNavigate}
+        role="button">
+          <Text style={styles.buttonText}>Create Account</Text>
+        </Pressable>
       </View>
     </View>
   );

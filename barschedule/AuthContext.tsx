@@ -9,7 +9,10 @@ interface AuthContextType {
 }
 
 //This is where we create our auth context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>({
+    user: null,
+    loading: true,
+});
 
 //Creating a custom hook goes here
 export const useAuth = () => {
@@ -21,6 +24,7 @@ export const useAuth = () => {
     }
     return context;
 }
+
 //Here is what the actual auth provider does, it takes in a child within the ReactNode
 export function AuthProvider ({ children }: { children: ReactNode}): JSX.Element {
     //Here we get the user that is currently using the platform

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { Href, router, useLocalSearchParams, useRouter } from "expo-router";
 import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, Platform } from "react-native";
-import { getDoc, doc, updateDoc, arrayUnion, collection, addDoc } from "firebase/firestore";
+import { getDoc, doc, updateDoc, arrayUnion, collection, addDoc, setDoc } from "firebase/firestore";
 import { db, OrgSetUp } from "@/firebaseConfig";
 import { useAuth } from "@/AuthContext";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -48,13 +48,14 @@ export default function Invite() {
                 console.log("The Data Base Doesn't exist");
             }
             try {
+                console.log(orgId);
                 const orgRef = doc(db, "Organizations", orgId as string);
                 const orgDoc = await getDoc(orgRef);
                 if (orgDoc.exists()!) {
                     console.log("Org Document does not exist");
                 }
                 const data = { id: orgId, ...orgDoc.data() } as OrgSetUp;
-                console.log(data);
+                console.log("Data: "  + data);
                 const inviteLinks = orgDoc.data()?.inviteLinks || [];
                 const now = new Date();
                 const activeInviteLink = inviteLinks.find(
@@ -95,24 +96,35 @@ export default function Invite() {
             return;
         }
         try {
+            const userRef = doc (db, "Users", user.uid);
             const orgRef = doc(db, "Organizations", orgId as string);
             const orgDoc = await getDoc(orgRef);
-            if (!orgDoc.exists()){
-                console.log("Org does not exist");
+            const userDoc = await getDoc(userRef);
+            if (!orgDoc.exists() || !userDoc.exists()){
+                console.log("Docs do not exist");
                 return;
             }
-            const pendingEmployeeRef = collection(orgRef, "PendingEmployees");
-            await addDoc(pendingEmployeeRef, {
+            const data = userDoc.data();
+            const pendingEmployeeRef = doc(orgRef, "PendingEmployees", user.uid);
+            const pendingEmployeeDoc = await getDoc(pendingEmployeeRef);
+            if (pendingEmployeeDoc.exists()){
+                console.log("Employee already requested");
+                return;
+            }
+            const now = new Date();
+            await setDoc(pendingEmployeeRef, {
                 userId: user.uid,
                 email: user.email,
-                requestedAt: new Date(),
+                FirstName: data.FirstName,
+                LastName: data.LastName,
+                requestedAt: now,
                 status: "pending"
             });
             if (Platform.OS === "web") {
-                router.push("/website");
+                router.replace("/(website)/dashboard" as Href);
             }
             else {
-                router.push("/app");
+                router.replace("/(app)/");
             }
         }
         catch (error: any) {

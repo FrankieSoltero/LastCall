@@ -10,11 +10,7 @@ import { AiOutlineBars } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
 
 
-//Fake employee list
-const employees: Employee[] = [
-    { FirstName: "Alex", LastName: "Berry", email: "alex@example.com", employeeID: "1" },
-    { FirstName: "Tobias", LastName: "Johnson", email: "tobias@example.com", employeeID: "2" }
-]
+
 
 export default function employeeView() {
     //We use the same use Route described in index
@@ -30,18 +26,64 @@ export default function employeeView() {
     const [modalVisible, setModalVisible] = useState(false);
     //We use this for our copied text to determine what instructions are given
     const [copied, setCopied] = useState(false);
+    const [employees, setEmployees] = useState<Employee[]>([]);
+    const [loading, setLoading] = useState(true);
     //We use use effect to turn off the header
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
-    //We use this render employees function to show the employess in a cell like manner
+    useEffect(() => {
+        //Create an organization fetcher that pulls data everytime the page is loaded
+        const fetchEmployees = async () => {
+            //Check if the orgId exists
+            if (!orgId) {
+                return;
+            }
+            //Check if the database exists 
+            if (!db) {
+                return;
+            }
+            //Use a try catch to do all the database actions
+            try {
+                /**
+                 * Employee Reference gathers the reference to the employees within the organizations sub collection
+                 * EmployeeSnapShot gets all the docs within the collection reference
+                 * EmployeeData maps each docs data within the snap shot to an employee item and stores them in the asyncronous array
+                 */
+                const employeeReference = collection(db, "Organizations", orgId, "Employees");
+                const employeeSnapShot = await getDocs(employeeReference);
+                const employeesData = employeeSnapShot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                } as unknown as Employee));
+                console.log(employeesData);
+                setEmployees(employeesData);
+            }
+            //Catch the error
+            catch (error: any) {
+                console.log("Error:", error);
+            }
+            //Set loading to false
+            finally {
+                setLoading(false);
+            }
+        };
+        fetchEmployees();
+    }, [orgId]);
+    /**
+     * This function renders our employees within the flatlist
+     * @param Employee this is each employee within the employee array
+     * @returns the cell style information of each employee with a button to edit an employees givin role and position
+     */
     const renderEmployees = ({ item }: { item: Employee }) => {
         return (
             <View style={styles.row}>
-                <Text style={styles.cell}>{item.FirstName + " " + item.LastName}</Text>
+                <Text style={styles.cell}>{item.name}</Text>
                 <Text style={styles.cell}>{item.email}</Text>
                 <View style={styles.cell}>
-                    <Button title={item.role || "Assign Role"} onPress={() => console.log("Balls")} />
+                <TouchableOpacity style={styles.button} onPress={() => console.log("role")}>
+                    <Text style={styles.buttonText}>Assign Role</Text>
+                </TouchableOpacity>
                 </View>
             </View>
         )
@@ -60,6 +102,9 @@ export default function employeeView() {
         //We use navigators clipborad function to copy the link for the user
         await navigator.clipboard.writeText(inviteCode);
         setCopied(true);
+    }
+    const handleRoleAssign = async (userId: string) => {
+        
     }
     //Our function to generate invite links
     const generateInviteLink = async (orgId: string) => {
@@ -120,7 +165,9 @@ export default function employeeView() {
                 <View style={styles.cell} />
                 <View style={styles.cell} />
                 <View style={styles.cell}>
-                    <Button title="Generate Invite Link" onPress={handleEmployeeInvite} />
+                <TouchableOpacity style={styles.button} onPress={handleEmployeeInvite}>
+                    <Text style={styles.buttonText}>Invite Employees</Text>
+                </TouchableOpacity>
                 </View>
             </View>
         )
@@ -131,7 +178,7 @@ export default function employeeView() {
             <FlatList
                 data={employees}
                 renderItem={renderEmployees}
-                keyExtractor={(item) => item.employeeID}
+                keyExtractor={(item) => item.userId}
                 ListFooterComponent={renderListFooter}
             />
             {/**Invite Code Modal will show up here */}
@@ -144,7 +191,7 @@ export default function employeeView() {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Sharable Invite Link</Text>
-                        <Text style={styles.modalContent}>{inviteCode}</Text>
+                        <Text style={styles.modalTitle}>{inviteCode}</Text>
                         {copied ? <Text style={styles.modalInstructions}>Link Copied</Text> : <Text style={styles.modalInstructions}>
                             Share this code with any employee you wish to. This code will expire in a week from now
                         </Text>}
@@ -171,6 +218,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
+        color: "#d4f4b3"
     },
     row: {
         flexDirection: "row",
@@ -182,6 +230,7 @@ const styles = StyleSheet.create({
     cell: {
         flex: 1,
         padding: 8,
+        color: "#d4f4b3"
     },
     footer: {
         marginTop: 16,
@@ -195,7 +244,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: "#0007bff",
+        backgroundColor: "#d4f4b3",
         justifyContent: "center",
         alignItems: "center",
         marginBottom: 8,
@@ -213,7 +262,7 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         width: "80%",
-        backgroundColor: "white",
+        backgroundColor: "#111d3e",
         borderRadius: 10,
         padding: 20,
         alignItems: "center",
@@ -226,20 +275,20 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#007bff",
+        color: "#d4f4b3",
         marginVertical: 10
     },
     modalCode: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#007bff",
+        color: "#d4f4b3",
         marginVertical: 16,
     },
     modalInstructions: {
         fontSize: 16,
         textAlign: "center",
         marginVertical: 10,
-        color: "#555"
+        color: "#d4f4b3"
     },
     buttonContainer: {
         flexDirection: "row",
@@ -249,14 +298,14 @@ const styles = StyleSheet.create({
     },
     button: {
         flex: 1,
-        backgroundColor: "#007bff",
+        backgroundColor: "#d4f4b3",
         padding: 10,
         borderRadius: 5,
         marginHorizontal: 5,
         alignItems: "center",
     },
     buttonText: {
-        color: "white",
+        color: "#111d3e",
         fontWeight: "bold",
         fontSize: 16,
     }

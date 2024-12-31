@@ -1,4 +1,4 @@
-import { Link, router, Stack, useGlobalSearchParams, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { Href, Link, router, Stack, useGlobalSearchParams, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
@@ -40,27 +40,7 @@ export default function DashBoard() {
       }
       //Use a try catch to do all the database actions
       try {
-        //We use firebase's doc function to pull the orgReference 
-        const organizationReference = doc(db, "Organizations", orgId);
-        //We use firebases get doc function to get the orgDocument with the reference
-        const orgDoc = await getDoc(organizationReference);
-        //If it exists then proceed with assigning the data
-        if (orgDoc.exists()) {
-          //We add the id to the data incase we need it, and interpret it as orgsetup
-          const data = { id: orgId, ...orgDoc.data()} as OrgSetUp;
-          //if the data exists then continue with setting the data with the useState
-          if (data){
-            setOrgData(data as OrgSetUp);
-          }
-          //Warn the console
-          else {
-            console.warn("Organization data is empty");
-          }
-        }
-        //Doc doesnt exist if it goes tot he else
-        else {
-          console.warn("Organization doesn't exist");
-        }
+       
       }
       //Catch the error
       catch (error: any) {
@@ -84,19 +64,19 @@ export default function DashBoard() {
   return (
     <View style={styles.container}>
       {/**Dashboard Cards */}
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/website/adminOrganization/${orgId}/employee`)}>
-        <MaterialIcons name="people" size={40} color="black"/>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/employee` as Href<string>)}>
+        <MaterialIcons name="people" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Employees</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/website/adminOrganization/${orgId}/createSchedule`)}>
-        <MaterialIcons name="schedule" size={40} color="black"/>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/createSchedule` as Href<string>)}>
+        <MaterialIcons name="schedule" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Create Schedule Template</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/website/adminOrganization/${orgId}/scheduleTemp`)}>
-        <MaterialIcons name="calendar-month" size={40} color="black"/>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/scheduleTemp` as Href<string>)}>
+        <MaterialIcons name="calendar-month" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Schedule Templates</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/website/adminOrganization/${orgId}/pendingEmployee`)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/pendingEmployee` as Href<string>)}>
         <MaterialIcons name="person-4" size={40} color="black"/>
         <Text style={styles.cardText}>Pending Employees</Text>
       </TouchableOpacity>
@@ -115,7 +95,7 @@ const styles = StyleSheet.create({
   card: {
     width: "45%",
     height: 150,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#d4f4b3",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
