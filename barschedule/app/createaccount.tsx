@@ -1,8 +1,8 @@
-import { Link, router, Stack, useNavigation, useRouter } from "expo-router";
+import { Href, Link, router, Stack, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, sendEmailVerification } from "firebase/auth"
-import {app, db } from "../firebaseConfig"
+import { auth ,db } from "../firebaseConfig"
 import { useAuth } from "@/AuthContext";
 import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
@@ -14,7 +14,9 @@ export default function CreateAccount(): JSX.Element{
     const [confirmPass, setConfirmPass] = useState<string>("");
     const [userName, setUserName] = useState<string>("");
     const [userLastName, setLastName] = useState<string>("");
-    
+    const params = useLocalSearchParams();
+    const redirect = params.redirect as unknown as Href<string>;
+    console.log(redirect);
     //Here we create our navigation variable so we can move around
     const navigation = useNavigation();
     //We use this to get rid of the header
@@ -22,7 +24,6 @@ export default function CreateAccount(): JSX.Element{
       navigation.setOptions({ headerShown: false});
     } ,[navigation]);
     //create a function to handle the account submissions
-    const auth = getAuth(app);
     const handleSubmission = async () => { 
       //If the passwords match then you can continue
       if (userLastName != null && userName != null && userPassword == confirmPass){
@@ -42,13 +43,22 @@ export default function CreateAccount(): JSX.Element{
           };
           //This allows for us to set the user Document to the user ID to make it easier to query for
           await setDoc(userDocReference, userData, { merge: true});
-
           //Here we check the platform
           if (Platform.OS === "web"){
-            router.replace("/website");
+            if (redirect == null){
+              router.replace("/(website)/dashboard" as Href);
+            }
+            else {
+              router.replace(redirect);
+            }
           }
           else{
-            router.replace("/app");
+            if (redirect == null){
+              router.replace("/(app)/");
+            } 
+            else {
+              router.replace(redirect);
+            }
           }
         }
           //Here we check for any error
@@ -101,9 +111,7 @@ export default function CreateAccount(): JSX.Element{
             secureTextEntry
         />
         <View style={styles.buttonContainer}>
-            <Pressable style={styles.buttonDesign} onPress={handleSubmission} role="button">
-                <Text style={styles.buttonText}>Submit</Text>
-            </Pressable>
+            <Button title="Submit" onPress={handleSubmission}/>
         </View>
        </View>
     );

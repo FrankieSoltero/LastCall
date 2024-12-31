@@ -1,4 +1,4 @@
-import { Stack, Slot, useRouter, router, useNavigation } from "expo-router";
+import { Stack, Slot, useRouter, router, useNavigation, Href } from "expo-router";
 import { AuthProvider, useAuth } from "@/AuthContext";
 import { useEffect, useState } from "react";
 import { Dimensions, Platform, StyleSheet, TouchableOpacity, View, Text } from "react-native";
@@ -15,7 +15,6 @@ export default function RootLayout() {
   //next two variables are explained in the index file
   const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
   const orgID = route.params?.orgId as string;
-  const navigation = useNavigation();
   //We use this function to toggle the side bar
   const toggleSideBar = () => {
     setOpenSideBar(!openSideBar);
@@ -23,7 +22,7 @@ export default function RootLayout() {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.toggleButton} onPress={toggleSideBar}>
-          <Ionicons name="menu" size={24} color="black" />
+          <Ionicons name="menu" size={24} color={openSideBar ? "#111d3e" : "#d4f4b3"} />
       </TouchableOpacity>
       {/**Side Bar */}
       {openSideBar && (
@@ -31,34 +30,40 @@ export default function RootLayout() {
           <View style={styles.sideBar}>
             <TouchableOpacity style={styles.toggleButton} onPress={toggleSideBar}>
               <Ionicons name="menu" size={24} color="black" />
-              <TouchableOpacity onPress={() => router.replace("/website/")}>
+              <TouchableOpacity onPress={() => router.replace("/(website)/dashboard")}>
                 <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} color="brown" />
+                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Home</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/website/adminOrganization/${orgID}`)}>
+              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}` as Href<string>)}>
                 <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} color="brown" />
+                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Dashboard</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/website/adminOrganization/${orgId}/scheduleTemp`)}>
+              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/scheduleTemp` as Href<string>)}>
                 <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} color="brown" />
+                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Schedule Templates</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/website/adminOrganization/${orgId}/createSchedule`)}>
+              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/createSchedule` as Href<string>)}>
                 <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} color="brown" />
+                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Create Schedule</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/website/adminOrganization/${orgId}/employee`)}>
+              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/employee` as Href<string>)}>
                 <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} color="brown" />
+                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Employees</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/pendingEmployee` as Href<string>)}>
+                <View style={styles.iconWithText}>
+                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
+                  <Text style={styles.sideBarLink}>Pending Employees</Text>
                 </View>
               </TouchableOpacity>
             </TouchableOpacity>
@@ -75,6 +80,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     flex: 1,
+    backgroundColor: "#111d3e"
   },
   toggleButton: {
     position: "absolute",
@@ -86,7 +92,7 @@ const styles = StyleSheet.create({
   },
   sideBar: {
     width: 200,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#d4f4b3",
     padding: 16,
     borderRightWidth: 1,
     borderRightColor: "#ddd",
@@ -101,7 +107,7 @@ const styles = StyleSheet.create({
   sideBarLink: {
     fontSize: 16,
     paddingVertical: 10,
-    color: "#007bff",
+    color: "#111d3e",
   },
   mainContent: {
     flex: 1,
@@ -116,5 +122,6 @@ const styles = StyleSheet.create({
   iconWithText: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#d4f4b3"
   }
 });

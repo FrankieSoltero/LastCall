@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { auth, db } from "@/firebaseConfig";
-import { addDoc, arrayUnion, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { useRoute } from "@react-navigation/native";
 
 
@@ -45,19 +45,26 @@ export default function HomeScreen(): JSX.Element {
       const orgRef = await addDoc(collection(db, "Organizations"), {
         name: orgName,
         description: orgDescription,
-        memberIds: [userId],
-        admins: [userName],
-        adminIds: [userId],
-        memberNames: [userName]
       });
+      const adminRef = doc(orgRef, "Employees", user.uid);
+      const adminDoc = await getDoc(adminRef);
+      if (adminDoc.exists()){
+        console.log("Admin already exists");
+        return;
+      }
       const orgID = orgRef.id;
+      await setDoc(adminRef, {
+        userId: user.uid,
+        email: user.email,
+        name: userName,
+        role: "Owner"
+      });
       await updateDoc(userDocReference, {
         OgrnaizationsIDs: arrayUnion(orgID),
-        Organizations: arrayUnion(orgName),
         AdminOrgs: arrayUnion(orgName)
       });
       Alert.alert("Organization created successfully!");
-      router.replace("/website");
+      router.replace("/(website)/dashboard");
     }
     //Here we catch an error
     catch (error:any){
