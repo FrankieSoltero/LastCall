@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
-import { db, OrgSetUp, RouteParams, Employee } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { AiOutlineBars } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Employee, RouteParams } from "@/constants/DataSetUps";
 
 export default function pendingEmployee() {
     /**

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db, OrgSetUp } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
 
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];

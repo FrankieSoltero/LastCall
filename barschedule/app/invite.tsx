@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Href, router, useLocalSearchParams, useRouter } from "expo-router";
 import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, Platform } from "react-native";
 import { getDoc, doc, updateDoc, arrayUnion, collection, addDoc, setDoc } from "firebase/firestore";
-import { db, OrgSetUp } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
 import { useAuth } from "@/AuthContext";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { OrgSetUp } from "@/constants/DataSetUps";
 
 export default function Invite() {
     /**

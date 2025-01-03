@@ -1,13 +1,14 @@
 import { Link, router, Stack, useGlobalSearchParams, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { arrayUnion, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { db, OrgSetUp, RouteParams, Employee } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { AiOutlineBars } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Employee, OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 
 
 
@@ -70,6 +71,9 @@ export default function employeeView() {
         };
         fetchEmployees();
     }, [orgId]);
+    if (loading){
+        return <ActivityIndicator size="large" color="#0000ff"/>
+    }
     /**
      * This function renders our employees within the flatlist
      * @param Employee this is each employee within the employee array
