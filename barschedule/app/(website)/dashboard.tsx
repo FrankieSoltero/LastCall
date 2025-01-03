@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { collection, collectionGroup, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { db, OrgSetUp } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
 import React from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
+import { OrgSetUp } from "@/constants/DataSetUps";
 const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen() {

@@ -6,7 +6,8 @@ import React from "react";
 import { AiOutlineBars } from "react-icons/ai";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { RouteParams } from "@/firebaseConfig";
+import { RouteParams } from "@/constants/DataSetUps";
+
 //You absolutely need an index in every folder including tabs it can be renamed through styling
 
 export default function RootLayout() {
@@ -29,7 +30,7 @@ export default function RootLayout() {
         <>
           <View style={styles.sideBar}>
             <TouchableOpacity style={styles.toggleButton} onPress={toggleSideBar}>
-              <Ionicons name="menu" size={24} color="black" />
+              <Ionicons name="menu" size={24} color="#111d3e" />
               <TouchableOpacity onPress={() => router.replace("/(website)/dashboard")}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />

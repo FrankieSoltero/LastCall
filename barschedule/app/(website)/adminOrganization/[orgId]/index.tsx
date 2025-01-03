@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { db, OrgSetUp, RouteParams } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { AiOutlineBars } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
+import { OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 
 
 export default function DashBoard() {
@@ -77,7 +78,7 @@ export default function DashBoard() {
         <Text style={styles.cardText}>Schedule Templates</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/pendingEmployee` as Href<string>)}>
-        <MaterialIcons name="person-4" size={40} color="black"/>
+        <MaterialIcons name="person-4" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Pending Employees</Text>
       </TouchableOpacity>
     </View>
