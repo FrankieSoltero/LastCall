@@ -6,7 +6,7 @@ import { useAuth } from "@/AuthContext";
 import { arrayUnion, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { AiOutlineBars } from "react-icons/ai";
+import { AiOutlineBars, AiTwotoneAudio } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Employee, OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 
@@ -108,6 +108,11 @@ export default function employeeView() {
         setCopied(true);
     }
     const handleRoleAssign = async (userId: string) => {
+        const employeeRef = doc(db, "Organizations", orgId, "Employees", userId);
+        const employeeDoc = await getDoc(employeeRef);
+        if (!employeeDoc.exists()){
+            console.log("Employee Does not Exist");
+        }
         
     }
     //Our function to generate invite links

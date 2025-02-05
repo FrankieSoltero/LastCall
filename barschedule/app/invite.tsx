@@ -121,12 +121,7 @@ export default function Invite() {
                 requestedAt: now,
                 status: "pending"
             });
-            if (Platform.OS === "web") {
-                router.replace("/(website)/dashboard" as Href);
-            }
-            else {
-                router.replace("/(app)/");
-            }
+            router.replace("/protected/dashboard" as Href);
         }
         catch (error: any) {
             console.log("Error joining Organization: ", error.message);

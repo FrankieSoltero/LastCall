@@ -60,11 +60,11 @@ export default function HomeScreen(): JSX.Element {
         role: "Owner"
       });
       await updateDoc(userDocReference, {
-        OgrnaizationsIDs: arrayUnion(orgID),
+        OrganizationsIDs: arrayUnion(orgID),
         AdminOrgs: arrayUnion(orgName)
       });
       Alert.alert("Organization created successfully!");
-      router.replace("/(website)/dashboard");
+      router.replace("/protected/dashboard");
     }
     //Here we catch an error
     catch (error:any){

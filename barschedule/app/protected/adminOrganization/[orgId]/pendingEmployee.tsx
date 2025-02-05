@@ -67,7 +67,7 @@ export default function pendingEmployee() {
             }
         };
         fetchPendingEmployees();
-    }, [orgId]);
+    }, [pendingEmployee]);
     //Our loading if statement
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />

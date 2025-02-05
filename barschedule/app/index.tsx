@@ -2,7 +2,7 @@
 import { Href, Link, router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { Image, Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable } from "react-native";
 import { useState, useEffect } from "react";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, browserLocalPersistence } from "firebase/auth"
 import { auth } from "../firebaseConfig";
 
 //This function here exports the User Login Text by using the styles variable
@@ -16,7 +16,6 @@ export default function UserLogin(): JSX.Element{
   //This function is to handle what happens when a user submits their login information
   const params = useLocalSearchParams();
   const redirect = params.redirect as unknown as string;
-  console.log(redirect);
   const handleSubmit = async (): Promise<void> => {
     //If both email and password are not null
     if (email && password){
@@ -27,16 +26,11 @@ export default function UserLogin(): JSX.Element{
         //Alert the user that the user login was saved 
         console.log("User Signed In");
         //Here we check the platform
-        if (Platform.OS === "web"){
-          if (redirect != null){
-            router.replace(redirect as Href<string>);
-          }
-          else {
-            router.replace("/(website)/dashboard" as Href);
-          }
+        if (redirect != null){
+          router.replace(redirect as Href<string>);
         }
         else {
-          router.replace("/(app)/");
+          router.replace("/protected/dashboard" as Href);
         }
       }
       //Here we catch any errors
@@ -66,10 +60,6 @@ export default function UserLogin(): JSX.Element{
   return (
     //below we set the text box for email and password and allow input to be stored in the array
     <View style={styles.container}>
-      <Image
-       source={require('../assets/images/LC-logo.png')}
-       style={{ width: 300, height: 300, marginBottom: 20 }}
-     />
       <Text>User Login</Text>
       <TextInput 
         style={styles.input}

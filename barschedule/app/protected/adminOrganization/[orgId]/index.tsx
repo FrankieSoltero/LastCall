@@ -41,6 +41,13 @@ export default function DashBoard() {
       }
       //Use a try catch to do all the database actions
       try {
+       const orgRef = doc(db, "Organizations", orgId);
+       const orgDoc = await getDoc(orgRef);
+       if (!orgDoc.exists()){
+        console.log("Org doesn't exist");
+        Alert.alert("Organization does not exist");
+       }
+       const data = orgDoc.data();
        
       }
       //Catch the error
@@ -65,19 +72,19 @@ export default function DashBoard() {
   return (
     <View style={styles.container}>
       {/**Dashboard Cards */}
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/employee` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/employee` as Href<string>)}>
         <MaterialIcons name="people" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Employees</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/createSchedule` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/createSchedule` as Href<string>)}>
         <MaterialIcons name="schedule" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Create Schedule Template</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/scheduleTemp` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/scheduleTemp` as Href<string>)}>
         <MaterialIcons name="calendar-month" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Schedule Templates</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/pendingEmployee` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/pendingEmployee` as Href<string>)}>
         <MaterialIcons name="person-4" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Pending Employees</Text>
       </TouchableOpacity>

@@ -20,6 +20,7 @@ export default function RootLayout() {
   const toggleSideBar = () => {
     setOpenSideBar(!openSideBar);
   }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.toggleButton} onPress={toggleSideBar}>
@@ -31,40 +32,10 @@ export default function RootLayout() {
           <View style={styles.sideBar}>
             <TouchableOpacity style={styles.toggleButton} onPress={toggleSideBar}>
               <Ionicons name="menu" size={24} color="#111d3e" />
-              <TouchableOpacity onPress={() => router.replace("/(website)/dashboard")}>
+              <TouchableOpacity onPress={() => router.replace("/protected/dashboard")}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Home</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}` as Href<string>)}>
-                <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
-                  <Text style={styles.sideBarLink}>Dashboard</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/scheduleTemp` as Href<string>)}>
-                <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
-                  <Text style={styles.sideBarLink}>Schedule Templates</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/createSchedule` as Href<string>)}>
-                <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
-                  <Text style={styles.sideBarLink}>Create Schedule</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/employee` as Href<string>)}>
-                <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
-                  <Text style={styles.sideBarLink}>Employees</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/pendingEmployee` as Href<string>)}>
-                <View style={styles.iconWithText}>
-                  <Ionicons style={styles.sideBarLink} name="beer" size={20} />
-                  <Text style={styles.sideBarLink}>Pending Employees</Text>
                 </View>
               </TouchableOpacity>
             </TouchableOpacity>
@@ -81,7 +52,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     flex: 1,
-    backgroundColor: "#111d3e"
+    backgroundColor: "white"
   },
   toggleButton: {
     position: "absolute",
