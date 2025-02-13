@@ -7,8 +7,6 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { signOut } from "firebase/auth";
 import { auth, db } from "@/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
-import { prepareUIRegistry } from "react-native-reanimated/lib/typescript/reanimated2/frameCallback/FrameCallbackRegistryUI";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 //You absolutely need an index in every folder including tabs it can be renamed through styling
 
 export default function RootLayout() {
@@ -16,18 +14,12 @@ export default function RootLayout() {
   const [isOpen, setOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const router = useRouter();
+  const OS = Platform.OS;
   //We use this to determine when the side bar is open
   const [openSideBar, setOpenSideBar] = useState(false);
-  //We use this function to toggle the side bar
-  const toggleSideBar = () => {
-    setOpenSideBar(!openSideBar);
-  }
-  if (loading){
-    return <Text>Loading...</Text>;
-  }
-  if (!user) return <Redirect href="/"/>;
   useEffect(() => {
     const fetchUserData = async () => {
+      if (!user) return <Redirect href="/"/>;
       try {
         const userRef = doc(db, "Users", user.uid);
         const userDoc = await getDoc(userRef);
@@ -44,10 +36,16 @@ export default function RootLayout() {
     }
     fetchUserData()
   }, [user]);
+  //We use this function to toggle the side bar
+  const toggleSideBar = () => {
+    setOpenSideBar(!openSideBar);
+  }
+  if (loading){
+    if (!user) return <Redirect href={"/"}/>;
+    return <Text>Loading...</Text>;
+  }
     return (
-      <GestureHandlerRootView>
-        <Slot/>
-      </GestureHandlerRootView>
+      <Slot/>
     )
   }
   const styles = StyleSheet.create({

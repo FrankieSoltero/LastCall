@@ -25,7 +25,7 @@ export const useAuth = () => {
     return context;
 }
 //Here is what the actual auth provider does, it takes in a child within the ReactNode
-export function AuthProvider ({ children }: { children: ReactNode}): JSX.Element {
+export function AuthProvider ({ children }: { children: ReactNode}): React.JSX.Element {
     //Here we get the user that is currently using the platform
     const [user, setUser] = useState<User | null>(null);
     //Here we get a loading function where if it is loading to enable a loading screen

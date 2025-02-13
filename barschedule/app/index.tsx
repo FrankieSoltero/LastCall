@@ -4,9 +4,10 @@ import { Image, Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Plat
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, browserLocalPersistence } from "firebase/auth"
 import { auth } from "../firebaseConfig";
+import React from "react";
 
 //This function here exports the User Login Text by using the styles variable
-export default function UserLogin(): JSX.Element{
+export default function UserLogin(): React.JSX.Element{
   //Here we use a state variable to store emails and have a setEmail function to go with it
   const [email, setEmail] = useState<string>("");
   //We do the same as above here but for passwords
@@ -27,7 +28,7 @@ export default function UserLogin(): JSX.Element{
         console.log("User Signed In");
         //Here we check the platform
         if (redirect != null){
-          router.replace(redirect as Href<string>);
+          router.replace(redirect as Href);
         }
         else {
           router.replace("/protected/dashboard" as Href);

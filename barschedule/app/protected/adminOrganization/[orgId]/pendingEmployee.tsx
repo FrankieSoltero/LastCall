@@ -10,6 +10,7 @@ import { AiOutlineBars } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Employee, RouteParams } from "@/constants/DataSetUps";
 
+
 export default function pendingEmployee() {
     /**
      * User is our current user
@@ -20,8 +21,8 @@ export default function pendingEmployee() {
      * pendingEmployee array is an array of pending employees
      */
     const { user } = useAuth();
-    const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
-    const orgId = route.params?.orgId as string;
+    const params = useLocalSearchParams();
+    const orgId = params.orgId as unknown as string;
     const navigation = useNavigation();
     const [loading, setLoading] = useState(true);
     const [pendingEmployee, setPendingEmployees] = useState<Employee[]>([]);

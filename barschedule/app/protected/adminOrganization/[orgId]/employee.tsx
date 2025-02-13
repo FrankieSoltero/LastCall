@@ -12,11 +12,11 @@ import { Employee, OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 
 
 
-
 export default function employeeView() {
     //We use the same use Route described in index
-    const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
-    const orgId = route.params?.orgId as string;
+    const params = useLocalSearchParams();
+    const orgId = params.orgId as unknown as string;
+    console.log(orgId);
     //The user variable defined using UseAuth
     const { user } = useAuth();
     //Our invite link variable

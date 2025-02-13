@@ -1,4 +1,4 @@
-import { Link, router, Stack, useNavigation, useRouter } from "expo-router";
+import { Href, Link, router, Stack, useNavigation, useRouter } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, ScrollView } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
@@ -68,6 +68,7 @@ export default function HomeScreen() {
       style={styles.card}
       onPress={() => {
         if (item.role === "admin" || item.role === "Owner"){
+          console.log(`/protected/adminOrganization/${item.id}`)
           router.push(`/protected/adminOrganization/${item.id}`);        
         }
         else {
@@ -91,17 +92,16 @@ export default function HomeScreen() {
   //here we render the footer that redirects to create org
   const renderFooter = () => {
     return (
-      <><TouchableOpacity
+      <TouchableOpacity
         style={styles.card}
         onPress={() => router.push("/protected/modals/createOrg")}>
           <MaterialIcons name="create" size={40} color="#111d3e" />
           <Text style={styles.orgName}>Create Organization</Text>
         </TouchableOpacity>
-        </>
+        
     )
   }
   return (
-    <>
       <View style={styles.container}>
         <FlatList
           data={organizations}
@@ -112,7 +112,6 @@ export default function HomeScreen() {
           ListFooterComponent={renderFooter}
           />
       </View>
-    </>
   );
 }
 const styles = StyleSheet.create({
