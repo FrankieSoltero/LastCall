@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase/firestore";
+import { StyleSheet } from "react-native";
 
 type RouteParams ={
     orgId: string;
@@ -24,5 +25,18 @@ type RouteParams ={
     status?: string,
     name?: string
   }
+  interface Availability {
+    Wednesday?: string,
+    Thursday?: string,
+    Friday?: string,
+    Saturday?: string,
+    Sunday?: string,
+    Monday?: string,
+    Tuesday?: string,
+  }
 
-export { RouteParams, OrgSetUp, Employee };
+const styles = StyleSheet.create({
+    
+})
+
+export { RouteParams, OrgSetUp, Employee, Availability };

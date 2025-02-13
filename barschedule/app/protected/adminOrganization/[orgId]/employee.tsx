@@ -6,17 +6,17 @@ import { useAuth } from "@/AuthContext";
 import { arrayUnion, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { AiOutlineBars } from "react-icons/ai";
+import { AiOutlineBars, AiTwotoneAudio } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Employee, OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 
 
 
-
 export default function employeeView() {
     //We use the same use Route described in index
-    const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
-    const orgId = route.params?.orgId as string;
+    const params = useLocalSearchParams();
+    const orgId = params.orgId as unknown as string;
+    console.log(orgId);
     //The user variable defined using UseAuth
     const { user } = useAuth();
     //Our invite link variable
@@ -108,6 +108,11 @@ export default function employeeView() {
         setCopied(true);
     }
     const handleRoleAssign = async (userId: string) => {
+        const employeeRef = doc(db, "Organizations", orgId, "Employees", userId);
+        const employeeDoc = await getDoc(employeeRef);
+        if (!employeeDoc.exists()){
+            console.log("Employee Does not Exist");
+        }
         
     }
     //Our function to generate invite links

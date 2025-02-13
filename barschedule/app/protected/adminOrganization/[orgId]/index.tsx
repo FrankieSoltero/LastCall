@@ -10,23 +10,18 @@ import { AiOutlineBars } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
 import { OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 
-
 export default function DashBoard() {
   //We define useRoute to take a RouteProp and definded the RouteParams to be in the same set up as the on imported
-  const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
   //Now we can pull the orgId if params is not null
-  const orgId = route.params?.orgId as string;
+  const params = useLocalSearchParams();
+  const orgId = params.orgId as unknown as string;
+  console.log(orgId);
   //Now we use our orgSet up interface to be able to map the data to an asynchronus function
+  const { user } = useAuth();
   const [orgData, setOrgData] = useState<OrgSetUp | null>(null);
   //Loading variable
   const [loading, setLoading] = useState(true);
-  //We pull user data here
-  const { user } = useAuth();
-
-  //We verify the user is logged in here
-  if (!user) {
-    return;
-  }
+  console.log(orgId);
   //We use the useEffect here so it loads on every interaction with the website
   useEffect(() => {
     //Create an organization fetcher that pulls data everytime the page is loaded
@@ -39,9 +34,18 @@ export default function DashBoard() {
       if (!db) {
         return;
       }
+      if (!user) {
+        return;
+      }
       //Use a try catch to do all the database actions
       try {
-       
+       const orgRef = doc(db, "Organizations", orgId);
+       const orgDoc = await getDoc(orgRef);
+       if (!orgDoc.exists()){
+        console.log("Org doesn't exist");
+        Alert.alert("Organization does not exist");
+       }
+       const data = orgDoc.data();
       }
       //Catch the error
       catch (error: any) {
@@ -65,19 +69,19 @@ export default function DashBoard() {
   return (
     <View style={styles.container}>
       {/**Dashboard Cards */}
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/employee` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/employee` as Href)}>
         <MaterialIcons name="people" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Employees</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/createSchedule` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/createSchedule` as Href)}>
         <MaterialIcons name="schedule" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Create Schedule Template</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/scheduleTemp` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/scheduleTemp` as Href)}>
         <MaterialIcons name="calendar-month" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Schedule Templates</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(website)/adminOrganization/${orgId}/pendingEmployee` as Href<string>)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/pendingEmployee` as Href)}>
         <MaterialIcons name="person-4" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Pending Employees</Text>
       </TouchableOpacity>
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   card: {
-    width: "45%",
+    width: "30%",
     height: 150,
     backgroundColor: "#d4f4b3",
     borderRadius: 10,

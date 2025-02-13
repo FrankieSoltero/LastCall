@@ -1,4 +1,4 @@
-import { Stack, Slot, useRouter, router, useNavigation, Href } from "expo-router";
+import { Stack, Slot, useRouter, router, useNavigation, Href, useLocalSearchParams } from "expo-router";
 import { AuthProvider, useAuth } from "@/AuthContext";
 import { useEffect, useState } from "react";
 import { Dimensions, Platform, StyleSheet, TouchableOpacity, View, Text } from "react-native";
@@ -9,13 +9,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { RouteParams } from "@/constants/DataSetUps";
 
 //You absolutely need an index in every folder including tabs it can be renamed through styling
-
 export default function RootLayout() {
   //We use this to determine when the side bar is open
   const [openSideBar, setOpenSideBar] = useState(false);
+  const params = useLocalSearchParams();
+  const orgId = params.orgId as unknown as string;
+  console.log(orgId);
   //next two variables are explained in the index file
-  const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
-  const orgID = route.params?.orgId as string;
   //We use this function to toggle the side bar
   const toggleSideBar = () => {
     setOpenSideBar(!openSideBar);
@@ -31,37 +31,37 @@ export default function RootLayout() {
           <View style={styles.sideBar}>
             <TouchableOpacity style={styles.toggleButton} onPress={toggleSideBar}>
               <Ionicons name="menu" size={24} color="#111d3e" />
-              <TouchableOpacity onPress={() => router.replace("/(website)/dashboard")}>
+              <TouchableOpacity onPress={() => router.replace("/protected/dashboard")}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Home</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}` as Href<string>)}>
+              <TouchableOpacity onPress={() => router.push(`/protected/adminOrganization/${orgId}`)}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Dashboard</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/scheduleTemp` as Href<string>)}>
+              <TouchableOpacity onPress={() => router.push(`/protected/adminOrganization/${orgId}/scheduleTemp` as Href)}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Schedule Templates</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/createSchedule` as Href<string>)}>
+              <TouchableOpacity onPress={() => router.push(`/protected/adminOrganization/${orgId}/createSchedule` as Href)}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Create Schedule</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/employee` as Href<string>)}>
+              <TouchableOpacity onPress={() => router.push(`/protected/adminOrganization/${orgId}/employee` as Href)}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Employees</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/(website)/adminOrganization/${orgID}/pendingEmployee` as Href<string>)}>
+              <TouchableOpacity onPress={() => router.push(`/protected/adminOrganization/${orgId}/pendingEmployee` as Href)}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Pending Employees</Text>

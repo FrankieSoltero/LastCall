@@ -1,4 +1,4 @@
-import { Link, router, Stack, useNavigation, useRouter } from "expo-router";
+import { Href, Link, router, Stack, useNavigation, useRouter } from "expo-router";
 import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, ScrollView } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
@@ -6,7 +6,7 @@ import { useAuth } from "@/AuthContext";
 import { collection, collectionGroup, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import React from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import { OrgSetUp } from "@/constants/DataSetUps";
 const screenWidth = Dimensions.get("window").width;
@@ -17,7 +17,6 @@ export default function HomeScreen() {
   const [organizations, setOrganizations] = useState<OrgSetUp[]>([]);
   const router = useRouter();
   if (loading) return <Text>Loading User...</Text>;
-  console.log(user?.uid);
   //Here we use our useEffect to essentially subscribe and call fetch orgs whenever the page is opened with the current user
   useEffect(() => {
     /**
@@ -60,7 +59,7 @@ export default function HomeScreen() {
       }
     };
     fetchDashboardData();
-  }, [user]);
+  }, [organizations]);
   //if it is loading show text
   if (orgLoading) return <Text>Organizations Loading...</Text>;
   const render = ({item} : {item:OrgSetUp}) => {
@@ -69,10 +68,11 @@ export default function HomeScreen() {
       style={styles.card}
       onPress={() => {
         if (item.role === "admin" || item.role === "Owner"){
-          router.push(`/(website)/adminOrganization/${item.id}`);        
+          console.log(`/protected/adminOrganization/${item.id}`)
+          router.push(`/protected/adminOrganization/${item.id}`);        
         }
         else {
-          router.push(`/(website)/memberOrganizations/${item.id}`);
+          router.push(`/protected/memberOrganizations/${item.id}`);
         }
       }}
       >
@@ -92,17 +92,16 @@ export default function HomeScreen() {
   //here we render the footer that redirects to create org
   const renderFooter = () => {
     return (
-      <><TouchableOpacity
+      <TouchableOpacity
         style={styles.card}
-        onPress={() => router.push("/(website)/modals/createOrg")}>
+        onPress={() => router.push("/protected/modals/createOrg")}>
           <MaterialIcons name="create" size={40} color="#111d3e" />
           <Text style={styles.orgName}>Create Organization</Text>
         </TouchableOpacity>
-        </>
+        
     )
   }
   return (
-    <>
       <View style={styles.container}>
         <FlatList
           data={organizations}
@@ -113,7 +112,6 @@ export default function HomeScreen() {
           ListFooterComponent={renderFooter}
           />
       </View>
-    </>
   );
 }
 const styles = StyleSheet.create({
