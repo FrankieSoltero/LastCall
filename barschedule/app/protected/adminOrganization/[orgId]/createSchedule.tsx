@@ -19,6 +19,15 @@ const CreateSchedule: React.FC = () => {
     setStartDate(selectedDate);
     setOpen(false);
   };
+  const formatLocalDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  
+  
 
   // This function generates the week schedule and saves it to Firestore as a subcollection under Organizations/{orgId}/weekSchedules
   const generateWeekSchedule = async () => {
@@ -27,32 +36,36 @@ const CreateSchedule: React.FC = () => {
       const daysData: { [key: string]: any } = {};
       let currentDate = new Date(startDate);
 
+
       for (let i = 0; i < numDays; i++) {
         const day = new Date(currentDate);
         newSchedule.push(day);
-        const dayKey = day.toISOString().slice(0, 10);
-        daysData[dayKey] = { roles: [] }; // Initially empty schedule for each day
+        const dayKey = formatLocalDate(day); // e.g., "2025-03-27"
+        daysData[dayKey] = { roles: [] }; // This sets up the "days" object correctly.
         currentDate.setDate(currentDate.getDate() + 1);
       }
+
       setSchedule(newSchedule);
 
       // Use startDate as the week start (YYYY-MM-DD)
-      const weekStart = startDate.toISOString().slice(0, 10);
-      const docId = `${orgId}_${weekStart}`;
+      const weekStartFormatted = formatLocalDate(startDate);
+      const docId = `${orgId}_${weekStartFormatted}`;
 
       const availabilityDeadline = new Date(startDate);
       availabilityDeadline.setDate(availabilityDeadline.getDate() - 1);
+      const availabilityDeadlineFormatted = formatLocalDate(availabilityDeadline);
+
 
       try {
         // Create a reference to the subcollection "weekSchedules" under Organizations/{orgId}
         const weekScheduleRef = doc(collection(db, "Organizations", orgIdString, "weekSchedules"), docId);
         await setDoc(weekScheduleRef, {
           orgId,
-          weekStart,
-          availabilityDeadline: availabilityDeadline.toISOString(),
+          weekStart: weekStartFormatted,
+          availabilityDeadline: availabilityDeadlineFormatted,
           days: daysData,
           generatedAt: new Date().toISOString(),
-        });
+        }, { merge: false });
         Alert.alert("Success", "Week schedule generated and saved!");
       } catch (error: any) {
         console.error("Error generating week schedule:", error);
@@ -117,6 +130,15 @@ const CreateSchedule: React.FC = () => {
           <Text style={styles.buttonText}>Generate Week Schedule</Text>
         </TouchableOpacity>
       )}
+      <TouchableOpacity
+        onPress={() => router.push(
+          `/protected/adminOrganization/${orgIdString}/weekSchedule?weekStart=${startDate ? formatLocalDate(startDate) : ""}` as Href
+        )}
+        style={styles.viewSchedulesButton}
+      >
+        <Text style={styles.viewSchedulesButtonText}>View & Edit This Week Schedule</Text>
+      </TouchableOpacity>
+
 
       {schedule.length > 0 && (
         <ScrollView horizontal style={styles.scheduleContainer}>
@@ -126,7 +148,7 @@ const CreateSchedule: React.FC = () => {
               style={styles.scheduleDate}
               onPress={() =>
                 router.push(
-                  `/protected/adminOrganization/${orgId}/daySchedule?date=${date.toISOString()}` as Href
+                  `/protected/adminOrganization/${orgId}/daySchedule?date=${formatLocalDate(date)}&weekStart=${startDate ? formatLocalDate(startDate) : ""}` as Href
                 )
               }
             >
@@ -135,6 +157,15 @@ const CreateSchedule: React.FC = () => {
           ))}
         </ScrollView>
       )}
+      <TouchableOpacity
+      onPress={() => router.push(
+        `/protected/adminOrganization/${orgId}/scheduleTemp?weekStart=${startDate ? formatLocalDate(startDate) : ""}` as Href
+      )}
+        style={styles.viewSchedulesButton}
+      >
+        <Text style={styles.viewSchedulesButtonText}>View & Edit All Schedules</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
@@ -151,6 +182,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  viewSchedulesButton: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  viewSchedulesButtonText: {
+    color: "white",
+    textAlign: "center",
+  },  
   input: { borderWidth: 1, padding: 8, marginBottom: 10 },
   button: { marginBottom: 10, padding: 10, backgroundColor: "#007bff", borderRadius: 5 },
   greenButton: { backgroundColor: "#28a745", marginTop: 20 },
