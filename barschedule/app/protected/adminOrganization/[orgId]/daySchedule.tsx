@@ -9,13 +9,16 @@ import {
   Modal 
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+// MAKE SURE YOU IMPORT THESE TWO OR ELSE it wont work
 import DropDownPicker from "react-native-dropdown-picker";
+//datetime picker i had to run npx expo run:ios in order for it to work. nothing else worked 
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "@/AuthContext";
 import { db } from "@/firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
-// ---- Fake Datasets ---- //
+//ideally this is in the employee section and is already set
+//Fake Dataset for testing
 const employees = [
   { id: 1, name: "Alice", role: "Bartender" },
   { id: 2, name: "Bob", role: "Barback" },
@@ -25,9 +28,10 @@ const employees = [
   { id: 6, name: "Frank", role: "Bartender" },
 ];
 
+//"ROLES"
 const allRoles = ["Bartender", "Barback", "Security", "Manager", "Door"];
 
-// ---- Type Definitions ---- //
+//type Definitions
 type Shift = {
   startTime: string;
   endTime: string;
@@ -39,7 +43,7 @@ type RoleSchedule = {
   shifts: Shift[];
 };
 
-// Helper to format a date as "YYYY-MM-DD" in local time.
+//Helper to format a date as "YYYY-MM-DD" in local time. in all my files i think just so dates are consistent
 const formatLocalDate = (date: Date): string => {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -48,114 +52,129 @@ const formatLocalDate = (date: Date): string => {
 };
 
 export default function DaySchedule() {
-  // Extract URL parameters and ensure they are strings
+  //Extract URL parameters for ORGid startweek and day make sure they are strings
   const params = useLocalSearchParams() as { orgId: string | string[]; date: string | string[]; weekStart: string | string[] };
   const orgId: string = Array.isArray(params.orgId) ? params.orgId[0] : params.orgId;
   const dateStr: string = Array.isArray(params.date) ? params.date[0] : params.date;
   const weekStart: string = Array.isArray(params.weekStart) ? params.weekStart[0] : params.weekStart;
 
-  // Use the provided date for this day
+  //ititialize date variables based on start date
   const selectedDate = new Date(dateStr);
   const formattedDate = selectedDate.toDateString();
   const dayOfWeek = selectedDate.toLocaleDateString("en-US", { weekday: "long" });
 
-  // Get the current user
+  //Get the current user
   const { user } = useAuth();
 
-  // UI state for roles and shifts
+  //UI state for roles and shifts
+  //control dropdown for roles
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  //store new role to be added
   const [newRole, setNewRole] = useState<string | null>(null);
+  //store the days schedule
   const [daySchedule, setDaySchedule] = useState<RoleSchedule[]>([]);
+  //employee dropdown visibility
   const [employeeDropdownOpen, setEmployeeDropdownOpen] = useState(false);
 
-  //Start time modal
+  //these two are for the time pickers 
+  //Start time modal state
   const [isStartTimePickerVisible, setIsStartTimePickerVisible] = useState(false);
   const [activeShiftForStart, setActiveShiftForStart] = useState<{ role: string; shiftIndex: number } | null>(null);
   const [tempStartTime, setTempStartTime] = useState(new Date());
 
-  // --- CUSTOM END TIME MODAL STATE ---
+  //end time modal state
   const [isEndTimeModalVisible, setIsEndTimeModalVisible] = useState(false);
   const [activeShiftForEnd, setActiveShiftForEnd] = useState<{ role: string; shiftIndex: number } | null>(null);
   const [tempEndTime, setTempEndTime] = useState<Date>(new Date());
 
-  // Fetch the saved day's schedule from Firestore when the component mounts.
-  // This ensures that if data was previously saved, it will be loaded.
+  //fetch the saved day's schedule from Firestore when the component mounts.
+  //This ensures that if data was previously saved, it will be loaded.
+  //SO manager can click in and out of day schedule even if they are not finished with it and data will show up
   React.useEffect(() => {
     const fetchDaySchedule = async () => {
-      const dayKey = formatLocalDate(selectedDate);
+      const dayKey = formatLocalDate(selectedDate); //format date as key use helper
+
+      //IMPORTANT
+      //doc id based on orgid and start date
       const docId = `${orgId}_${weekStart}`;
       try {
-        const docRef = doc(db, "Organizations", orgId, "weekSchedules", docId);
+        const docRef = doc(db, "Organizations", orgId, "weekSchedules", docId);   //reference the firstore document
         const docSnap = await getDoc(docRef);
+
+        //ge tthe saved day schedule we already made this in create schedule
         if (docSnap.exists() && docSnap.data().days && docSnap.data().days[dayKey]) {
-          const dayData = docSnap.data().days[dayKey];
-          // Assume that dayData.roles is what you want to set as daySchedule
+          const dayData = docSnap.data().days[dayKey]; //set the state with the saved schedule
+          //Assume that dayData.roles is what you want to set as daySchedule
           setDaySchedule(dayData.roles || []);
         } else {
-          // If there's no saved data, ensure the state is empty
+          //If there's no saved data, ensure the state is empty
           setDaySchedule([]);
         }
       } catch (error) {
-        console.error("Error fetching day schedule:", error);
+        console.error("Error fetching day schedule:", error);    //if error
         Alert.alert("Error", "Failed to load day schedule.");
       }
     };
     fetchDaySchedule();
-  }, [orgId, weekStart, dateStr]);
+  }, [orgId, weekStart, dateStr]); //dependency array ensures this runs on parameter change
 
 
-  // Functions to add roles and shifts
+  //functions to add roles and shifts
+  //bc first the manager chooses which role they want to schedule first then within that they add shifts for that role
   const addRoleSchedule = () => {
     if (!newRole) return;
     if (!daySchedule.some((rs) => rs.role === newRole)) {
       setDaySchedule((prev) => [...prev, { role: newRole, shifts: [] }]);
     }
-    setNewRole(null);
+    setNewRole(null); //reset role after adding
   };
 
+  //once chose role, add shift for that role
   const addShift = (role: string) => {
     setDaySchedule((prev) =>
       prev.map((rs) =>
-        rs.role === role
+        rs.role === role  //find role that matches the parameter passed role (like you need to be the correct role to shop up in dropdown)
           ? { ...rs, shifts: [...rs.shifts, { startTime: "", endTime: "", employeeId: null }] }
-          : rs
+          : rs //if role doesnt match then leave unchanged
       )
     );
   };
 
+  //Update a shift's data (start time, end time, or employee assignment)
   const updateShift = (
-    role: string,
-    shiftIndex: number,
-    field: "startTime" | "endTime" | "employeeId",
-    value: string | number | null
+    role: string,  //role of the shift (eg bartender)
+    shiftIndex: number,  //index of shift in roles shift array
+    field: "startTime" | "endTime" | "employeeId",   //field to be updated
+    value: string | number | null //new value to be set for field
   ) => {
     setDaySchedule((prev) =>
       prev.map((rs) => {
-        if (rs.role === role) {
-          const newShifts = [...rs.shifts];
-          newShifts[shiftIndex] = { ...newShifts[shiftIndex], [field]: value };
-          return { ...rs, shifts: newShifts };
+        if (rs.role === role) {  //find role passed as parameter
+          const newShifts = [...rs.shifts]; // Create a copy of the current shifts array to ensure immutability
+          newShifts[shiftIndex] = { ...newShifts[shiftIndex], [field]: value }; //update the shift at the specified index //keep existing shifts other data bc obviously will be multiple shifts
+          return { ...rs, shifts: newShifts }; //return updated role object
         }
-        return rs;
+        return rs; //if role doesnt match nada
       })
     );
   };
 
+  //if you want to remove a shift
   const removeShift = (role: string, shiftIndex: number) => {
     setDaySchedule((prev) =>
       prev.map((rs) => {
         if (rs.role === role) {
-          const newShifts = [...rs.shifts];
-          newShifts.splice(shiftIndex, 1);
-          return { ...rs, shifts: newShifts };
+          const newShifts = [...rs.shifts]; //copy of the shifts array to avoid mutating the original
+          newShifts.splice(shiftIndex, 1); //remove the shift at the specified index
+          return { ...rs, shifts: newShifts }; //return the updated role object with the new shifts array
         }
-        return rs;
+        return rs;  //if the role does not match, return the role unchanged
       })
     );
   };
 
 
-  // --- End Time Modal Handlers ---
+  // start Time Modal Handlers
   const handleSaveStartTime = () => {
     if (activeShiftForStart) {
       updateShift(
@@ -165,12 +184,12 @@ export default function DaySchedule() {
         tempStartTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       );
     }
-    setIsStartTimePickerVisible(false);
-    setActiveShiftForStart(null);
+    setIsStartTimePickerVisible(false); //close picker after save
+    setActiveShiftForStart(null); //reset active shift
   };
 
 
-  // --- End Time Modal Handlers ---
+  // end Time Modal Handlers 
   const handleSaveEndTime = () => {
     if (activeShiftForEnd) {
       updateShift(
@@ -184,6 +203,9 @@ export default function DaySchedule() {
     setActiveShiftForEnd(null);
   };
 
+  //Set a default call end time
+  //in my mind if someone is supposed to be on call, then that can just be listed as their endtime. 
+  //if im on call starting at 2pm, then my start time is 2pm and my end time is CALL
   const handleSetCallEndTime = () => {
     if (activeShiftForEnd) {
       updateShift(activeShiftForEnd.role, activeShiftForEnd.shiftIndex, "endTime", "CALL");
@@ -192,6 +214,8 @@ export default function DaySchedule() {
     setActiveShiftForEnd(null);
   };
 
+  //similar to call end tim ebut for close
+  //if shift just goes to close the that will be listed end time
   const handleSetCloseEndTime = () => {
     if (activeShiftForEnd) {
       updateShift(activeShiftForEnd.role, activeShiftForEnd.shiftIndex, "endTime", "CLOSE");
@@ -201,19 +225,21 @@ export default function DaySchedule() {
   };
 
 
-  // Publish function: updates the existing week schedule document with this day's data
-  const publishSchedule = async () => {
+  //Save schedule function. Manager needs to press this button in order for data to save to firestore
+  //need to press in order for them to be able to click out and into day and what they edited to persisit
+  //save function: updates the existing week schedule document with this day's data
+  const saveSchedule = async () => {
     if (!orgId || !weekStart) {
       Alert.alert("Error", "Missing organization ID or week start.");
       return;
     }
     try {
-      // Use local date formatting for the day key
+      //Use local date formatting for the day key
       const dayKey = formatLocalDate(selectedDate);
-      // Build the document ID using orgId and the weekStart (manager-chosen)
+      //Build the document ID using orgId and the weekStart (manager-chosen)
       const docId = `${orgId}_${weekStart}`;
       
-      // Use setDoc with merge: true so that we update the existing document rather than overwrite it
+      //Use setDoc with merge: true so that we update the existing document rather than overwrite it
       await setDoc(
         doc(db, "Organizations", orgId, "weekSchedules", docId),
         {
@@ -227,14 +253,15 @@ export default function DaySchedule() {
         },
         { merge: true }
       );
-      Alert.alert("Success", "Day schedule published successfully!");
+      Alert.alert("Success", "Day schedule published successfully!");  //works
     } catch (error: any) {
-      console.error("Error publishing schedule:", error);
+      console.error("Error publishing schedule:", error);  //error 
       Alert.alert("Error", "Failed to publish schedule.");
     }
   };
 
   // Rendering UI
+  //router hook to naviagte 
   const router = useRouter();
   return (
     <View style={styles.container}>
@@ -330,9 +357,9 @@ export default function DaySchedule() {
   </View>
 ))}
 
-
-      <TouchableOpacity onPress={publishSchedule} style={styles.publishButton}>
-        <Text style={styles.publishButtonText}>Save Schedule</Text>
+{/* This could be too wordy */}
+      <TouchableOpacity onPress={saveSchedule} style={styles.publishButton}>
+        <Text style={styles.publishButtonText}>Save Schedule Must Press In Order for Changes to Save</Text>
       </TouchableOpacity>
 
 
@@ -420,7 +447,7 @@ export default function DaySchedule() {
 };
 
 
-
+//styles
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
@@ -562,9 +589,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   shiftContainer: {
-    marginBottom: 15, // spacing between shifts
+    marginBottom: 15, //spacing between shifts
   },
   employeeDropdownContainer: {
-    marginTop: 8, // spacing between the time pickers row and the dropdown
+    marginTop: 8, //spacing between the time pickers row and the dropdown
   }
 }); 

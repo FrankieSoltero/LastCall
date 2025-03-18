@@ -12,8 +12,13 @@ import { useLocalSearchParams, useRouter, Href } from "expo-router";
 import { collection, doc, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 
+//the purpose of this screen is to show all of the schedules that the manager is editing/pblishing
+//allows manager to delete a schedule if they want
+
+
+//Define the ScheduleData interface to structure the schedule data fetched from Firestore
 interface ScheduleData {
-    id: string; // Firestore document ID
+    id: string; //Firestore document ID
     orgId: string;
     weekStart: string;
     days: {
@@ -29,16 +34,17 @@ interface ScheduleData {
       };
     };
     generatedAt: string;
-    availabilityDeadline?: string; // Optional field
+    availabilityDeadline?: string; 
   }
   
-
+//same as other pages. extract from URL and helper
 const ManageSchedules: React.FC = () => {
   const { orgId } = useLocalSearchParams() as { orgId: string };
   const router = useRouter();
   const [schedules, setSchedules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  //helper
   const formatLocalDate = (date: Date): string => {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -46,35 +52,45 @@ const ManageSchedules: React.FC = () => {
     return `${year}-${month}-${day}`;
   };
 
+    //make sure orID is string
+    const orgIdString = Array.isArray(orgId) ? orgId[0] : orgId;
+    //start date
+     const [startDate, setStartDate] = useState<Date | null>(null);
+
+
   // Extract fetchSchedules into a function so we can refresh later
   const fetchSchedules = async () => {
-    if (!orgId) return;
-    setLoading(true);
+    if (!orgId) return;  //make sur orgid there
+    setLoading(true); //loading state true while fetching data
     try {
-      const schedulesRef = collection(db, "Organizations", orgId, "weekSchedules");
-      const querySnapshot = await getDocs(schedulesRef);
+      const schedulesRef = collection(db, "Organizations", orgId, "weekSchedules"); //firestore collection
+      const querySnapshot = await getDocs(schedulesRef); //get documents
       const scheduleData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }))as ScheduleData[];
-      // Optionally, sort the schedules by weekStart
+
+      // Sort the fetched schedules by the weekStart date in ascending order
       const sortedSchedules = scheduleData.sort((a, b) => new Date(a.weekStart).getTime() - new Date(b.weekStart).getTime());
       setSchedules(sortedSchedules);
     } catch (error) {
-      console.error("Error fetching schedules:", error);
+      console.error("Error fetching schedules:", error);   //error logged
       Alert.alert("Error", "Failed to fetch schedules.");
     } finally {
-      setLoading(false);
+      setLoading(false); //after fetch set state to false
     }
   };
 
   useEffect(() => {
-    fetchSchedules();
+    fetchSchedules();  //Call the fetchSchedules function to retrieve the data
   }, [orgId]);
 
+
+  //If manager wants to delete a whole scheduel this will delete it from firestore completely
   const handleDeleteSchedule = async (scheduleId: string, weekStart: string) => {
     Alert.alert(
       "Delete Schedule",
+      //make sure they actually want to delete schedule in case they clicked it accidentally
       `Are you sure you want to delete the schedule starting ${weekStart}?`,
       [
         {
@@ -84,6 +100,8 @@ const ManageSchedules: React.FC = () => {
         {
           text: "Delete",
           style: "destructive",
+
+          //delete from firestore and refresh
           onPress: async () => {
             try {
               const docRef = doc(db, "Organizations", orgId, "weekSchedules", scheduleId);
@@ -100,6 +118,8 @@ const ManageSchedules: React.FC = () => {
     );
   };
 
+  //honestly dont think this really fully works yet becuase i cant see member side but once availability is set we should
+  //have a screen on member side where once this button is pressed, members will see the schedule and cant edit it
   const handlePublishSchedule = async (scheduleId: string, weekStart: string) => {
     Alert.alert(
       "Publish Schedule",
@@ -128,6 +148,7 @@ const ManageSchedules: React.FC = () => {
   };
 
 
+  //if it is taking  while to load spinner haha
   if (loading) {
     return (
       <View style={styles.container}>
@@ -136,6 +157,7 @@ const ManageSchedules: React.FC = () => {
     );
   }
 
+  //list of schedules
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Manage Week Schedules</Text>
@@ -180,6 +202,8 @@ const ManageSchedules: React.FC = () => {
   );
 };
 
+
+//styles
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
