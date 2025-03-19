@@ -6,7 +6,6 @@ import { useAuth } from "@/AuthContext";
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { AiOutlineBars } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
 import { OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 
@@ -15,7 +14,6 @@ export default function DashBoard() {
   //Now we can pull the orgId if params is not null
   const params = useLocalSearchParams();
   const orgId = params.orgId as unknown as string;
-  console.log(orgId);
   //Now we use our orgSet up interface to be able to map the data to an asynchronus function
   const { user } = useAuth();
   const [orgData, setOrgData] = useState<OrgSetUp | null>(null);

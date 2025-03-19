@@ -65,7 +65,7 @@ export default function HomeScreen(): React.JSX.Element {
         AdminOrgs: arrayUnion(orgName)
       });
       Alert.alert("Organization created successfully!");
-      router.replace("/protected/dashboard");
+      router.replace("/(protected)/dashboard");
     }
     //Here we catch an error
     catch (error:any){

@@ -6,7 +6,6 @@ import { useAuth } from "@/AuthContext";
 import { arrayUnion, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { AiOutlineBars, AiTwotoneAudio } from "react-icons/ai";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Employee, OrgSetUp, RouteParams } from "@/constants/DataSetUps";
 

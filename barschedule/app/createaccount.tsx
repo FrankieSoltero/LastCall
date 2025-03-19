@@ -16,7 +16,7 @@ export default function CreateAccount(): React.JSX.Element {
   const [userName, setUserName] = useState<string>("");
   const [userLastName, setLastName] = useState<string>("");
   const params = useLocalSearchParams();
-  const redirect = params.redirect as unknown as Href<string>;
+  const redirect = params.redirect as unknown as Href;
   //Here we create our navigation variable so we can move around
   const navigation = useNavigation();
   //We use this to get rid of the header

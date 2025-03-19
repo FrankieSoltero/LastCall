@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from "@/AuthContext";
 import { useEffect, useState } from "react";
 import { Dimensions, Platform, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import React from "react";
-import { AiOutlineBars } from "react-icons/ai";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { RouteParams } from "@/constants/DataSetUps";
@@ -32,7 +31,7 @@ export default function RootLayout() {
           <View style={styles.sideBar}>
             <TouchableOpacity style={styles.toggleButton} onPress={toggleSideBar}>
               <Ionicons name="menu" size={24} color="#111d3e" />
-              <TouchableOpacity onPress={() => router.replace("/protected/dashboard")}>
+              <TouchableOpacity onPress={() => router.replace("/(protected)/dashboard")}>
                 <View style={styles.iconWithText}>
                   <Ionicons style={styles.sideBarLink} name="beer" size={20} />
                   <Text style={styles.sideBarLink}>Home</Text>

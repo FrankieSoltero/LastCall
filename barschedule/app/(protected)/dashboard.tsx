@@ -69,10 +69,10 @@ export default function HomeScreen() {
       onPress={() => {
         if (item.role === "admin" || item.role === "Owner"){
           console.log(`/protected/adminOrganization/${item.id}`)
-          router.push(`/protected/adminOrganization/${item.id}`);        
+          router.push(`/(protected)/adminOrganization/${item.id}`);        
         }
         else {
-          router.push(`/protected/memberOrganizations/${item.id}`);
+          router.push(`/(protected)/memberOrganizations/${item.id}`);
         }
       }}
       >
@@ -94,7 +94,7 @@ export default function HomeScreen() {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() => router.push("/protected/modals/createOrg")}>
+        onPress={() => router.push("/(protected)/modals/createOrg")}>
           <MaterialIcons name="create" size={40} color="#111d3e" />
           <Text style={styles.orgName}>Create Organization</Text>
         </TouchableOpacity>

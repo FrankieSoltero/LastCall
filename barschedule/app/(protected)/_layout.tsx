@@ -1,4 +1,4 @@
-import { useRouter, Redirect, Slot } from "expo-router";
+import { useRouter, Redirect, Slot, Stack } from "expo-router";
 import { useAuth } from "@/AuthContext";
 import { useEffect, useState } from "react";
 import { Text, StyleSheet, View, TouchableOpacity, Dimensions, Platform } from "react-native";
@@ -45,7 +45,13 @@ export default function RootLayout() {
     return <Text>Loading...</Text>;
   }
     return (
-      <Slot/>
+      <Stack>
+        <Stack.Screen name="createOrg" options={{title: "Create Organization"}}/>
+        <Stack.Screen name="dashboard" options={{title: "Home"}}/>
+        <Stack.Screen name="profile" options={{title: "Profile"}}/>
+        <Stack.Screen name="memberOrganizations/[orgId]" />
+        <Stack.Screen name="adminOrganizations/[orgId]"/>
+      </Stack>
     )
   }
   const styles = StyleSheet.create({
