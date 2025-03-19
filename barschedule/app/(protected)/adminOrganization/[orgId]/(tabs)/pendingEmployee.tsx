@@ -142,6 +142,9 @@ export default function pendingEmployee() {
         const date = item.requestedAt;
         return (
             <View style={styles.employeeCard}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                          <Text style={styles.backButtonText}>Back</Text>
+                          </TouchableOpacity>
                 <Text style={styles.employeeName}>{item.FirstName + " " + item.LastName}</Text>
                 <Text style={styles.employeeName}>{"Date Requested: " + date?.toDate()}</Text>
                 <View style={styles.buttonContainer}>
@@ -172,6 +175,17 @@ const styles = StyleSheet.create({
     containder: {
         padding: 16,
     },
+    backButton: {
+        marginBottom: 10,
+        padding: 10,
+        backgroundColor: "#007bff",
+        borderRadius: 5,
+        alignSelf: "flex-start",
+      },
+      backButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+      },
     employeeCard: {
         backgroundColor: "#d4f4b3",
         padding: 16,

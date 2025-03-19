@@ -17,6 +17,9 @@ export default function HomeScreen(): React.JSX.Element {
 
 
   const handleOrgCreate = async () => {
+    //handle multiple clicks
+    if (creating) return;  
+    setCreating(true);
     //Here we do our first check when we call org create to make sure everything is filled out
     if (!orgName || !orgDescription){
       //Sends an alert to fill the fields

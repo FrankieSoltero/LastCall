@@ -80,7 +80,11 @@ export default function employeeView() {
      */
     const renderEmployees = ({ item }: { item: Employee }) => {
         return (
+            
             <View style={styles.row}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <Text style={styles.backButtonText}>Back</Text>
+                </TouchableOpacity>
                 <Text style={styles.cell}>{item.name}</Text>
                 <Text style={styles.cell}>{item.email}</Text>
                 <View style={styles.cell}>
@@ -304,6 +308,17 @@ const styles = StyleSheet.create({
         marginTop: 20,
         width: "100%"
     },
+    backButton: {
+        marginBottom: 10,
+        padding: 10,
+        backgroundColor: "#007bff",
+        borderRadius: 5,
+        alignSelf: "flex-start",
+      },
+      backButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+      },
     button: {
         flex: 1,
         backgroundColor: "#d4f4b3",
