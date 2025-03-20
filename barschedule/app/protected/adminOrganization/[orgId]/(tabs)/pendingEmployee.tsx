@@ -23,7 +23,7 @@ export default function pendingEmployee() {
     const params = useLocalSearchParams();
     const orgId = params.orgId as unknown as string;
     const navigation = useNavigation();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [pendingEmployee, setPendingEmployees] = useState<Employee[]>([]);
     //Check is the user is validated
     if (!user) {

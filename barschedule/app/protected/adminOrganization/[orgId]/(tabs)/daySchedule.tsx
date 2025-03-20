@@ -11,8 +11,8 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 // MAKE SURE YOU IMPORT THESE TWO OR ELSE it wont work
 import DropDownPicker from "react-native-dropdown-picker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 //datetime picker i had to run npx expo run:ios in order for it to work. nothing else worked 
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "@/AuthContext";
 import { db } from "@/firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -380,9 +380,9 @@ export default function DaySchedule() {
                 value={tempStartTime}
                 mode="time"
                 display="default"
-                onChange={(event, selectedTime) => {
-                  if (event.type === "set" && selectedTime) {
-                    setTempStartTime(selectedTime);
+                onChange={(event: DateTimePickerEvent, date?: Date) => {
+                  if (event.type === "set" && date) {
+                    setTempStartTime(date);
                   }
                 }}
               />
@@ -421,9 +421,9 @@ export default function DaySchedule() {
                 value={tempEndTime}
                 mode="time"
                 display="default"
-                onChange={(event, selectedTime) => {
-                  if (event.type === "set" && selectedTime) {
-                    setTempEndTime(selectedTime);
+                onChange={(event: DateTimePickerEvent, date?: Date) => {
+                  if (event.type === "set" && date) {
+                    setTempStartTime(date);
                   }
                 }}
               />

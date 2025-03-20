@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { fetchUserProfile, updateUserProfile } from '../services/userService';
+import { fetchUserProfile, updateUserProfile } from '@/constants/userService';
 import { useAuth } from "@/AuthContext";
 
 const Profile = () => {
