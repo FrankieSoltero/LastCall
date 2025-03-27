@@ -28,7 +28,7 @@ export const useAuth = () => {
 };
 
 // AuthProvider component to wrap your app.
-export function AuthProvider({ children }: { children: ReactNode }): React.JSX.Element {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);

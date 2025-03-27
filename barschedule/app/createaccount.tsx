@@ -8,7 +8,7 @@ import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import React from "react";
 
 //Here we define what will be shown on this page
-export default function CreateAccount(): React.JSX.Element {
+export default function CreateAccount() {
   //Here we set our variables to be used to create a user using state variables
   const [userEmail, setUserEmail] = useState<string>("");
   const [userPassword, setUserPassword] = useState<string>("");
@@ -51,7 +51,7 @@ export default function CreateAccount(): React.JSX.Element {
 
         // Redirect the user based on whether a redirect URL was provided
         if (redirect == null) {
-          router.replace("/protected/dashboard" as Href);
+          router.replace("/(protected)/dashboard" as Href);
         } else {
           router.replace(redirect);
         }

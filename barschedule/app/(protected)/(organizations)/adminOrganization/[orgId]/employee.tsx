@@ -58,6 +58,7 @@ export default function employeeView() {
                 } as unknown as Employee));
                 console.log(employeesData);
                 setEmployees(employeesData);
+                console.log("Done")
             }
             //Catch the error
             catch (error: any) {

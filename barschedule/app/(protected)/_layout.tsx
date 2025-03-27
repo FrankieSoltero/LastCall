@@ -7,12 +7,10 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 export default function RootLayout() {
   const {user, loading} = useAuth();
     return (
-      <Stack>
+      <Stack screenOptions={{ headerShown: false}}>
         <Stack.Screen name="createOrg" options={{title: "Create Organization"}}/>
         <Stack.Screen name="dashboard" options={{title: "Home"}}/>
         <Stack.Screen name="profile" options={{title: "Profile"}}/>
-        <Stack.Screen name="memberOrganizations/[orgId]" options={{headerShown: false}}/>
-        <Stack.Screen name="adminOrganizations/[orgId]" options={{headerShown: false}}/>
       </Stack>
     )
   }

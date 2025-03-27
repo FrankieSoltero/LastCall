@@ -9,7 +9,7 @@ import { useRoute } from "@react-navigation/native";
 import React from "react";
 
 
-export default function HomeScreen(): React.JSX.Element {
+export default function HomeScreen() {
   const { user, loading } = useAuth();
   const [orgName, setOrgName] = useState("");
   const [orgDescription, setorgDescription] = useState("");

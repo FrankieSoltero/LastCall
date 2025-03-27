@@ -8,6 +8,7 @@ import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { OrgSetUp, RouteParams } from "@/constants/DataSetUps";
+import React from "react";
 
 export default function DashBoard() {
   //We define useRoute to take a RouteProp and definded the RouteParams to be in the same set up as the on imported

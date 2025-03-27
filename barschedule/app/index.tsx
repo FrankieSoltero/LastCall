@@ -7,7 +7,7 @@ import { auth } from "../firebaseConfig";
 import React from "react";
 
 //This function here exports the User Login Text by using the styles variable
-export default function UserLogin(): React.JSX.Element{
+export default function UserLogin() {
   //Here we use a state variable to store emails and have a setEmail function to go with it
   const [email, setEmail] = useState<string>("");
   //We do the same as above here but for passwords
@@ -31,7 +31,7 @@ export default function UserLogin(): React.JSX.Element{
           router.replace(redirect as Href);
         }
         else {
-          router.replace("/protected/dashboard" as Href);
+          router.replace("/(protected)/dashboard" as Href);
         }
       }
       //Here we catch any errors
@@ -65,6 +65,7 @@ export default function UserLogin(): React.JSX.Element{
       <TextInput 
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor={'black'}
         value={email}
         onChangeText={setEmail}
         inputMode="email"
@@ -72,6 +73,7 @@ export default function UserLogin(): React.JSX.Element{
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor={'black'}
         value={password}
         onChangeText={setPassword}
         secureTextEntry

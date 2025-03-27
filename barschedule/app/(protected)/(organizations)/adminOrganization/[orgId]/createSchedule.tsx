@@ -1,5 +1,5 @@
 import { AuthProvider, useAuth } from "@/AuthContext";
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, Href, useRouter } from "expo-router";
 
@@ -196,17 +196,19 @@ const CreateSchedule: React.FC = () => {
       {schedule.length > 0 && (
         <ScrollView horizontal style={styles.scheduleContainer}>
           {schedule.map((date, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.scheduleDate}
-              onPress={() =>
-                router.push(
-                  `/protected/adminOrganization/${orgId}/daySchedule?date=${formatLocalDate(date)}&weekStart=${startDate ? formatLocalDate(startDate) : ""}` as Href
-                )
-              }
-            >
-              <Text>{date.toDateString()}</Text>
-            </TouchableOpacity>
+            <View key={index}>
+              <TouchableOpacity
+                key={index}
+                style={styles.scheduleDate}
+                onPress={() =>
+                  router.push(
+                    `/protected/adminOrganization/${orgId}/daySchedule?date=${formatLocalDate(date)}&weekStart=${startDate ? formatLocalDate(startDate) : ""}` as Href
+                  )
+                }
+              >
+                <Text>{date.toDateString()}</Text>
+              </TouchableOpacity>
+            </View>
           ))}
         </ScrollView>
       )}

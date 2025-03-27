@@ -7,6 +7,7 @@ import { collection, doc, getDocs, query, setDoc, where } from "firebase/firesto
 import { db } from "@/firebaseConfig";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { RouteParams, Availability } from "@/constants/DataSetUps";
+import React from "react";
 
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];

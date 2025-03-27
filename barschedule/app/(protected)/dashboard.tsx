@@ -29,14 +29,11 @@ export default function HomeScreen() {
     const fetchDashboardData = async () => {
       try {
         if (!user) return;
-        console.log("Step 1");
         const employeeQuery = query(
           collectionGroup(db, "Employees"),
           where("userId", "==", user.uid)
         );
-        console.log("Step 2");
         const employeeSnapShot = await getDocs(employeeQuery);
-        console.log("Step 3");
         const orgData = await Promise.all(
           employeeSnapShot.docs.map(async (docSnapshot) => {
             const orgId = docSnapshot.ref.parent.parent?.id;
@@ -68,11 +65,11 @@ export default function HomeScreen() {
       style={styles.card}
       onPress={() => {
         if (item.role === "admin" || item.role === "Owner"){
-          console.log(`/protected/adminOrganization/${item.id}`)
-          router.push(`/protected/adminOrganization/${item.id}`);        
+          console.log(`/(protected)/(organizations)/adminOrganization/${item.id}`)
+          router.push(`/(protected)/(organizations)/adminOrganization/${item.id}`);        
         }
         else {
-          router.push(`/protected/memberOrganizations/${item.id}`);
+          router.push(`/(protected)/(organizations)/memberOrganizations/${item.id}`);
         }
       }}
       >
@@ -94,7 +91,7 @@ export default function HomeScreen() {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() => router.push("/protected/createOrg")}>
+        onPress={() => router.push("/(protected)/createOrg")}>
           <MaterialIcons name="create" size={40} color="#111d3e" />
           <Text style={styles.orgName}>Create Organization</Text>
         </TouchableOpacity>
