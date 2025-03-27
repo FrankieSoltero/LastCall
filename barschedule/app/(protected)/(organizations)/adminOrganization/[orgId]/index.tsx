@@ -72,15 +72,15 @@ export default function DashBoard() {
         <MaterialIcons name="people" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Employees</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/createSchedule` as Href)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(protected)/adminOrganization/${orgId}/createSchedule` as Href)}>
         <MaterialIcons name="schedule" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Create Schedule Template</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/scheduleTemp` as Href)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(protected)/adminOrganization/${orgId}/scheduleTemp` as Href)}>
         <MaterialIcons name="calendar-month" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Schedule Templates</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => router.push(`/protected/adminOrganization/${orgId}/pendingEmployee` as Href)}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push(`/(protected)/adminOrganization/${orgId}/pendingEmployee` as Href)}>
         <MaterialIcons name="person-4" size={40} color="#111d3e"/>
         <Text style={styles.cardText}>Pending Employees</Text>
       </TouchableOpacity>
