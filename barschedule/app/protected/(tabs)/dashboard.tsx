@@ -16,7 +16,6 @@ export default function HomeScreen() {
   const [orgLoading, setOrgLoading] = useState(true);
   const [organizations, setOrganizations] = useState<OrgSetUp[]>([]);
   const router = useRouter();
-  if (loading) return <Text>Loading User...</Text>;
   //Here we use our useEffect to essentially subscribe and call fetch orgs whenever the page is opened with the current user
   useEffect(() => {
     /**
@@ -56,20 +55,22 @@ export default function HomeScreen() {
       }
     };
     fetchDashboardData();
-  }, [organizations]);
+  }, [user]);
   //if it is loading show text
+  if (!user) return router.replace('/');
   if (orgLoading) return <Text>Organizations Loading...</Text>;
+  if (loading) return <Text>Loading User...</Text>;
   const render = ({item} : {item:OrgSetUp}) => {
     return (
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
         if (item.role === "admin" || item.role === "Owner"){
-          console.log(`/(protected)/(organizations)/adminOrganization/${item.id}`)
-          router.push(`/(protected)/(organizations)/adminOrganization/${item.id}`);        
+          console.log(`/protected/adminOrganization/${item.id}`)
+          router.push(`/protected/adminOrganization/${item.id}`);        
         }
         else {
-          router.push(`/(protected)/(organizations)/memberOrganizations/${item.id}`);
+          router.push(`/protected/memberOrganizations/${item.id}`);
         }
       }}
       >
@@ -87,17 +88,6 @@ export default function HomeScreen() {
     );
   }
   //here we render the footer that redirects to create org
-  const renderFooter = () => {
-    return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push("/(protected)/createOrg")}>
-          <MaterialIcons name="create" size={40} color="#111d3e" />
-          <Text style={styles.orgName}>Create Organization</Text>
-        </TouchableOpacity>
-        
-    )
-  }
   return (
       <View style={styles.container}>
         <FlatList
@@ -106,7 +96,6 @@ export default function HomeScreen() {
           numColumns={2}
           renderItem={render}
           contentContainerStyle={styles.listContainer}
-          ListFooterComponent={renderFooter}
           />
       </View>
   );

@@ -68,7 +68,7 @@ export default function CreateAccount() {
       Alert.alert("Error", "Your Passwords Must Match");
     }
   };
-
+  router.canGoBack();
   //Here we use the return function to create the visual elements
   return (
     <View style={styles.container}>
@@ -78,12 +78,14 @@ export default function CreateAccount() {
         placeholder="First Name"
         value={userName}
         onChangeText={setUserName}
+        placeholderTextColor={'black'}
       />
       <TextInput
         style={styles.input}
         placeholder="Last Name"
         value={userLastName}
         onChangeText={setLastName}
+        placeholderTextColor={'black'}
       />
       <TextInput
         style={styles.input}
@@ -91,6 +93,7 @@ export default function CreateAccount() {
         value={userEmail}
         onChangeText={setUserEmail}
         inputMode="email"
+        placeholderTextColor={'black'}
       />
       <TextInput
         style={styles.input}
@@ -98,6 +101,7 @@ export default function CreateAccount() {
         value={userPassword}
         onChangeText={setUserPassword}
         secureTextEntry
+        placeholderTextColor={'black'}
       />
       <TextInput
         style={styles.input}
@@ -105,6 +109,7 @@ export default function CreateAccount() {
         value={confirmPass}
         onChangeText={setConfirmPass}
         secureTextEntry
+        placeholderTextColor={'black'}
       />
       <View style={styles.buttonContainer}>
         <Button title="Submit" onPress={handleSubmission} />
@@ -120,14 +125,16 @@ const styles = StyleSheet.create({
     justifyContent: `center`,
     alignItems: `center`,
     padding: 16,
+    backgroundColor: '#d4f4b3'
   },
   input: {
     width: Platform.OS === "web" ? "50%" : "100%",
     padding: 8,
     marginVertical: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#111d3e",
     borderRadius: 3,
+    backgroundColor: 'white'
   },
   buttonContainer: {
     flexDirection: "row",

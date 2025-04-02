@@ -30,11 +30,6 @@ export default function pendingEmployee() {
         router.replace("/");
         return;
     }
-    //disable the header
-    useEffect(() => {
-        navigation.setOptions({ headerShown: false });
-    }, [navigation]);
-
     //We use the useEffect here so it loads on every interaction with the website
     useEffect(() => {
         //Create an organization fetcher that pulls data everytime the page is loaded
@@ -142,9 +137,6 @@ export default function pendingEmployee() {
         const date = item.requestedAt;
         return (
             <View style={styles.employeeCard}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                          <Text style={styles.backButtonText}>Back</Text>
-                          </TouchableOpacity>
                 <Text style={styles.employeeName}>{item.FirstName + " " + item.LastName}</Text>
                 <Text style={styles.employeeName}>{"Date Requested: " + date?.toDate()}</Text>
                 <View style={styles.buttonContainer}>

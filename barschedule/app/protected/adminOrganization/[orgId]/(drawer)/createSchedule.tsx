@@ -128,11 +128,8 @@ const CreateSchedule: React.FC = () => {
   //but eventually
   //can click into whichever schedule and it will bring them to the week layout for that particular schedule
   return (
-    <View style={{ padding: 20, backgroundColor: 'black' }}>
+    <View style={{ padding: 10, backgroundColor: 'black' }}>
       {/* Back Button OPEN TO CHANGING THIS I JUST NEEDED FOR TESTING. I think you said yu were gonna make it a sidebar*/}
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
       
       
       <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 10, color: "white" }}>
@@ -228,17 +225,6 @@ const CreateSchedule: React.FC = () => {
 //diff styles
 //will edit once we are fully functinal, looks a bit ugly right now, but lets wait until availability is done lol
 const styles = StyleSheet.create({
-  backButton: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
-    alignSelf: "flex-start",
-  },
-  backButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
   viewSchedulesButton: {
     backgroundColor: "#007bff",
     padding: 10,

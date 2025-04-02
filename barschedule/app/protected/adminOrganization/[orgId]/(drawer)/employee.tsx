@@ -30,9 +30,6 @@ export default function employeeView() {
     const [loading, setLoading] = useState(true);
     //We use use effect to turn off the header
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
-    }, [navigation]);
-    useEffect(() => {
         //Create an organization fetcher that pulls data everytime the page is loaded
         const fetchEmployees = async () => {
             //Check if the orgId exists
@@ -83,9 +80,6 @@ export default function employeeView() {
         return (
             
             <View style={styles.row}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                <Text style={styles.backButtonText}>Back</Text>
-                </TouchableOpacity>
                 <Text style={styles.cell}>{item.name}</Text>
                 <Text style={styles.cell}>{item.email}</Text>
                 <View style={styles.cell}>
@@ -175,12 +169,15 @@ export default function employeeView() {
     const renderListFooter = () => {
         return (
             <View style={styles.row}>
-                <View style={styles.cell} />
-                <View style={styles.cell} />
                 <View style={styles.cell}>
-                <TouchableOpacity style={styles.button} onPress={handleEmployeeInvite}>
-                    <Text style={styles.buttonText}>Invite Employees</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={handleEmployeeInvite}>
+                        <Text style={styles.buttonText}>Create Roles</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.cell}>
+                    <TouchableOpacity style={styles.button} onPress={handleEmployeeInvite}>
+                        <Text style={styles.buttonText}>Invite Employees</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         )
@@ -226,12 +223,13 @@ export default function employeeView() {
 const styles = StyleSheet.create({
     containder: {
         padding: 16,
+        backgroundColor: 'white'
     },
     header: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        color: "#d4f4b3"
+        color: "#111d3e"
     },
     row: {
         flexDirection: "row",
@@ -243,7 +241,7 @@ const styles = StyleSheet.create({
     cell: {
         flex: 1,
         padding: 8,
-        color: "#d4f4b3"
+        color: "#111d3e"
     },
     footer: {
         marginTop: 16,
@@ -309,27 +307,16 @@ const styles = StyleSheet.create({
         marginTop: 20,
         width: "100%"
     },
-    backButton: {
-        marginBottom: 10,
-        padding: 10,
-        backgroundColor: "#007bff",
-        borderRadius: 5,
-        alignSelf: "flex-start",
-      },
-      backButtonText: {
-        color: "#fff",
-        fontWeight: "bold",
-      },
     button: {
         flex: 1,
-        backgroundColor: "#d4f4b3",
+        backgroundColor: "#111d3e",
         padding: 10,
         borderRadius: 5,
         marginHorizontal: 5,
         alignItems: "center",
     },
     buttonText: {
-        color: "#111d3e",
+        color: "#d4f4b3",
         fontWeight: "bold",
         fontSize: 16,
     }

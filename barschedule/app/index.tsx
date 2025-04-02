@@ -31,7 +31,7 @@ export default function UserLogin() {
           router.replace(redirect as Href);
         }
         else {
-          router.replace("/(protected)/dashboard" as Href);
+          router.replace("/protected/dashboard" as Href);
         }
       }
       //Here we catch any errors
