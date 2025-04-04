@@ -20,7 +20,7 @@ export const fetchUserProfile = async () => {
 /**
  * Updates the current user’s profile data in Firestore.
  */
-export const updateUserProfile = async (data: { FirstName?: string; LastName?: string; email?: string }) => {
+export const updateUserProfile = async (data: { FirstName?: string; LastName?: string; email?: string, pushNotifications?: boolean }) => {
   const auth = getAuth();
   if (!auth.currentUser) throw new Error("User not authenticated");
   const userDocRef = doc(db, "Users", auth.currentUser.uid);
