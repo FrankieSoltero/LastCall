@@ -1,25 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, Alert, Button, StyleSheet, Switch, Animated } from 'react-native';
 import { fetchUserProfile, updateUserProfile } from '../services/userService';
-import { useAuth } from "@/AuthContext";
+import { useAuth } from '@/AuthContext';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
 
 const Profile = () => {
-  // Local state for profile fields
+  // State for profile fields
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
+  // State for push notifications preference
+  const [pushNotifications, setPushNotifications] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showCheckmark, setShowCheckmark] = useState<boolean>(false);
+  const checkmarkOpacity = useRef(new Animated.Value(0)).current;
   const { user, loading: authLoading } = useAuth();
 
-  // Fetch the user profile when the component mounts
+  // Fetch user profile data when the component mounts
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const profileData = await fetchUserProfile();
-        // Assume the Firestore document has FirstName, LastName, and email fields
         setFirstName(profileData.FirstName || "");
         setLastName(profileData.LastName || "");
         setEmail(profileData.email || "");
+        setPushNotifications(profileData.pushNotifications || false);
       } catch (error) {
         console.error("Error loading profile:", error);
       } finally {
@@ -29,53 +35,140 @@ const Profile = () => {
     loadProfile();
   }, []);
 
-  // Function to handle profile updates
+  // Save changes for push notifications (names and email are read-only)
   const handleSaveChanges = async () => {
-    if (!firstName.trim() || !lastName.trim() || !email.trim()) {
-      Alert.alert('Error', 'Please fill out all fields.');
+    if (!email.trim()) {
+      Alert.alert('Error', 'Email is missing.');
       return;
     }
     try {
-      await updateUserProfile({ FirstName: firstName, LastName: lastName, email });
+      await updateUserProfile({
+        FirstName: firstName, // read-only field
+        LastName: lastName,   // read-only field
+        email,                // read-only field
+        pushNotifications,
+      });
       Alert.alert('Success', 'Profile updated successfully!');
+      // Show animated checkmark
+      setShowCheckmark(true);
+      Animated.timing(checkmarkOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        setTimeout(() => {
+          Animated.timing(checkmarkOpacity, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }).start(() => setShowCheckmark(false));
+        }, 1500);
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     }
   };
 
-  // Show a loading indicator while fetching data
+  // Sign Out Function
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to sign out. Please try again.');
+    }
+  };
+
+  // Delete Account Function with confirmation
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const currentUser = auth.currentUser;
+              if (currentUser) {
+                await currentUser.delete();
+              }
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete account. Please try again.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   if (loading || authLoading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Profile Page</Text>
+
+      {/* First Name Field (read-only) */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: '#eee', color: '#555' }]}
         placeholder="First Name"
         value={firstName}
-        onChangeText={setFirstName}
-        autoCapitalize="words"
+        editable={false} // First name is read-only
+        selectTextOnFocus={false} // Prevents text selection
       />
+      {/* Last Name Field (read-only) */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: '#eee', color: '#555' }]}
         placeholder="Last Name"
         value={lastName}
-        onChangeText={setLastName}
-        autoCapitalize="words"
+        editable={false} // Last name is read-only
+        selectTextOnFocus={false} // Prevents text selection
       />
+      {/* Email Field (read-only) */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: '#eee', color: '#555' }]}
         placeholder="Email"
         value={email}
-        onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        editable={false} // Email is read-only; cannot be changed
+        selectTextOnFocus={false} // Prevents text selection
       />
+
+      {/* Push Notifications Toggle */}
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Push Notifications</Text>
+        <Switch
+          value={pushNotifications}
+          onValueChange={setPushNotifications}
+          trackColor={{ false: "#767577", true: "#81b0ff" }}
+          thumbColor={pushNotifications ? "#f5dd4b" : "#f4f3f4"}
+        />
+      </View>
+
       <Button title="Save Changes" onPress={handleSaveChanges} />
+
+      {/* Animated Checkmark */}
+      {showCheckmark && (
+        <Animated.View style={{ opacity: checkmarkOpacity }}>
+          <Text style={styles.checkmark}>✓</Text>
+        </Animated.View>
+      )}
+
+      {/* Sign Out and Delete Account Buttons */}
+      <View style={styles.buttonContainer}>
+        <Button title="Sign Out" onPress={handleSignOut} />
+        <Button title="Delete Account" onPress={handleDeleteAccount} color="red" />
+      </View>
     </View>
   );
 };
@@ -88,18 +181,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   header: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '600',
     marginBottom: 20,
     textAlign: 'center',
   },
   input: {
     borderWidth: 1,
+    height: 40,
     borderColor: '#ccc',
-    padding: 10,
     marginBottom: 15,
+    paddingHorizontal: 10,
     borderRadius: 5,
-    backgroundColor: 'white',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  buttonContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  checkmark: {
+    fontSize: 30,
+    textAlign: 'center',
+    color: 'green',
   },
 });
 
