@@ -23,7 +23,7 @@ type RouteParams ={
     role?: string,
     requestedAt?: Timestamp,
     status?: string,
-    name?: string
+    name?: string,
   }
   interface Availability {
     Wednesday?: string,
