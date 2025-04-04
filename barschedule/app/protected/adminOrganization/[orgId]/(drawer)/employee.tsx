@@ -8,7 +8,7 @@ import { db } from "@/firebaseConfig";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Employee, OrgSetUp, RouteParams } from "@/constants/DataSetUps";
-
+import * as Clipboard from 'expo-clipboard';
 
 
 export default function employeeView() {
@@ -101,8 +101,13 @@ export default function employeeView() {
     }
     //Our function to handle what happens when we press the copy link
     const handleCopyLink = async () => {
-        //We use navigators clipborad function to copy the link for the user
-        await navigator.clipboard.writeText(inviteCode);
+        if (Platform.OS == 'web'){
+            //We use navigators clipborad function to copy the link for the user
+            await navigator.clipboard.writeText(inviteCode);
+        }
+        else {
+            await Clipboard.setStringAsync(inviteCode);
+        }
         setCopied(true);
     }
     const handleRoleAssign = async (userId: string) => {
@@ -116,7 +121,7 @@ export default function employeeView() {
     //Our function to generate invite links
     const generateInviteLink = async (orgId: string) => {
         //Before deployment link to use to make the invite code
-        const beforeDeploymentLink = "http://localhost:8081";
+        const beforeDeploymentLink = "http://192.168.0.80:8081";
         //We use maths random function to generate a random token
         const Randomtoken = Math.random().toString(36).substring(2, 15) as string;
         try {
@@ -235,7 +240,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         paddingVertical: 8,
         borderBottomWidth: 1,
-        borderBottomColor: "#ccc",
         alignItems: "center"
     },
     cell: {

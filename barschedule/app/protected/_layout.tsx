@@ -5,8 +5,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Platform, useColorScheme } from "react-native";
 //You absolutely need an index in every folder including tabs it can be renamed through styling
 export default function RootLayout() {
-  const {user, loading} = useAuth();
-  const colorScheme = useColorScheme();
     return (
         <Stack screenOptions={{ headerShown: false}}>
           <Stack.Screen name="(tabs)"/>

@@ -121,7 +121,7 @@ export default function Invite() {
                 requestedAt: now,
                 status: "pending"
             });
-            router.replace("/(protected)/dashboard" as Href);
+            router.replace("/protected/(tabs)/dashboard" as Href);
         }
         catch (error: any) {
             console.log("Error joining Organization: ", error.message);

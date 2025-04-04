@@ -1,5 +1,5 @@
 import { Href, Link, router, Stack, useNavigation, useRouter } from "expo-router";
-import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, ScrollView } from "react-native";
+import { Text, View, StyleSheet, TextInput, Button, Alert, FlatList, Platform, Dimensions, Modal, Pressable, ScrollView, useColorScheme } from "react-native";
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { useAuth } from "@/AuthContext";
@@ -15,6 +15,7 @@ export default function HomeScreen() {
   const { user, loading } = useAuth();
   const [orgLoading, setOrgLoading] = useState(true);
   const [organizations, setOrganizations] = useState<OrgSetUp[]>([]);
+  const colorScheme = useColorScheme();
   const router = useRouter();
   //Here we use our useEffect to essentially subscribe and call fetch orgs whenever the page is opened with the current user
   useEffect(() => {
@@ -55,11 +56,17 @@ export default function HomeScreen() {
       }
     };
     fetchDashboardData();
-  }, [user]);
+  }, [organizations]);
   //if it is loading show text
-  if (!user) return router.replace('/');
+  if (loading){
+    return <Text>User Loading...</Text>
+  }
+  else {
+    if (!user) {
+      return router.replace('/');
+    }
+  }
   if (orgLoading) return <Text>Organizations Loading...</Text>;
-  if (loading) return <Text>Loading User...</Text>;
   const render = ({item} : {item:OrgSetUp}) => {
     return (
     <TouchableOpacity
@@ -87,6 +94,71 @@ export default function HomeScreen() {
       </TouchableOpacity>
     );
   }
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colorScheme === 'dark' ? "black": 'white',
+      padding: 20,
+      justifyContent: "center"
+    },
+    sidebarButtons: {
+      flex: 1,
+      justifyContent: "flex-start",
+      paddingVertical: 10,
+    },
+    buttonWrap: {
+      marginVertical: 10,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: "bold",
+      marginBottom: 16,
+      textAlign: "center",
+    },
+    listContainer: {
+      alignItems: "center",
+    },
+    card: {
+      backgroundColor: colorScheme === 'dark' ? '#c9cdce': '#c6d2d4',
+      padding: 30,
+      margin: 10,
+      borderRadius: 16,
+      width: screenWidth * 0.42,
+      height: 200,
+      shadowColor: "#000",
+      shadowOpacity: 0.1,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 4,
+      elevation: 4,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    orgName: {
+      fontSize: 18,
+      color: "#111d3e",
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    orgDescritpion: {
+      fontSize: 14,
+      color: "#111d3e",
+      textAlign: "center",
+      marginBottom: 8
+    },
+    roleText: {
+      fontSize: 12,
+      fontStyle: "italic",
+      color: "#111d3e",
+      textAlign: "center"
+    },
+    buttonText: {
+      marginTop: 8,
+      fontSize: 8,
+      color: "#111d3e",
+      fontWeight: "bold"
+    }
+  });
+  
   //here we render the footer that redirects to create org
   return (
       <View style={styles.container}>
@@ -100,80 +172,3 @@ export default function HomeScreen() {
       </View>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111d3e",
-    padding: 20,
-    justifyContent: "center"
-  },
-  sidebar: {
-    width: "10%",
-    backgroundColor: "#d4f4b3",
-    padding: 16,
-    borderRightWidth: 1,
-    borderRightColor: "#ddd",
-    height: Dimensions.get("window").height,
-  },
-  sideBarTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  sidebarButtons: {
-    flex: 1,
-    justifyContent: "flex-start",
-    paddingVertical: 10,
-  },
-  buttonWrap: {
-    marginVertical: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  listContainer: {
-    alignItems: "center",
-  },
-  card: {
-    backgroundColor: "#d4f4b3",
-    padding: 30,
-    margin: 10,
-    borderRadius: 16,
-    width: screenWidth * 0.42,
-    height: 200,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 4,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  orgName: {
-    fontSize: 18,
-    color: "#111d3e",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  orgDescritpion: {
-    fontSize: 14,
-    color: "#111d3e",
-    textAlign: "center",
-    marginBottom: 8
-  },
-  roleText: {
-    fontSize: 12,
-    fontStyle: "italic",
-    color: "#111d3e",
-    textAlign: "center"
-  },
-  buttonText: {
-    marginTop: 8,
-    fontSize: 8,
-    color: "#111d3e",
-    fontWeight: "bold"
-  }
-});
