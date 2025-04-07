@@ -133,9 +133,14 @@ export default function employeeView() {
    }
    //Our function to handle what happens when we press the copy link
    const handleCopyLink = async () => {
-       //We use navigators clipborad function to copy the link for the user
-       await navigator.clipboard.writeText(inviteCode);
-       setCopied(true);
+        if (Platform.OS == 'web'){
+            //We use navigators clipborad function to copy the link for the user
+            await navigator.clipboard.writeText(inviteCode);
+        }
+        else {
+            await Clipboard.setStringAsync(inviteCode);
+        }
+        setCopied(true);
    }
    const handleRoleAssign = async (userId: string) => {
        const employeeRef = doc(db, "Organizations", orgId, "Employees", userId);
@@ -143,8 +148,6 @@ export default function employeeView() {
        if (!employeeDoc.exists()) {
            console.log("Employee Does not Exist");
        }
-
-
    }
 
 
