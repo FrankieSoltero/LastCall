@@ -195,9 +195,7 @@ const ManageSchedules: React.FC = () => {
           </View>
         )}
       />
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
+     
     </View>
   );
 };
@@ -257,18 +255,7 @@ const styles = StyleSheet.create({
     color: "#fff", 
     textAlign: "center", 
     fontWeight: "bold" 
-  },
-  backButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
-    alignSelf: "center",
-  },
-  backButtonText: { 
-    color: "#fff", 
-    fontWeight: "bold" 
-  },
+  }
 });
 
 export default ManageSchedules;
