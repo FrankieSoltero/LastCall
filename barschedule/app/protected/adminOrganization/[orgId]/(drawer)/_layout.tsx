@@ -8,7 +8,11 @@ export default function RootLayout() {
   const params = useLocalSearchParams()
   const orgId = params.orgId as unknown as string
   const router = useRouter()
-
+  /**
+   * We use this function to add our go home button to our drawer container
+   * @param props our go home button
+   * @returns our go home button in the container
+   */
   function GoHomeButton(props: any) {
     return (
       <DrawerContentScrollView {...props}>
@@ -30,6 +34,9 @@ export default function RootLayout() {
   }
   return (
     <Drawer drawerContent={(props) => <GoHomeButton{...props} />}>
+      {/**Each screen is a file in the folder and the label is what shows up in the drawer and the title is what shows up on the page after navigation
+       * initial params is how we pass our organization id
+       */}
       <Drawer.Screen name="index" options={{ drawerLabel: 'Home', title: 'Dashboard' }} initialParams={{ orgId }} />
       <Drawer.Screen name="employee" options={{ drawerLabel: 'Employees', title: 'Employees' }} initialParams={{ orgId }} />
       <Drawer.Screen name="createSchedule" options={{ drawerLabel: 'Create Schedule', title: 'Create a Schedule' }} initialParams={{ orgId }} />

@@ -15,8 +15,6 @@ export default function HomeScreen() {
   const { user, loading } = useAuth();
   const [orgLoading, setOrgLoading] = useState(true);
   const [organizations, setOrganizations] = useState<OrgSetUp[]>([]);
-  const colorScheme = useColorScheme();
-  const router = useRouter();
   //Here we use our useEffect to essentially subscribe and call fetch orgs whenever the page is opened with the current user
   useEffect(() => {
     /**
@@ -57,6 +55,8 @@ export default function HomeScreen() {
     };
     fetchDashboardData();
   }, [organizations]);
+  const colorScheme = useColorScheme();
+  const router = useRouter();
   //if it is loading show text
   if (loading){
     return <Text>User Loading...</Text>

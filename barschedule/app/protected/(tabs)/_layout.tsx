@@ -9,7 +9,11 @@ export default function RootLayout() {
   const {user, loading} = useAuth();
   const colorScheme = useColorScheme()
     return (
+      
         <Tabs screenOptions={{ headerShown: false, tabBarStyle: {backgroundColor: colorScheme === 'dark' ? '#c9cdce' : '#c6d2d4'}}}>
+          {/** Above we use screen options to not show the headers and set the background color of the tabs
+           * Below we use tabBarIcon to set the icon and color of the icon for each tab on the dashboard
+           */}
           <Tabs.Screen name="createOrg" options={{
                 title: "Create Organization",
                 tabBarIcon: () => <MaterialIcons size={28} name='create' color={colorScheme === 'dark' ? '#111d3e': '#d4f4b3'} />
