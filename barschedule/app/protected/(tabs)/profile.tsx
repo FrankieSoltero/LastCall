@@ -91,7 +91,7 @@ const Profile = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              const currentUser = auth.currentUser;
+              const currentUser = user;
               if (currentUser) {
                 await currentUser.delete();
               }

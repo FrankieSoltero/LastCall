@@ -12,6 +12,8 @@ import { OrgSetUp } from "@/constants/DataSetUps";
 const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen() {
+  const colorScheme = useColorScheme();
+  const router = useRouter();
   const { user, loading } = useAuth();
   const [orgLoading, setOrgLoading] = useState(true);
   const [organizations, setOrganizations] = useState<OrgSetUp[]>([]);
@@ -55,8 +57,6 @@ export default function HomeScreen() {
     };
     fetchDashboardData();
   }, [organizations]);
-  const colorScheme = useColorScheme();
-  const router = useRouter();
   //if it is loading show text
   if (loading){
     return <Text>User Loading...</Text>
