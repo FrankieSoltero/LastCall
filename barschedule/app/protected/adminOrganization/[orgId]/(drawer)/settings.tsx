@@ -3,6 +3,7 @@ import { View, Text, Button, Alert, StyleSheet, ActivityIndicator, TextInput } f
 import { Picker } from '@react-native-picker/picker';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
+import { useLocalSearchParams } from 'expo-router';
 
 interface Employee {
   id: string;
@@ -16,12 +17,13 @@ interface AdminSettingsProps {
   orgId: string;
 }
 
-const AdminSettings: React.FC<AdminSettingsProps> = ({ orgId }) => {
+export default function DashBoard() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
-
+  const params = useLocalSearchParams();
+  const orgId = params.orgId as unknown as string;
   // This function fetches employees from Firestore for our organization.
   const fetchEmployees = async () => {
     if (!orgId) return;
@@ -192,5 +194,3 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   }
 });
-
-export default AdminSettings;

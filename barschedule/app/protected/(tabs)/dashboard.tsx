@@ -12,11 +12,11 @@ import { OrgSetUp } from "@/constants/DataSetUps";
 const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen() {
-  const colorScheme = useColorScheme();
-  const router = useRouter();
   const { user, loading } = useAuth();
   const [orgLoading, setOrgLoading] = useState(true);
   const [organizations, setOrganizations] = useState<OrgSetUp[]>([]);
+  const colorScheme = useColorScheme();
+  const router = useRouter();
   //Here we use our useEffect to essentially subscribe and call fetch orgs whenever the page is opened with the current user
   useEffect(() => {
     /**

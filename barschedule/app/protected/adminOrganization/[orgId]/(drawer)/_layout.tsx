@@ -42,6 +42,7 @@ export default function RootLayout() {
       <Drawer.Screen name="createSchedule" options={{ drawerLabel: 'Create Schedule', title: 'Create a Schedule' }} initialParams={{ orgId }} />
       <Drawer.Screen name="pendingEmployee" options={{ drawerLabel: 'Pending Employee List', title: 'Pending Employees' }} initialParams={{ orgId }} />
       <Drawer.Screen name="scheduleTemp" options={{ drawerLabel: 'Schedule Templates', title: 'Templates' }} initialParams={{ orgId }} />
+      <Drawer.Screen name="settings" options={{drawerLabel: 'Settings', title: "Settings" }} initialParams={{orgId}}/>
     </Drawer>
   )
 }
