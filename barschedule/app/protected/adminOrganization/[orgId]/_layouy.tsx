@@ -6,9 +6,12 @@ import { Platform, useColorScheme } from "react-native";
 //You absolutely need an index in every folder including tabs it can be renamed through styling
 export default function RootLayout() {
     return (
+      <SafeAreaView style={{flex:1}}>
         <Stack screenOptions={{ headerShown: false}}>
-          <Stack.Screen name="(tabs)"/>
+          <Stack.Screen name="daySchedule"/>
+          <Stack.Screen name='weekSchedule'/>
         </Stack>
+    </SafeAreaView>
     )
   }
   

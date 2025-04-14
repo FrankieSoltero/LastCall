@@ -68,7 +68,7 @@ export default function HomeScreen() {
         AdminOrgs: arrayUnion(orgName)
       });
       Alert.alert("Organization created successfully!");
-      router.replace("/protected/dashboard");
+      router.replace("/protected/(tabs)/dashboard");
     }
     //Here we catch an error
     catch (error:any){
@@ -89,12 +89,14 @@ export default function HomeScreen() {
             placeholder="Organization Name"
             value={orgName}
             onChangeText={setOrgName}
+            placeholderTextColor={'black'}
             />
           <TextInput
             style={styles.input}
             placeholder="Ogranization Descritpion"
             value={orgDescription}
             onChangeText={setorgDescription}
+            placeholderTextColor={'black'}
             />
           <Button
             title={creating ? "Creating..." : "Create Organization"}
