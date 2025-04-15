@@ -433,16 +433,31 @@ export default function DaySchedule() {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Select Start Time</Text>
-              <DateTimePicker
-                value={tempStartTime}
-                mode="time"
-                display="default"
-                onChange={(event, selectedTime) => {
-                  if (event.type === "set" && selectedTime) {
-                    setTempStartTime(selectedTime);
-                  }
-                }}
-              />
+              {Platform.OS === "ios" || Platform.OS === "android" ? (
+  <DateTimePicker
+    value={tempStartTime}
+    mode="time"
+    display="default"
+    onChange={(event, selectedTime) => {
+      if (event.type === "set" && selectedTime) {
+        setTempStartTime(selectedTime);
+      }
+    }}
+  />
+) : (
+  <input
+    type="time"
+    onChange={(e) => {
+      const [hours, minutes] = e.target.value.split(":").map(Number);
+      const updatedDate = new Date();
+      updatedDate.setHours(hours);
+      updatedDate.setMinutes(minutes);
+      setTempStartTime(updatedDate);
+    }}
+    style={{ padding: 10, fontSize: 16 }}
+  />
+)}
+
               <View style={styles.modalButtons}>
                 <TouchableOpacity onPress={handleSaveStartTime} style={styles.modalButton}>
                   <Text style={styles.modalButtonText}>Save Time</Text>
