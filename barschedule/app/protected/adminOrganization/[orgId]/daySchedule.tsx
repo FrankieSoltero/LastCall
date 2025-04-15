@@ -16,6 +16,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "@/AuthContext";
 import { db } from "@/firebaseConfig";
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { Platform } from "react-native";
 
 
 
