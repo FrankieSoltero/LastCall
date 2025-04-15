@@ -421,42 +421,64 @@ export default function DaySchedule() {
 
       {/* This could be too wordy */}
 
-      {isStartTimePickerVisible && (
-        <Modal
-          transparent
-          animationType="slide"
-          onRequestClose={() => {
-            setIsStartTimePickerVisible(false);
-            setActiveShiftForStart(null);
-          }}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Select Start Time</Text>
-              {Platform.OS === "ios" || Platform.OS === "android" ? (
-  <DateTimePicker
-    value={tempStartTime}
-    mode="time"
-    display="default"
-    onChange={(event, selectedTime) => {
-      if (event.type === "set" && selectedTime) {
-        setTempStartTime(selectedTime);
-      }
+     {isStartTimePickerVisible && (
+  <Modal
+    transparent
+    animationType="slide"
+    onRequestClose={() => {
+      setIsStartTimePickerVisible(false);
+      setActiveShiftForStart(null);
     }}
-  />
-) : (
-  <input
-    type="time"
-    onChange={(e) => {
-      const [hours, minutes] = e.target.value.split(":").map(Number);
-      const updatedDate = new Date();
-      updatedDate.setHours(hours);
-      updatedDate.setMinutes(minutes);
-      setTempStartTime(updatedDate);
-    }}
-    style={{ padding: 10, fontSize: 16 }}
-  />
+  >
+    <View style={styles.modalContainer}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalTitle}>Select Start Time</Text>
+
+        {Platform.OS === "ios" || Platform.OS === "android" ? (
+          <DateTimePicker
+            value={tempStartTime}
+            mode="time"
+            display="default"
+            onChange={(event, selectedTime) => {
+              if (event.type === "set" && selectedTime) {
+                setTempStartTime(selectedTime);
+              }
+            }}
+          />
+        ) : (
+          <input
+            type="time"
+            onChange={(e) => {
+              const [hours, minutes] = e.target.value.split(":").map(Number);
+              const updatedDate = new Date();
+              updatedDate.setHours(hours);
+              updatedDate.setMinutes(minutes);
+              setTempStartTime(updatedDate);
+            }}
+            style={{ padding: 10, fontSize: 16 }}
+          />
+        )}
+
+        {/* Save/Cancel Buttons */}
+        <View style={styles.modalButtons}>
+          <TouchableOpacity onPress={handleSaveStartTime} style={styles.modalButton}>
+            <Text style={styles.modalButtonText}>Save Time</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setIsStartTimePickerVisible(false);
+              setActiveShiftForStart(null);
+            }}
+            style={[styles.modalButton, { backgroundColor: "#f44336" }]}
+          >
+            <Text style={styles.modalButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </Modal>
 )}
+
 
               <View style={styles.modalButtons}>
                 <TouchableOpacity onPress={handleSaveStartTime} style={styles.modalButton}>
