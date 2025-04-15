@@ -480,67 +480,70 @@ export default function DaySchedule() {
 )}
 
 
-              <View style={styles.modalButtons}>
-                <TouchableOpacity onPress={handleSaveStartTime} style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Save Time</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setIsStartTimePickerVisible(false);
-                    setActiveShiftForStart(null);
-                  }}
-                  style={[styles.modalButton, { backgroundColor: "#f44336" }]}
-                >
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
 
+{isEndTimeModalVisible && (
+  <Modal
+    transparent
+    animationType="slide"
+    onRequestClose={() => {
+      setIsEndTimeModalVisible(false);
+      setActiveShiftForEnd(null);
+    }}
+  >
+    <View style={styles.modalContainer}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalTitle}>Select End Time</Text>
 
-      {isEndTimeModalVisible && (
-        <Modal
-          transparent
-          animationType="slide"
-          onRequestClose={() => {
-            setIsEndTimeModalVisible(false);
-            setActiveShiftForEnd(null);
-          }}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Select End Time</Text>
-              <DateTimePicker
-                value={tempEndTime}
-                mode="time"
-                display="default"
-                onChange={(event, selectedTime) => {
-                  if (event.type === "set" && selectedTime) {
-                    setTempEndTime(selectedTime);
-                  }
-                }}
-              />
-              <View style={styles.modalButtons}>
-                <TouchableOpacity onPress={handleSaveEndTime} style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Save Time</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleSetCallEndTime} style={[styles.modalButton, { backgroundColor: "#ff9800" }]}>
-                  <Text style={styles.modalButtonText}>CALL</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleSetCloseEndTime} style={[styles.modalButton, { backgroundColor: "#f44336" }]}>
-                  <Text style={styles.modalButtonText}>CLOSE</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
+        {Platform.OS === "ios" || Platform.OS === "android" ? (
+          <DateTimePicker
+            value={tempEndTime}
+            mode="time"
+            display="default"
+            onChange={(event, selectedTime) => {
+              if (event.type === "set" && selectedTime) {
+                setTempEndTime(selectedTime);
+              }
+            }}
+          />
+        ) : (
+          <input
+            type="time"
+            onChange={(e) => {
+              const [hours, minutes] = e.target.value.split(":").map(Number);
+              const updatedDate = new Date();
+              updatedDate.setHours(hours);
+              updatedDate.setMinutes(minutes);
+              setTempEndTime(updatedDate);
+            }}
+            style={{ padding: 10, fontSize: 16 }}
+          />
+        )}
+
+        {/* Buttons: Save, CALL, CLOSE, Cancel */}
+        <View style={styles.modalButtons}>
+          <TouchableOpacity onPress={handleSaveEndTime} style={styles.modalButton}>
+            <Text style={styles.modalButtonText}>Save Time</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSetCallEndTime} style={[styles.modalButton, { backgroundColor: "#ff9800" }]}>
+            <Text style={styles.modalButtonText}>CALL</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSetCloseEndTime} style={[styles.modalButton, { backgroundColor: "#2196f3" }]}>
+            <Text style={styles.modalButtonText}>CLOSE</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setIsEndTimeModalVisible(false);
+              setActiveShiftForEnd(null);
+            }}
+            style={[styles.modalButton, { backgroundColor: "#f44336" }]}
+          >
+            <Text style={styles.modalButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
-  );
-};
-
+  </Modal>
+)}
 
 
 
