@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
@@ -49,6 +48,3 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-=======
-![LastCall  Expo Poster](https://github.com/user-attachments/assets/52c4c8b8-e8d1-4c33-a1a0-bc1c708d4c88)
->>>>>>> origin/main
