@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "barschedule",
+    "slug": "bar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./LC-logo.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./LC-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.barschedule.capstone",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./LC-logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.barschedule.capstone"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "server",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cf61a1c3-ff63-4af0-81db-57a3f29c768b"
+      }
+    },
+    "owner": "cscapstone2024"
+  }
+}
