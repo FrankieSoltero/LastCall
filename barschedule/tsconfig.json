@@ -1,17 +1,46 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-native",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "app/*"
+      ],
+      "@/AuthContext": [
+        "AuthContext.tsx"
+      ],
+      "@/firebaseConfig": [
+        "firebaseConfig.ts"
+      ],
+      "@/constants/*": [
+        "constants/*"
+      ],
+      "@/app/hooks/*": [
+        "app/hooks/*"
       ]
-    }
+    },
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "app/**/*.tsx",
+    "app/**/*.ts",
+    "node_modules/@types/react/index.d.ts",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ],
+  "extends": "expo/tsconfig.base"
 }

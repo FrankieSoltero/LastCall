@@ -8,6 +8,7 @@ import { db } from "@/firebaseConfig";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { RouteParams, Availability } from "@/constants/DataSetUps";
 import React from "react";
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];

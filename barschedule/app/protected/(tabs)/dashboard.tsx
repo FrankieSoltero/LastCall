@@ -9,6 +9,7 @@ import React from "react";
 import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import { OrgSetUp } from "@/constants/DataSetUps";
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen() {

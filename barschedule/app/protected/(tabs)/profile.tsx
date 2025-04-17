@@ -4,6 +4,7 @@ import { fetchUserProfile, updateUserProfile } from '@/constants/userService';
 import { useAuth } from '@/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 
 const Profile = () => {
   // State for profile fields

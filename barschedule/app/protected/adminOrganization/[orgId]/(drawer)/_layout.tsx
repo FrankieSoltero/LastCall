@@ -3,6 +3,8 @@ import { Drawer } from 'expo-router/drawer'
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useThemeColors } from '@/app/hooks/useThemeColors'; 
+
 //You absolutely need an index in every folder including tabs it can be renamed through styling
 export default function RootLayout() {
   const params = useLocalSearchParams()

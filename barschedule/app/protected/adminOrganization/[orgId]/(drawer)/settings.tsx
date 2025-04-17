@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet, ActivityIndicator, TextInput, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { useLocalSearchParams } from 'expo-router';
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 
 interface Employee {
   id: string;
@@ -22,17 +23,19 @@ export default function DashBoard() {
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [theme, setTheme] = useState<string>('light'); // Track the theme manually
   const params = useLocalSearchParams();
   const orgId = params.orgId as unknown as string;
-  // This function fetches employees from Firestore for our organization.
+
+  const colors = useThemeColors(); // Get colors based on the system theme (will be overridden manually)
+
+  // Fetch employees from Firestore
   const fetchEmployees = async () => {
     if (!orgId) return;
     setLoading(true);
     try {
-      // Get the reference to the Employees subcollection.
       const employeeReference = collection(db, "Organizations", orgId, "Employees");
       const employeeSnapShot = await getDocs(employeeReference);
-      // Map the documents to my Employee interface.
       const employeesData = employeeSnapShot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -46,28 +49,23 @@ export default function DashBoard() {
     }
   };
 
-  // Fetch employees when the component mounts or when orgId changes.
   useEffect(() => {
     fetchEmployees();
   }, [orgId]);
 
-  // I filter the employees based on the search term entered.
   const filteredEmployees = employees.filter(emp => {
     const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   });
 
-  // This function promotes a selected employee to admin after a confirmation prompt.
   const handlePromoteToAdmin = async () => {
     if (!selectedEmployee) {
       Alert.alert("Select Employee", "Please select an employee to promote.");
       return;
     }
-    // Find the selected employee so we can show their name in the confirmation.
     const emp = employees.find(emp => emp.id === selectedEmployee);
     const empName = emp ? `${emp.firstName} ${emp.lastName}` : '';
     
-    // Show a confirmation alert before promoting the employee.
     Alert.alert(
       "Confirm Promotion",
       `Are you sure you want to promote ${empName} to admin?`,
@@ -78,10 +76,8 @@ export default function DashBoard() {
           onPress: async () => {
             try {
               const employeeRef = doc(db, "Organizations", orgId, "Employees", selectedEmployee);
-              // Update the employee's role to 'admin'.
               await updateDoc(employeeRef, { role: "admin" });
               Alert.alert("Success", `${empName} has been promoted to admin.`);
-              // Refresh the employee list for a real-time UI update.
               await fetchEmployees();
             } catch (error) {
               console.error("Error promoting employee:", error);
@@ -94,7 +90,6 @@ export default function DashBoard() {
     );
   };
 
-  // This function deletes the organization after a confirmation prompt.
   const handleDeleteOrganization = async () => {
     Alert.alert(
       "Delete Organization",
@@ -106,10 +101,8 @@ export default function DashBoard() {
           style: "destructive",
           onPress: async () => {
             try {
-              // Delete the organization document from Firestore.
               await deleteDoc(doc(db, "Organizations", orgId));
               Alert.alert("Deleted", "Organization has been deleted.");
-              // Optionally, add navigation or further UI updates here.
             } catch (error) {
               console.error("Error deleting organization:", error);
               Alert.alert("Error", "Failed to delete organization.");
@@ -120,24 +113,26 @@ export default function DashBoard() {
     );
   };
 
-  // If the data is still loading, show a spinner.
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Admin Settings</Text>
+  // Toggle the theme manually
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
-      <Text style={styles.sectionHeader}>Promote Employee to Admin</Text>
-      {/* Search bar to filter employees by name */}
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.header, { color: colors.text }]}>Admin Settings</Text>
+
+      <Text style={[styles.sectionHeader, { color: colors.text }]}>Promote Employee to Admin</Text>
       <TextInput
-        style={styles.searchInput}
+        style={[styles.searchInput, { borderColor: colors.text }]}
         placeholder="Search employees..."
         value={searchTerm}
         onChangeText={setSearchTerm}
       />
-      {/* Picker for selecting an employee */}
       <Picker
         selectedValue={selectedEmployee}
         onValueChange={(itemValue) => setSelectedEmployee(itemValue)}
@@ -157,33 +152,37 @@ export default function DashBoard() {
       <View style={styles.divider} />
 
       <Button title="Delete Organization" onPress={handleDeleteOrganization} color="red" />
+
+      <View style={styles.divider} />
+
+      {/* Toggle between light and dark mode */}
+      <Text style={{ color: colors.text }}>Switch Theme</Text>
+      <Switch value={theme === 'dark'} onValueChange={toggleTheme} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff'
   },
   header: {
     fontSize: 24,
     fontWeight: '600',
     marginBottom: 20,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   sectionHeader: {
     fontSize: 18,
-    marginBottom: 10
+    marginBottom: 10,
   },
   searchInput: {
     height: 40,
-    borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10
+    marginBottom: 10,
   },
   picker: {
     marginBottom: 20,
@@ -192,5 +191,5 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#ccc',
     marginVertical: 20,
-  }
+  },
 });
