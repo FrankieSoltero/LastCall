@@ -11,6 +11,7 @@ import {
 import { useLocalSearchParams, useRouter, Href } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 
 
 //purpose of this page is a screen that a manager can click into and see a list of the schedules they just generated

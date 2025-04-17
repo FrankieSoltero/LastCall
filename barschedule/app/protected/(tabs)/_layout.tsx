@@ -4,6 +4,7 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Platform, useColorScheme } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 //You absolutely need an index in every folder including tabs it can be renamed through styling
 export default function RootLayout() {
   const {user, loading} = useAuth();

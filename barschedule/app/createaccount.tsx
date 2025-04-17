@@ -6,6 +6,7 @@ import { auth, db } from "../firebaseConfig";
 import { useAuth } from "@/AuthContext";
 import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import React from "react";
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 
 //Here we define what will be shown on this page
 export default function CreateAccount() {

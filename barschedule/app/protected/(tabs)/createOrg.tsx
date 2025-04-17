@@ -7,6 +7,7 @@ import { auth, db } from "@/firebaseConfig";
 import { addDoc, arrayUnion, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { useRoute } from "@react-navigation/native";
 import React from "react";
+import { useThemeColors } from '@/app/hooks/useThemeColors';
 
 
 export default function HomeScreen() {
