@@ -14,9 +14,10 @@ import { useThemeColors } from '@/app/hooks/useThemeColors';
 //fix colors
 
 
+console.log("✅ Employee screen loaded");
 
 
-export default function employeeView() {
+export default function EmployeeView() {
     //We use the same use Route described in index
     const params = useLocalSearchParams();
     const orgId = params.orgId as unknown as string;
