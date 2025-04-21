@@ -132,7 +132,7 @@ const ManageSchedules: React.FC = () => {
             try {
               const scheduleDocRef = doc(db, "Organizations", orgId, "weekSchedules", scheduleId);
               await updateDoc(scheduleDocRef, {
-                isPublished: true,
+                published: true,
                 publishedAt: new Date().toISOString(),
               });
               Alert.alert("Success", "Schedule published successfully!");
@@ -158,6 +158,8 @@ const ManageSchedules: React.FC = () => {
   }
 
   //list of schedules
+  //check or x if it is published or not. If it is published then it will show up on employee side
+  //if not published it will not show up, but it will still save in firestore
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Manage Week Schedules</Text>
@@ -176,6 +178,9 @@ const ManageSchedules: React.FC = () => {
             <Text style={styles.cardTitle}>Week Starting: {item.weekStart}</Text>
             <Text style={styles.cardSubtitle}>
             Availability Deadline: {item.availabilityDeadline || "N/A"}
+            </Text>
+            <Text style={{ color: item.published ? "#00FF88" : "#FF5C5C", marginTop: 4 }}>
+              {item.published ? "Published ✅" : "Not Published ❌"}
             </Text>
             </TouchableOpacity>
             <View style={styles.actionButtons}>
@@ -233,23 +238,26 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 10,
-    justifyContent: "space-around",
   },
-  publishButton: { 
-    backgroundColor: "#28a745", 
-    padding: 8, 
-    borderRadius: 5 
+  publishButton: {
+    backgroundColor: "#28a745",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 5,
   },
   publishButtonText: { 
     color: "#fff", 
     fontWeight: "bold" 
   },
-  deleteButton: { 
-    backgroundColor: "#dc3545", 
-    padding: 8, 
-    borderRadius: 5, 
-    marginTop: 10 
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginLeft: 5,
   },
   deleteButtonText: { 
     color: "#fff", 
