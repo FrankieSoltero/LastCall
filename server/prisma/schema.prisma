@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String         @id @default(uuid()) @db.Uuid
+  email       String         @unique
+  firstName   String         @map("first_name")
+  lastName    String         @map("last_name")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  employees   Employee[]
+  inviteLinks InviteLink[]
+  ownedOrgs   Organization[] @relation("OrgOwner")
+
+  @@map("users")
+}
+
+model Organization {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  ownerId     String       @map("owner_id") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  employees   Employee[]
+  inviteLinks InviteLink[]
+  owner       User         @relation("OrgOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  roles       Role[]
+  schedules   Schedule[]
+
+  @@map("organizations")
+}
+
+model Employee {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  role           EmployeeRole   @default(EMPLOYEE)
+  status         EmployeeStatus @default(PENDING)
+  requestedAt    DateTime       @default(now()) @map("requested_at")
+  approvedAt     DateTime?      @map("approved_at")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  availability   Availability[]
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shifts         Shift[]
+  roleAssignments EmployeeRoleAssignment[]
+
+  @@unique([userId, organizationId])
+  @@map("employees")
+}
+
+model InviteLink {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  token          String       @unique
+  expiresAt      DateTime     @map("expires_at")
+  createdById    String       @map("created_by_id") @db.Uuid
+  createdAt      DateTime     @default(now()) @map("created_at")
+  createdBy      User         @relation(fields: [createdById], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("invite_links")
+}
+
+model Schedule {
+  id                   String         @id @default(uuid()) @db.Uuid
+  organizationId       String         @map("organization_id") @db.Uuid
+  weekStartDate        DateTime       @map("week_start_date") @db.Date
+  availabilityDeadline DateTime       @map("availability_deadline") @db.Date
+  isPublished          Boolean        @default(false) @map("is_published")
+  publishedAt          DateTime?      @map("published_at")
+  createdAt            DateTime       @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
+  availability         Availability[]
+  scheduleDays         ScheduleDay[]
+  organization         Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, weekStartDate])
+  @@map("schedules")
+}
+
+model ScheduleDay {
+  id         String   @id @default(uuid()) @db.Uuid
+  scheduleId String   @map("schedule_id") @db.Uuid
+  date       DateTime @db.Date
+  createdAt  DateTime @default(now()) @map("created_at")
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  shifts     Shift[]
+
+  @@unique([scheduleId, date])
+  @@map("schedule_days")
+}
+
+model Role {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  name           String
+  createdAt      DateTime     @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  shifts         Shift[]
+  employeeAssignments EmployeeRoleAssignment[]
+
+  @@unique([organizationId, name])
+  @@map("roles")
+}
+
+model Shift {
+  id            String      @id @default(uuid()) @db.Uuid
+  scheduleDayId String      @map("schedule_day_id") @db.Uuid
+  roleId        String      @map("role_id") @db.Uuid
+  employeeId    String?     @map("employee_id") @db.Uuid
+  startTime     DateTime    @map("start_time") @db.Time(6)
+  endTime       DateTime    @map("end_time") @db.Time(6)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  employee      Employee?   @relation(fields: [employeeId], references: [id])
+  role          Role        @relation(fields: [roleId], references: [id])
+  scheduleDay   ScheduleDay @relation(fields: [scheduleDayId], references: [id], onDelete: Cascade)
+
+  @@map("shifts")
+}
+
+model Availability {
+  id         String             @id @default(uuid()) @db.Uuid
+  employeeId String             @map("employee_id") @db.Uuid
+  scheduleId String             @map("schedule_id") @db.Uuid
+  dayOfWeek  String             @map("day_of_week")
+  status     AvailabilityStatus
+  startTime  DateTime?          @map("start_time") @db.Time(6)
+  endTime    DateTime?          @map("end_time") @db.Time(6)
+  createdAt  DateTime           @default(now()) @map("created_at")
+  updatedAt  DateTime           @updatedAt @map("updated_at")
+  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  schedule   Schedule           @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, scheduleId, dayOfWeek])
+  @@map("availability")
+}
+
+model EmployeeRoleAssignment {
+  id         String   @id @default(uuid()) @db.Uuid
+  employeeId String   @map("employee_id") @db.Uuid
+  roleId     String   @map("role_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, roleId])
+  @@map("employee_role_assignments")
+}
+
+enum EmployeeRole {
+  OWNER
+  ADMIN
+  EMPLOYEE
+}
+
+enum EmployeeStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  UNAVAILABLE
+  PREFERRED
+}
