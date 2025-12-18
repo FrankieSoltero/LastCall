@@ -2,32 +2,10 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { authMiddleware } from '../middleware/auth';
 import crypto from 'crypto';
+import { isOrgAdmin } from '../lib/helper';
 
 const router = Router();
 
-/**
- * Helper function to check if the user is an admin or owner of the organization
- */
-async function isOrgAdmin(userId: string, orgId: string): Promise<boolean> {
-    const org = await prisma.organization.findUnique({
-        where: { id: orgId },
-        include: {
-            employees: {
-                where: {
-                    userId: userId,
-                    status: 'APPROVED'
-                }
-            }
-        }
-    })
-
-    if (!org) return false;
-
-    return (
-        org.ownerId === userId ||
-        org.employees.some(emp => emp.role === 'ADMIN' || emp.role === 'OWNER')
-    )
-}
 
 router.get('/:orgId/employees', authMiddleware, async (req: Request, res: Response) => {
     try {

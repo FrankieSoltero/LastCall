@@ -4,7 +4,12 @@ import dotenv from 'dotenv';
 import { prisma } from './lib/prisma';
 import { authMiddleware } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
-import organizationsRouter from './routes/organization'
+import organizationsRouter from './routes/organization';
+import schedulesRouter from './routes/schedules';
+import employeeRouter from './routes/employee';
+import shiftRouter from './routes/shift';
+import availabilityRouter from './routes/availability';
+import rolesRouter from './routes/roles';
 /**
  * This is the set up
  * app -> is our actual backend app that we start with express
@@ -88,6 +93,14 @@ app.use('/api/protected', authMiddleware, async (req: Request, res: Response) =>
 })
 
 app.use('/api/organizations', organizationsRouter);
+app.use('/api/organizations', employeeRouter);
+app.use('/api', employeeRouter);
+app.use('/api/organization', schedulesRouter);
+app.use('/api', schedulesRouter);
+app.use('/api', shiftRouter);
+app.use('/api', availabilityRouter);
+app.use('/api/organizations', rolesRouter);
+app.use('/api', rolesRouter);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({
