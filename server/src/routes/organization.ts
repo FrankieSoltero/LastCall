@@ -100,7 +100,7 @@ router.get('/:id', authMiddleware, async (req: Request, res: Response) => {
         const hasAccess = organization.ownerId === userId || organization.employees.some(emp => emp.userId === userId && emp.status === 'APPROVED');
 
         if (!hasAccess) {
-            res.status(403).json({ error: 'Access denied'})
+            return res.status(403).json({ error: 'Access denied'})
         }
 
         res.json(organization)
@@ -123,6 +123,14 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 
         if (!name || name.trim().length === 0) {
             return res.status(400).json({ error: 'Organization name is required'});
+        }
+
+        if (name.trim().length > 255) {
+            return res.status(400).json({ error: 'Organization name must be 255 characters or less' });
+        }
+
+        if (description && description.trim().length > 1000) {
+            return res.status(400).json({ error: 'Description must be 1000 characters or less' });
         }
 
         const organization = await prisma.organization.create({
@@ -183,6 +191,14 @@ router.patch('/:id', authMiddleware, async (req: Request, res: Response) => {
 
         if (name !== undefined && name.trim().length === 0) {
             return res.status(400).json({ error: 'Organization name cannot be empty' });
+        }
+
+        if (name && name.trim().length > 255) {
+            return res.status(400).json({ error: 'Organization name must be 255 characters or less' });
+        }
+
+        if (description && description.trim().length > 1000) {
+            return res.status(400).json({ error: 'Description must be 1000 characters or less' });
         }
 
         const updated = await prisma.organization.update({

@@ -25,7 +25,6 @@ export async function authMiddleware(
 ) {
     try {
         const authHeader = req.headers.authorization;
-
         if (!authHeader) {
             return res.status(401).json({
                 error: 'No Authorization header provided'

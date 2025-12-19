@@ -76,6 +76,10 @@ router.post('/:orgId/roles', authMiddleware, async (req: Request, res: Response)
             return res.status(400).json({ error: 'Role name is required' });
         }
 
+        if (name.trim().length > 100) {
+            return res.status(400).json({ error: 'Role name must be 100 characters or less' });
+        }
+
         const role = await prisma.role.create({
             data: {
                 organizationId: orgId,
@@ -122,6 +126,10 @@ router.patch('/roles/:id', authMiddleware, async (req: Request, res: Response) =
 
         if (!name || name.trim().length === 0) {
             return res.status(400).json({ error: 'Role name cannot be empty' });
+        }
+
+        if (name.trim().length > 100) {
+            return res.status(400).json({ error: 'Role name must be 100 characters or less' });
         }
 
         const updated = await prisma.role.update({

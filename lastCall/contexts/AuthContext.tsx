@@ -1,12 +1,19 @@
-import React, {createContext, use, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import React, {createContext, useContext, useEffect, useRef, useState } from 'react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import prisma from '@/lib/prisma';
+import { api } from '@/lib/api';
+import { UserBasic } from '@/types/api';
+
+type User = {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+}
 
 interface AuthContextType {
     session: Session | null;
     user: User | null;
-    dbUser: any | null;
     loading: boolean;
     signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
@@ -18,106 +25,102 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [user, setUser] = useState<User | null>(null);
-    const [dbUser, setDbUser] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session }}) => {
-            setSession(session)
-            setUser(session?.user || null);
-
-            if(session?.user) {
-                loadDbUser(session.user.id);
-            } else {
-                setDbUser(null);
-                setLoading(false);
-            }
-
-        })
-
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user || null);
-
-            if (session?.user) {
-                loadDbUser(session.user.id);
-            } else {
-                setDbUser(null);
-                setLoading(false);
-            }
-        });
-
-        return () => subscription.unsubscribe()
-    }, [])
-
-    async function loadDbUser(userId: string) {
+    const justSignedUp = useRef(false);
+    const loadDbUser = async () => {
         try {
-            const user = await prisma.user.findUnique({
-                where: {
-                    id: userId,
-                },
-                include: {
-                    ownedOrgs: true,
-                    employees: {
-                        include: {
-                            organization: true
-                        }
-                    }
-                }
-            })
-            setDbUser(user);
-        } catch (error: any) {
-            console.error("Error loading from database", error);
-        } finally {
-            setLoading(false)
+            const dbUser = await api.getCurrentUser();
+            setUser(dbUser);
+        } catch (error) {
+            console.error('Error loading user:', error);
+            setUser(null);
         }
     }
-    async function signUp(email: string, password: string, firstName: string, lastName: string) {
+
+    const signIn = async (email: string, password: string) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) throw error;
+        if(data.user) {
+            await loadDbUser();
+        }
+    }
+
+    const signUp = async (
+        email: string,
+        password: string,
+        firstName: string,
+        lastName: string
+    ) => {
+        justSignedUp.current = true;
         const { data, error } = await supabase.auth.signUp({
             email,
             password
         });
 
-        if (error) throw error;
+        if (error) {
+            justSignedUp.current = false;
+            throw error;
+        };
+        if (!data.user) throw new Error('No user returned');
 
-        if (data.user) {
-            await prisma.user.create({
-                data: {
-                    id: data.user.id,
-                    email,
-                    firstName,
-                    lastName
-                }
-            })
+        try {
+            await api.post<UserBasic>('/users', {
+                id: data.user.id,
+                email,
+                firstName,
+                lastName
+            });
+            await loadDbUser();
+        } catch (error) {
+            console.error('Error creating a user in database:', error);
+            throw error;
         }
     }
-    async function signIn(email: string, password: string) {
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password
+
+    const signOut = async () => {
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+    }
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session }}) => {
+            setSession(session);
+            if(session?.user) {
+                loadDbUser();
+            } else {
+                setLoading(false);
+            }
         });
 
-        if (error) throw error;
-    }
-    async function signOut() {
-        const { error } = await supabase.auth.signOut();
+        const { data: { subscription }} = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                setSession(session);
+                if (session?.user) {
+                    if (justSignedUp.current) {
+                        justSignedUp.current = false;
+                    } else {
+                        await loadDbUser();
+                    }
+                } else {
+                    setUser(null);
+                }
+                setLoading(false);
+            }
+        );
 
-        if (error) throw error
-    }
+        return () => subscription.unsubscribe()
+    }, []);
 
-    const value = {
-        session,
-        user,
-        dbUser,
-        loading,
-        signUp,
-        signIn,
-        signOut
-    }
-
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    return (
+        <AuthContext.Provider value={{ session, user, loading, signIn, signOut, signUp}}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
 
 export function useAuth() {

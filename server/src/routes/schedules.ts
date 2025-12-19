@@ -106,7 +106,8 @@ router.get('/schedules/:id', authMiddleware, async (req: Request, res: Response)
                                 user: {
                                     select: {
                                         firstName: true,
-                                        lastName: true
+                                        lastName: true,
+                                        id: true
                                     }
                                 }
                             }

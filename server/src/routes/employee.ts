@@ -33,6 +33,7 @@ router.get('/:orgId/employees', authMiddleware, async (req: Request, res: Respon
             include: {
                 user: {
                     select: {
+                        id: true,
                         email: true,
                         firstName: true,
                         lastName: true
@@ -68,6 +69,21 @@ router.post('/:orgId/employees/invite', authMiddleware, async (req: Request, res
         if (!isAdmin) {
             return res.status(403).json({ error: 'Only admin and owners can create invite links' });
         }
+
+        // Validate expiresInDays (1-30 days)
+        if (expiresInDays < 1 || expiresInDays > 30) {
+            return res.status(400).json({
+                error: 'Invite link expiration must be between 1 and 30 days'
+            });
+        }
+
+        // Clean up expired invite links for this organization
+        await prisma.inviteLink.deleteMany({
+            where: {
+                organizationId: orgId,
+                expiresAt: { lt: new Date() }
+            }
+        });
 
         const token = crypto.randomBytes(32).toString('hex');
 

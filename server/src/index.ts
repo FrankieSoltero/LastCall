@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { prisma } from './lib/prisma';
+import rateLimit from 'express-rate-limit';
 import { authMiddleware } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 import organizationsRouter from './routes/organization';
@@ -10,6 +11,8 @@ import employeeRouter from './routes/employee';
 import shiftRouter from './routes/shift';
 import availabilityRouter from './routes/availability';
 import rolesRouter from './routes/roles';
+import usersRouter from './routes/users';
+import helmet from 'helmet';
 /**
  * This is the set up
  * app -> is our actual backend app that we start with express
@@ -21,6 +24,19 @@ import rolesRouter from './routes/roles';
  */
 dotenv.config();
 
+/**
+ * Validate required environment variables on startup
+ * This prevents the server from starting with missing configuration
+ */
+const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'DATABASE_URL'];
+for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+        console.error(`❌ FATAL ERROR: Missing required environment variable: ${envVar}`);
+        console.error('Please check your .env file and ensure all required variables are set.');
+        process.exit(1);
+    }
+}
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -30,7 +46,19 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100
+})
+
+/**
+ * Security middleware
+ * - JSON body parser with size limit to prevent memory exhaustion attacks
+ * - Helmet adds security headers to protect against common vulnerabilities
+ */
+app.use(express.json({ limit: '10mb' }));
+app.use(helmet());
+
 
 app.get('/health', (req: Request, res: Response) => {
     res.json({
@@ -39,7 +67,7 @@ app.get('/health', (req: Request, res: Response) => {
         timestamp: new Date().toISOString() 
     })
 });
-
+app.use('/api', limiter);
 app.use('/api/test-db', async (_req: Request, res: Response) => {
     try {
         const userCount = await prisma.user.count();
@@ -68,8 +96,9 @@ app.use('/api/test-db', async (_req: Request, res: Response) => {
 
 app.use('/api/protected', authMiddleware, async (req: Request, res: Response) => {
     try {
+        console.log(req.userId);
         const user = await prisma.user.findUnique({
-            where: {id: req.userId },
+            where: { id: req.userId },
             select: {
                 id: true,
                 email: true,
@@ -77,25 +106,26 @@ app.use('/api/protected', authMiddleware, async (req: Request, res: Response) =>
                 lastName: true
             }
         });
-
+        console.log(user);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        res.json({
-            message: 'You are authenticated',
-            user
-        });
+        res.json(user);
     } catch (error) {
         console.error('Protected route error:', error);
         res.status(500).json({ error: 'Failed to fetch user'})
     }
 })
 
+// Public routes (no auth required)
+app.use('/api/users', usersRouter);
+
+// Protected routes (require auth)
 app.use('/api/organizations', organizationsRouter);
 app.use('/api/organizations', employeeRouter);
 app.use('/api', employeeRouter);
-app.use('/api/organization', schedulesRouter);
+app.use('/api/organizations', schedulesRouter);
 app.use('/api', schedulesRouter);
 app.use('/api', shiftRouter);
 app.use('/api', availabilityRouter);
