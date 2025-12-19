@@ -145,6 +145,10 @@ class ApiClient {
         return this.get<EmployeeWithUser[]>(`/organizations/${orgId}/employees`);
     }
 
+    async getEmployee(orgId: string) {
+        return this.get<EmployeeWithUser>(`/organizations/${orgId}/employee`);
+    }
+
     async createInviteLink(orgId: string, expiresInDays: number = 7) {
         return this.post<InviteLinkWithOrg>(`/organizations/${orgId}/employees/invite`, { expiresInDays });
     }

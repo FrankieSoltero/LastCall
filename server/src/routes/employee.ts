@@ -52,6 +52,46 @@ router.get('/:orgId/employees', authMiddleware, async (req: Request, res: Respon
         res.status(500).json({ error: 'Failed to fetch employees' });
     }
 })
+/**
+ * GET Method
+ * Purpose -> Gets a single employee for employee role validation
+ * Returns -> Employee record with the user id, first and last name, and email
+ */
+router.get('/:orgId/employee', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId!;
+        const { orgId } = req.params;
+
+        const employee = await prisma.employee.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId,
+                    organizationId: orgId
+                }
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
+        });
+
+        if (!employee) {
+            return res.status(403).json({ error: 'Access Denied' });
+        }
+
+        return res.json(employee);
+
+    } catch (error) {
+        console.error('Error fetching employee', error);
+        res.status(500).json({ error: 'Failed to fetch employee' });
+    }
+})
 
 /**
  * POST Method this is where invite links are created

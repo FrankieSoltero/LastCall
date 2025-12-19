@@ -1643,15 +1643,63 @@ try {
 - AuthContext managing authentication state
 - Supabase integration configured
 - Root layout with AuthProvider and PortalHost
+- Authentication routing logic implemented in _layout.tsx
+
+**Frontend UI - Completed Pages:**
+- **Landing Page** (`app/index.tsx`) - Clean dark design with branding, "Get Started" and login CTAs
+- **Login Screen** (`app/(auth)/login.tsx`) - Email/password form with proper validation and loading states
+- **Sign Up Screen** (`app/(auth)/signup.tsx`) - Full registration form with firstName, lastName, email, password
+- **Fork Page** (`app/(app)/forkPage.tsx`) - Smart routing page that shows:
+  - Organization lobby (list of user's orgs) if they have memberships
+  - Onboarding (join/create options) if they have no organizations
+  - Fixed type issues (using `org._count.employees` instead of non-existent `org.role`)
+
+**Design System Established:**
+- **Color Palette:**
+  - Primary background: `#020617` (Slate-950)
+  - Secondary background: `#0f172a` (Slate-900)
+  - Component background: `#1e293b` (Slate-800)
+  - Borders: `#1e293b`, `#334155` (Slate-800/700)
+  - Text: `#ffffff` (white), `#94a3b8` (Slate-400), `#64748b` (Slate-500)
+  - Accent: `#818cf8` (Indigo-400), `#4f46e5` (Indigo-600), `#3b82f6` (Blue-500)
+- **Typography:**
+  - Large titles: 32-48px, fontWeight '700'
+  - Subtitles: 16-20px, Slate-400
+  - Labels: 14px, fontWeight '600', Slate-300
+- **Components:**
+  - Button/Input height: 56px
+  - Border radius: 12-24px for cards/buttons
+  - Padding: 24px horizontal standard
+  - Consistent spacing with `gap` property
+- **Patterns:**
+  - SafeAreaView containers
+  - KeyboardAvoidingView for forms
+  - Loading states with ActivityIndicator
+  - Error handling with Alert
+  - Icons from lucide-react-native
 
 ### ⏳ In Progress
-- Frontend UI components and screens
+
+**Frontend UI - Navigation Structure:**
+Creating placeholder pages for fork page navigation:
+- `app/(app)/joinOrganization.tsx` - Page for entering invite code to join organization
+- `app/(app)/createOrganization.tsx` - Form to create new organization
+- `app/(app)/[orgId]/index.tsx` - Organization dashboard (dynamic route)
+
+**Next Steps:**
+1. Create the three placeholder pages above
+2. Update navigation paths in forkPage.tsx to point to correct routes
+3. Build out the organization dashboard
+4. Implement create organization flow
+5. Implement join organization flow
 
 ### 📋 Not Started
-- User interface screens
-- Navigation structure
-- Forms and inputs
-- List views and detail views
+- Organization management screens
+- Employee management screens
+- Schedule creation and management
+- Shift management
+- Availability submission
+- Role management
 - State management for complex UI
 - Offline support
 - Push notifications
@@ -2046,6 +2094,271 @@ When building UI, test these scenarios:
 - Time format: "HH:MM" (24-hour)
 - Day names: Monday-Sunday (exact case)
 - Availability status: AVAILABLE | UNAVAILABLE | PREFERRED
+
+---
+
+## Design Reference for New Pages
+
+When creating new pages, follow these established patterns from existing screens:
+
+### Page Template Structure
+```typescript
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { IconName } from 'lucide-react-native';
+
+export default function PageName() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header with back button if needed */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Page Title</Text>
+        <Text style={styles.subtitle}>Supporting description text.</Text>
+      </View>
+
+      {/* Main content */}
+      <View style={styles.content}>
+        {/* Your content here */}
+      </View>
+
+      {/* Action button (if needed) */}
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleAction}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#020617" />
+        ) : (
+          <Text style={styles.buttonText}>Action Text</Text>
+        )}
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#020617',
+    paddingHorizontal: 24,
+  },
+  header: {
+    marginTop: 40,
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#94a3b8',
+    lineHeight: 24,
+  },
+  content: {
+    flex: 1,
+  },
+  button: {
+    backgroundColor: '#4f46e5',
+    height: 56,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+});
+```
+
+### Component Patterns
+
+**Input Field:**
+```typescript
+<View style={styles.inputGroup}>
+  <Text style={styles.label}>Label Text</Text>
+  <View style={styles.inputContainer}>
+    <IconName size={20} color="#64748b" style={styles.inputIcon} />
+    <TextInput
+      style={styles.input}
+      placeholder="Placeholder..."
+      placeholderTextColor="#64748b"
+      value={value}
+      onChangeText={setValue}
+    />
+  </View>
+</View>
+
+// Styles:
+inputGroup: {
+  gap: 8,
+},
+label: {
+  fontSize: 14,
+  fontWeight: '600',
+  color: '#cbd5e1',
+  marginLeft: 4,
+},
+inputContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#0f172a',
+  borderWidth: 1,
+  borderColor: '#1e293b',
+  borderRadius: 12,
+  height: 56,
+  paddingHorizontal: 16,
+},
+inputIcon: {
+  marginRight: 12,
+},
+input: {
+  flex: 1,
+  color: '#ffffff',
+  fontSize: 16,
+  height: '100%',
+},
+```
+
+**Card/List Item:**
+```typescript
+<TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={handlePress}>
+  <View style={styles.iconBubble}>
+    <IconName size={24} color="#fff" />
+  </View>
+  <View style={styles.cardContent}>
+    <Text style={styles.cardTitle}>Title</Text>
+    <Text style={styles.cardDesc}>Description text</Text>
+  </View>
+  <ChevronRight size={20} color="#475569" />
+</TouchableOpacity>
+
+// Styles:
+card: {
+  backgroundColor: '#1e293b',
+  borderRadius: 16,
+  padding: 16,
+  marginBottom: 12,
+  flexDirection: 'row',
+  alignItems: 'center',
+  borderWidth: 1,
+  borderColor: '#334155',
+},
+iconBubble: {
+  width: 48,
+  height: 48,
+  borderRadius: 12,
+  backgroundColor: '#3b82f6',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginRight: 16,
+},
+cardContent: {
+  flex: 1,
+},
+cardTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#fff',
+  marginBottom: 4,
+},
+cardDesc: {
+  fontSize: 14,
+  color: '#94a3b8',
+},
+```
+
+**Primary Button (White on Dark):**
+```typescript
+button: {
+  backgroundColor: '#ffffff',
+  height: 56,
+  borderRadius: 12,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: 8,
+},
+buttonText: {
+  color: '#020617',
+  fontSize: 16,
+  fontWeight: '700',
+},
+```
+
+**Secondary Button (Indigo):**
+```typescript
+button: {
+  backgroundColor: '#4f46e5',
+  height: 56,
+  borderRadius: 12,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: 16,
+  shadowColor: '#4f46e5',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.2,
+  shadowRadius: 12,
+  elevation: 4,
+},
+buttonText: {
+  color: '#ffffff',
+  fontSize: 16,
+  fontWeight: '700',
+},
+```
+
+### Color Variables (for quick reference)
+```typescript
+const colors = {
+  // Backgrounds
+  bg_primary: '#020617',    // Slate-950 - Main background
+  bg_secondary: '#0f172a',  // Slate-900 - Input backgrounds
+  bg_tertiary: '#1e293b',   // Slate-800 - Card backgrounds
+
+  // Borders
+  border_primary: '#1e293b',  // Slate-800
+  border_secondary: '#334155', // Slate-700
+
+  // Text
+  text_primary: '#ffffff',    // White - Headings
+  text_secondary: '#94a3b8',  // Slate-400 - Subtitles
+  text_tertiary: '#64748b',   // Slate-500 - Descriptions
+  text_label: '#cbd5e1',      // Slate-300 - Input labels
+  text_muted: '#475569',      // Slate-600 - Footer text
+
+  // Accents
+  accent_primary: '#4f46e5',  // Indigo-600 - Primary buttons
+  accent_secondary: '#818cf8', // Indigo-400 - Icons/highlights
+  accent_info: '#3b82f6',     // Blue-500 - Info badges
+  accent_success: '#34d399',  // Emerald-400 - Success states
+};
+```
+
+### Icons Used
+- `ArrowLeft` - Back buttons
+- `Mail`, `Lock` - Auth forms
+- `Plus` - Add/Create actions
+- `QrCode` - Join organization
+- `Building2` - Organizations
+- `ChevronRight` - Navigation arrows
+- `LogOut` - Sign out
+- `Martini` - App logo
+
+All icons from: `lucide-react-native`
 
 ---
 

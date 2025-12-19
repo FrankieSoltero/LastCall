@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StatusBar, StyleSheet, Platform } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Martini, ArrowRight } from 'lucide-react-native';
 
 export default function LandingPage() {
-  const router = useRouter();
 
   return (
     <View style={styles.container}>

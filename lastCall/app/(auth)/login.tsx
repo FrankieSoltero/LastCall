@@ -49,7 +49,7 @@ export default function SignIn() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.push('/')} style={styles.backButton}>
             <ArrowLeft size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
