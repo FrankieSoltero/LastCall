@@ -38,6 +38,18 @@ router.get('/:orgId/employees', authMiddleware, async (req: Request, res: Respon
                         firstName: true,
                         lastName: true
                     }
+                },
+                roleAssignments: {
+                    select: {
+                        id: true,
+                        roleId: true,
+                        role: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        }
+                    }
                 }
             },
             orderBy: [

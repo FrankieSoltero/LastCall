@@ -83,6 +83,11 @@ export type Shift = Prisma.ShiftModel
  */
 export type Availability = Prisma.AvailabilityModel
 /**
+ * Model GeneralAvailability
+ * 
+ */
+export type GeneralAvailability = Prisma.GeneralAvailabilityModel
+/**
  * Model EmployeeRoleAssignment
  * 
  */

@@ -393,6 +393,7 @@ export const ModelName = {
   Role: 'Role',
   Shift: 'Shift',
   Availability: 'Availability',
+  GeneralAvailability: 'GeneralAvailability',
   EmployeeRoleAssignment: 'EmployeeRoleAssignment'
 } as const
 
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "organization" | "employee" | "inviteLink" | "schedule" | "scheduleDay" | "role" | "shift" | "availability" | "employeeRoleAssignment"
+    modelProps: "user" | "organization" | "employee" | "inviteLink" | "schedule" | "scheduleDay" | "role" | "shift" | "availability" | "generalAvailability" | "employeeRoleAssignment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1079,6 +1080,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    GeneralAvailability: {
+      payload: Prisma.$GeneralAvailabilityPayload<ExtArgs>
+      fields: Prisma.GeneralAvailabilityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GeneralAvailabilityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GeneralAvailabilityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>
+        }
+        findFirst: {
+          args: Prisma.GeneralAvailabilityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GeneralAvailabilityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>
+        }
+        findMany: {
+          args: Prisma.GeneralAvailabilityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>[]
+        }
+        create: {
+          args: Prisma.GeneralAvailabilityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>
+        }
+        createMany: {
+          args: Prisma.GeneralAvailabilityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GeneralAvailabilityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>[]
+        }
+        delete: {
+          args: Prisma.GeneralAvailabilityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>
+        }
+        update: {
+          args: Prisma.GeneralAvailabilityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>
+        }
+        deleteMany: {
+          args: Prisma.GeneralAvailabilityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GeneralAvailabilityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GeneralAvailabilityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>[]
+        }
+        upsert: {
+          args: Prisma.GeneralAvailabilityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GeneralAvailabilityPayload>
+        }
+        aggregate: {
+          args: Prisma.GeneralAvailabilityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGeneralAvailability>
+        }
+        groupBy: {
+          args: Prisma.GeneralAvailabilityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GeneralAvailabilityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GeneralAvailabilityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GeneralAvailabilityCountAggregateOutputType> | number
+        }
+      }
+    }
     EmployeeRoleAssignment: {
       payload: Prisma.$EmployeeRoleAssignmentPayload<ExtArgs>
       fields: Prisma.EmployeeRoleAssignmentFieldRefs
@@ -1245,6 +1320,7 @@ export type InviteLinkScalarFieldEnum = (typeof InviteLinkScalarFieldEnum)[keyof
 export const ScheduleScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
+  name: 'name',
   weekStartDate: 'weekStartDate',
   availabilityDeadline: 'availabilityDeadline',
   isPublished: 'isPublished',
@@ -1283,6 +1359,7 @@ export const ShiftScalarFieldEnum = {
   employeeId: 'employeeId',
   startTime: 'startTime',
   endTime: 'endTime',
+  isOnCall: 'isOnCall',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1293,7 +1370,6 @@ export type ShiftScalarFieldEnum = (typeof ShiftScalarFieldEnum)[keyof typeof Sh
 export const AvailabilityScalarFieldEnum = {
   id: 'id',
   employeeId: 'employeeId',
-  scheduleId: 'scheduleId',
   dayOfWeek: 'dayOfWeek',
   status: 'status',
   startTime: 'startTime',
@@ -1303,6 +1379,20 @@ export const AvailabilityScalarFieldEnum = {
 } as const
 
 export type AvailabilityScalarFieldEnum = (typeof AvailabilityScalarFieldEnum)[keyof typeof AvailabilityScalarFieldEnum]
+
+
+export const GeneralAvailabilityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  dayOfWeek: 'dayOfWeek',
+  status: 'status',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GeneralAvailabilityScalarFieldEnum = (typeof GeneralAvailabilityScalarFieldEnum)[keyof typeof GeneralAvailabilityScalarFieldEnum]
 
 
 export const EmployeeRoleAssignmentScalarFieldEnum = {
@@ -1539,6 +1629,7 @@ export type GlobalOmitConfig = {
   role?: Prisma.RoleOmit
   shift?: Prisma.ShiftOmit
   availability?: Prisma.AvailabilityOmit
+  generalAvailability?: Prisma.GeneralAvailabilityOmit
   employeeRoleAssignment?: Prisma.EmployeeRoleAssignmentOmit
 }
 

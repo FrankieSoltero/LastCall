@@ -27,7 +27,6 @@ export type AggregateAvailability = {
 export type AvailabilityMinAggregateOutputType = {
   id: string | null
   employeeId: string | null
-  scheduleId: string | null
   dayOfWeek: string | null
   status: $Enums.AvailabilityStatus | null
   startTime: Date | null
@@ -39,7 +38,6 @@ export type AvailabilityMinAggregateOutputType = {
 export type AvailabilityMaxAggregateOutputType = {
   id: string | null
   employeeId: string | null
-  scheduleId: string | null
   dayOfWeek: string | null
   status: $Enums.AvailabilityStatus | null
   startTime: Date | null
@@ -51,7 +49,6 @@ export type AvailabilityMaxAggregateOutputType = {
 export type AvailabilityCountAggregateOutputType = {
   id: number
   employeeId: number
-  scheduleId: number
   dayOfWeek: number
   status: number
   startTime: number
@@ -65,7 +62,6 @@ export type AvailabilityCountAggregateOutputType = {
 export type AvailabilityMinAggregateInputType = {
   id?: true
   employeeId?: true
-  scheduleId?: true
   dayOfWeek?: true
   status?: true
   startTime?: true
@@ -77,7 +73,6 @@ export type AvailabilityMinAggregateInputType = {
 export type AvailabilityMaxAggregateInputType = {
   id?: true
   employeeId?: true
-  scheduleId?: true
   dayOfWeek?: true
   status?: true
   startTime?: true
@@ -89,7 +84,6 @@ export type AvailabilityMaxAggregateInputType = {
 export type AvailabilityCountAggregateInputType = {
   id?: true
   employeeId?: true
-  scheduleId?: true
   dayOfWeek?: true
   status?: true
   startTime?: true
@@ -174,7 +168,6 @@ export type AvailabilityGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type AvailabilityGroupByOutputType = {
   id: string
   employeeId: string
-  scheduleId: string
   dayOfWeek: string
   status: $Enums.AvailabilityStatus
   startTime: Date | null
@@ -207,7 +200,6 @@ export type AvailabilityWhereInput = {
   NOT?: Prisma.AvailabilityWhereInput | Prisma.AvailabilityWhereInput[]
   id?: Prisma.UuidFilter<"Availability"> | string
   employeeId?: Prisma.UuidFilter<"Availability"> | string
-  scheduleId?: Prisma.UuidFilter<"Availability"> | string
   dayOfWeek?: Prisma.StringFilter<"Availability"> | string
   status?: Prisma.EnumAvailabilityStatusFilter<"Availability"> | $Enums.AvailabilityStatus
   startTime?: Prisma.DateTimeNullableFilter<"Availability"> | Date | string | null
@@ -215,13 +207,11 @@ export type AvailabilityWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
-  schedule?: Prisma.XOR<Prisma.ScheduleScalarRelationFilter, Prisma.ScheduleWhereInput>
 }
 
 export type AvailabilityOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
-  scheduleId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   status?: Prisma.SortOrder
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -229,17 +219,15 @@ export type AvailabilityOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   employee?: Prisma.EmployeeOrderByWithRelationInput
-  schedule?: Prisma.ScheduleOrderByWithRelationInput
 }
 
 export type AvailabilityWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  employeeId_scheduleId_dayOfWeek?: Prisma.AvailabilityEmployeeIdScheduleIdDayOfWeekCompoundUniqueInput
+  employeeId_dayOfWeek?: Prisma.AvailabilityEmployeeIdDayOfWeekCompoundUniqueInput
   AND?: Prisma.AvailabilityWhereInput | Prisma.AvailabilityWhereInput[]
   OR?: Prisma.AvailabilityWhereInput[]
   NOT?: Prisma.AvailabilityWhereInput | Prisma.AvailabilityWhereInput[]
   employeeId?: Prisma.UuidFilter<"Availability"> | string
-  scheduleId?: Prisma.UuidFilter<"Availability"> | string
   dayOfWeek?: Prisma.StringFilter<"Availability"> | string
   status?: Prisma.EnumAvailabilityStatusFilter<"Availability"> | $Enums.AvailabilityStatus
   startTime?: Prisma.DateTimeNullableFilter<"Availability"> | Date | string | null
@@ -247,13 +235,11 @@ export type AvailabilityWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
-  schedule?: Prisma.XOR<Prisma.ScheduleScalarRelationFilter, Prisma.ScheduleWhereInput>
-}, "id" | "employeeId_scheduleId_dayOfWeek">
+}, "id" | "employeeId_dayOfWeek">
 
 export type AvailabilityOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
-  scheduleId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   status?: Prisma.SortOrder
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -271,7 +257,6 @@ export type AvailabilityScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AvailabilityScalarWhereWithAggregatesInput | Prisma.AvailabilityScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Availability"> | string
   employeeId?: Prisma.UuidWithAggregatesFilter<"Availability"> | string
-  scheduleId?: Prisma.UuidWithAggregatesFilter<"Availability"> | string
   dayOfWeek?: Prisma.StringWithAggregatesFilter<"Availability"> | string
   status?: Prisma.EnumAvailabilityStatusWithAggregatesFilter<"Availability"> | $Enums.AvailabilityStatus
   startTime?: Prisma.DateTimeNullableWithAggregatesFilter<"Availability"> | Date | string | null
@@ -289,13 +274,11 @@ export type AvailabilityCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   employee: Prisma.EmployeeCreateNestedOneWithoutAvailabilityInput
-  schedule: Prisma.ScheduleCreateNestedOneWithoutAvailabilityInput
 }
 
 export type AvailabilityUncheckedCreateInput = {
   id?: string
   employeeId: string
-  scheduleId: string
   dayOfWeek: string
   status: $Enums.AvailabilityStatus
   startTime?: Date | string | null
@@ -313,13 +296,11 @@ export type AvailabilityUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutAvailabilityNestedInput
-  schedule?: Prisma.ScheduleUpdateOneRequiredWithoutAvailabilityNestedInput
 }
 
 export type AvailabilityUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   employeeId?: Prisma.StringFieldUpdateOperationsInput | string
-  scheduleId?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAvailabilityStatusFieldUpdateOperationsInput | $Enums.AvailabilityStatus
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -331,7 +312,6 @@ export type AvailabilityUncheckedUpdateInput = {
 export type AvailabilityCreateManyInput = {
   id?: string
   employeeId: string
-  scheduleId: string
   dayOfWeek: string
   status: $Enums.AvailabilityStatus
   startTime?: Date | string | null
@@ -353,7 +333,6 @@ export type AvailabilityUpdateManyMutationInput = {
 export type AvailabilityUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   employeeId?: Prisma.StringFieldUpdateOperationsInput | string
-  scheduleId?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAvailabilityStatusFieldUpdateOperationsInput | $Enums.AvailabilityStatus
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -372,16 +351,14 @@ export type AvailabilityOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type AvailabilityEmployeeIdScheduleIdDayOfWeekCompoundUniqueInput = {
+export type AvailabilityEmployeeIdDayOfWeekCompoundUniqueInput = {
   employeeId: string
-  scheduleId: string
   dayOfWeek: string
 }
 
 export type AvailabilityCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
-  scheduleId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   status?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
@@ -393,7 +370,6 @@ export type AvailabilityCountOrderByAggregateInput = {
 export type AvailabilityMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
-  scheduleId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   status?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
@@ -405,7 +381,6 @@ export type AvailabilityMaxOrderByAggregateInput = {
 export type AvailabilityMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
-  scheduleId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   status?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
@@ -456,48 +431,6 @@ export type AvailabilityUncheckedUpdateManyWithoutEmployeeNestedInput = {
   deleteMany?: Prisma.AvailabilityScalarWhereInput | Prisma.AvailabilityScalarWhereInput[]
 }
 
-export type AvailabilityCreateNestedManyWithoutScheduleInput = {
-  create?: Prisma.XOR<Prisma.AvailabilityCreateWithoutScheduleInput, Prisma.AvailabilityUncheckedCreateWithoutScheduleInput> | Prisma.AvailabilityCreateWithoutScheduleInput[] | Prisma.AvailabilityUncheckedCreateWithoutScheduleInput[]
-  connectOrCreate?: Prisma.AvailabilityCreateOrConnectWithoutScheduleInput | Prisma.AvailabilityCreateOrConnectWithoutScheduleInput[]
-  createMany?: Prisma.AvailabilityCreateManyScheduleInputEnvelope
-  connect?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-}
-
-export type AvailabilityUncheckedCreateNestedManyWithoutScheduleInput = {
-  create?: Prisma.XOR<Prisma.AvailabilityCreateWithoutScheduleInput, Prisma.AvailabilityUncheckedCreateWithoutScheduleInput> | Prisma.AvailabilityCreateWithoutScheduleInput[] | Prisma.AvailabilityUncheckedCreateWithoutScheduleInput[]
-  connectOrCreate?: Prisma.AvailabilityCreateOrConnectWithoutScheduleInput | Prisma.AvailabilityCreateOrConnectWithoutScheduleInput[]
-  createMany?: Prisma.AvailabilityCreateManyScheduleInputEnvelope
-  connect?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-}
-
-export type AvailabilityUpdateManyWithoutScheduleNestedInput = {
-  create?: Prisma.XOR<Prisma.AvailabilityCreateWithoutScheduleInput, Prisma.AvailabilityUncheckedCreateWithoutScheduleInput> | Prisma.AvailabilityCreateWithoutScheduleInput[] | Prisma.AvailabilityUncheckedCreateWithoutScheduleInput[]
-  connectOrCreate?: Prisma.AvailabilityCreateOrConnectWithoutScheduleInput | Prisma.AvailabilityCreateOrConnectWithoutScheduleInput[]
-  upsert?: Prisma.AvailabilityUpsertWithWhereUniqueWithoutScheduleInput | Prisma.AvailabilityUpsertWithWhereUniqueWithoutScheduleInput[]
-  createMany?: Prisma.AvailabilityCreateManyScheduleInputEnvelope
-  set?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  disconnect?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  delete?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  connect?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  update?: Prisma.AvailabilityUpdateWithWhereUniqueWithoutScheduleInput | Prisma.AvailabilityUpdateWithWhereUniqueWithoutScheduleInput[]
-  updateMany?: Prisma.AvailabilityUpdateManyWithWhereWithoutScheduleInput | Prisma.AvailabilityUpdateManyWithWhereWithoutScheduleInput[]
-  deleteMany?: Prisma.AvailabilityScalarWhereInput | Prisma.AvailabilityScalarWhereInput[]
-}
-
-export type AvailabilityUncheckedUpdateManyWithoutScheduleNestedInput = {
-  create?: Prisma.XOR<Prisma.AvailabilityCreateWithoutScheduleInput, Prisma.AvailabilityUncheckedCreateWithoutScheduleInput> | Prisma.AvailabilityCreateWithoutScheduleInput[] | Prisma.AvailabilityUncheckedCreateWithoutScheduleInput[]
-  connectOrCreate?: Prisma.AvailabilityCreateOrConnectWithoutScheduleInput | Prisma.AvailabilityCreateOrConnectWithoutScheduleInput[]
-  upsert?: Prisma.AvailabilityUpsertWithWhereUniqueWithoutScheduleInput | Prisma.AvailabilityUpsertWithWhereUniqueWithoutScheduleInput[]
-  createMany?: Prisma.AvailabilityCreateManyScheduleInputEnvelope
-  set?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  disconnect?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  delete?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  connect?: Prisma.AvailabilityWhereUniqueInput | Prisma.AvailabilityWhereUniqueInput[]
-  update?: Prisma.AvailabilityUpdateWithWhereUniqueWithoutScheduleInput | Prisma.AvailabilityUpdateWithWhereUniqueWithoutScheduleInput[]
-  updateMany?: Prisma.AvailabilityUpdateManyWithWhereWithoutScheduleInput | Prisma.AvailabilityUpdateManyWithWhereWithoutScheduleInput[]
-  deleteMany?: Prisma.AvailabilityScalarWhereInput | Prisma.AvailabilityScalarWhereInput[]
-}
-
 export type EnumAvailabilityStatusFieldUpdateOperationsInput = {
   set?: $Enums.AvailabilityStatus
 }
@@ -510,12 +443,10 @@ export type AvailabilityCreateWithoutEmployeeInput = {
   endTime?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  schedule: Prisma.ScheduleCreateNestedOneWithoutAvailabilityInput
 }
 
 export type AvailabilityUncheckedCreateWithoutEmployeeInput = {
   id?: string
-  scheduleId: string
   dayOfWeek: string
   status: $Enums.AvailabilityStatus
   startTime?: Date | string | null
@@ -556,7 +487,6 @@ export type AvailabilityScalarWhereInput = {
   NOT?: Prisma.AvailabilityScalarWhereInput | Prisma.AvailabilityScalarWhereInput[]
   id?: Prisma.UuidFilter<"Availability"> | string
   employeeId?: Prisma.UuidFilter<"Availability"> | string
-  scheduleId?: Prisma.UuidFilter<"Availability"> | string
   dayOfWeek?: Prisma.StringFilter<"Availability"> | string
   status?: Prisma.EnumAvailabilityStatusFilter<"Availability"> | $Enums.AvailabilityStatus
   startTime?: Prisma.DateTimeNullableFilter<"Availability"> | Date | string | null
@@ -565,57 +495,8 @@ export type AvailabilityScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Availability"> | Date | string
 }
 
-export type AvailabilityCreateWithoutScheduleInput = {
-  id?: string
-  dayOfWeek: string
-  status: $Enums.AvailabilityStatus
-  startTime?: Date | string | null
-  endTime?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  employee: Prisma.EmployeeCreateNestedOneWithoutAvailabilityInput
-}
-
-export type AvailabilityUncheckedCreateWithoutScheduleInput = {
-  id?: string
-  employeeId: string
-  dayOfWeek: string
-  status: $Enums.AvailabilityStatus
-  startTime?: Date | string | null
-  endTime?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type AvailabilityCreateOrConnectWithoutScheduleInput = {
-  where: Prisma.AvailabilityWhereUniqueInput
-  create: Prisma.XOR<Prisma.AvailabilityCreateWithoutScheduleInput, Prisma.AvailabilityUncheckedCreateWithoutScheduleInput>
-}
-
-export type AvailabilityCreateManyScheduleInputEnvelope = {
-  data: Prisma.AvailabilityCreateManyScheduleInput | Prisma.AvailabilityCreateManyScheduleInput[]
-  skipDuplicates?: boolean
-}
-
-export type AvailabilityUpsertWithWhereUniqueWithoutScheduleInput = {
-  where: Prisma.AvailabilityWhereUniqueInput
-  update: Prisma.XOR<Prisma.AvailabilityUpdateWithoutScheduleInput, Prisma.AvailabilityUncheckedUpdateWithoutScheduleInput>
-  create: Prisma.XOR<Prisma.AvailabilityCreateWithoutScheduleInput, Prisma.AvailabilityUncheckedCreateWithoutScheduleInput>
-}
-
-export type AvailabilityUpdateWithWhereUniqueWithoutScheduleInput = {
-  where: Prisma.AvailabilityWhereUniqueInput
-  data: Prisma.XOR<Prisma.AvailabilityUpdateWithoutScheduleInput, Prisma.AvailabilityUncheckedUpdateWithoutScheduleInput>
-}
-
-export type AvailabilityUpdateManyWithWhereWithoutScheduleInput = {
-  where: Prisma.AvailabilityScalarWhereInput
-  data: Prisma.XOR<Prisma.AvailabilityUpdateManyMutationInput, Prisma.AvailabilityUncheckedUpdateManyWithoutScheduleInput>
-}
-
 export type AvailabilityCreateManyEmployeeInput = {
   id?: string
-  scheduleId: string
   dayOfWeek: string
   status: $Enums.AvailabilityStatus
   startTime?: Date | string | null
@@ -632,12 +513,10 @@ export type AvailabilityUpdateWithoutEmployeeInput = {
   endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  schedule?: Prisma.ScheduleUpdateOneRequiredWithoutAvailabilityNestedInput
 }
 
 export type AvailabilityUncheckedUpdateWithoutEmployeeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  scheduleId?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAvailabilityStatusFieldUpdateOperationsInput | $Enums.AvailabilityStatus
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -648,51 +527,6 @@ export type AvailabilityUncheckedUpdateWithoutEmployeeInput = {
 
 export type AvailabilityUncheckedUpdateManyWithoutEmployeeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  scheduleId?: Prisma.StringFieldUpdateOperationsInput | string
-  dayOfWeek?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumAvailabilityStatusFieldUpdateOperationsInput | $Enums.AvailabilityStatus
-  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type AvailabilityCreateManyScheduleInput = {
-  id?: string
-  employeeId: string
-  dayOfWeek: string
-  status: $Enums.AvailabilityStatus
-  startTime?: Date | string | null
-  endTime?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type AvailabilityUpdateWithoutScheduleInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  dayOfWeek?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumAvailabilityStatusFieldUpdateOperationsInput | $Enums.AvailabilityStatus
-  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  employee?: Prisma.EmployeeUpdateOneRequiredWithoutAvailabilityNestedInput
-}
-
-export type AvailabilityUncheckedUpdateWithoutScheduleInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  employeeId?: Prisma.StringFieldUpdateOperationsInput | string
-  dayOfWeek?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumAvailabilityStatusFieldUpdateOperationsInput | $Enums.AvailabilityStatus
-  startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type AvailabilityUncheckedUpdateManyWithoutScheduleInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  employeeId?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAvailabilityStatusFieldUpdateOperationsInput | $Enums.AvailabilityStatus
   startTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -706,7 +540,6 @@ export type AvailabilityUncheckedUpdateManyWithoutScheduleInput = {
 export type AvailabilitySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   employeeId?: boolean
-  scheduleId?: boolean
   dayOfWeek?: boolean
   status?: boolean
   startTime?: boolean
@@ -714,13 +547,11 @@ export type AvailabilitySelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["availability"]>
 
 export type AvailabilitySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   employeeId?: boolean
-  scheduleId?: boolean
   dayOfWeek?: boolean
   status?: boolean
   startTime?: boolean
@@ -728,13 +559,11 @@ export type AvailabilitySelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   createdAt?: boolean
   updatedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["availability"]>
 
 export type AvailabilitySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   employeeId?: boolean
-  scheduleId?: boolean
   dayOfWeek?: boolean
   status?: boolean
   startTime?: boolean
@@ -742,13 +571,11 @@ export type AvailabilitySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   createdAt?: boolean
   updatedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["availability"]>
 
 export type AvailabilitySelectScalar = {
   id?: boolean
   employeeId?: boolean
-  scheduleId?: boolean
   dayOfWeek?: boolean
   status?: boolean
   startTime?: boolean
@@ -757,30 +584,25 @@ export type AvailabilitySelectScalar = {
   updatedAt?: boolean
 }
 
-export type AvailabilityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "employeeId" | "scheduleId" | "dayOfWeek" | "status" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["availability"]>
+export type AvailabilityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "employeeId" | "dayOfWeek" | "status" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["availability"]>
 export type AvailabilityInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }
 export type AvailabilityIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }
 export type AvailabilityIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }
 
 export type $AvailabilityPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Availability"
   objects: {
     employee: Prisma.$EmployeePayload<ExtArgs>
-    schedule: Prisma.$SchedulePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     employeeId: string
-    scheduleId: string
     dayOfWeek: string
     status: $Enums.AvailabilityStatus
     startTime: Date | null
@@ -1182,7 +1004,6 @@ readonly fields: AvailabilityFieldRefs;
 export interface Prisma__AvailabilityClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   employee<T extends Prisma.EmployeeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmployeeDefaultArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  schedule<T extends Prisma.ScheduleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScheduleDefaultArgs<ExtArgs>>): Prisma.Prisma__ScheduleClient<runtime.Types.Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1214,7 +1035,6 @@ export interface Prisma__AvailabilityClient<T, Null = never, ExtArgs extends run
 export interface AvailabilityFieldRefs {
   readonly id: Prisma.FieldRef<"Availability", 'String'>
   readonly employeeId: Prisma.FieldRef<"Availability", 'String'>
-  readonly scheduleId: Prisma.FieldRef<"Availability", 'String'>
   readonly dayOfWeek: Prisma.FieldRef<"Availability", 'String'>
   readonly status: Prisma.FieldRef<"Availability", 'AvailabilityStatus'>
   readonly startTime: Prisma.FieldRef<"Availability", 'DateTime'>

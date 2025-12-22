@@ -10,6 +10,7 @@ import schedulesRouter from './routes/schedules';
 import employeeRouter from './routes/employee';
 import shiftRouter from './routes/shift';
 import availabilityRouter from './routes/availability';
+import generalAvailabilityRouter from './routes/generalAvailability';
 import rolesRouter from './routes/roles';
 import usersRouter from './routes/users';
 import helmet from 'helmet';
@@ -129,6 +130,7 @@ app.use('/api/organizations', schedulesRouter);
 app.use('/api', schedulesRouter);
 app.use('/api', shiftRouter);
 app.use('/api', availabilityRouter);
+app.use('/api', generalAvailabilityRouter);
 app.use('/api/organizations', rolesRouter);
 app.use('/api', rolesRouter);
 

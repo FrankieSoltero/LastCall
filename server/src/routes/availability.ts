@@ -6,38 +6,62 @@ import { isOrgAdmin } from '../lib/helper';
 const router = Router();
 
 /**
- * GET Method 
- * Purpose -> View All availability submissions for a schedule (admin view)
- * Access -> Only Admin/Owner
- * Returns -> All Employees availability
+ * Helper function: Get availability with fallback to general
+ * If no org-specific availability exists, use general availability
  */
-router.get('/schedules/:scheduleId/availability', authMiddleware, async (req: Request, res: Response) => {
+async function getAvailabilityWithFallback(employeeId: string, userId: string) {
+    const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    // Get org-specific availability
+    const orgAvailability = await prisma.availability.findMany({
+        where: { employeeId }
+    });
+
+    // Get general availability
+    const generalAvailability = await prisma.generalAvailability.findMany({
+        where: { userId }
+    });
+
+    // Create a map of days that have org-specific availability
+    const orgDays = new Set(orgAvailability.map(a => a.dayOfWeek));
+
+    // For days without org-specific availability, use general
+    const fallbackAvailability = generalAvailability
+        .filter(ga => !orgDays.has(ga.dayOfWeek))
+        .map(ga => ({
+            id: ga.id,
+            employeeId,
+            dayOfWeek: ga.dayOfWeek,
+            status: ga.status,
+            startTime: ga.startTime,
+            endTime: ga.endTime,
+            createdAt: ga.createdAt,
+            updatedAt: ga.updatedAt,
+            isGeneral: true // Mark as fallback
+        }));
+
+    // Combine and sort
+    return [...orgAvailability, ...fallbackAvailability].sort((a, b) => {
+        return DAYS.indexOf(a.dayOfWeek) - DAYS.indexOf(b.dayOfWeek);
+    });
+}
+
+/**
+ * GET Method
+ * Purpose -> View all availability for an organization (admin view with fallback)
+ * Access -> Only Admin/Owner
+ * Returns -> All employees' availability (org-specific + general fallback)
+ */
+router.get('/organizations/:orgId/availability', authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.userId!;
-        const { scheduleId } = req.params;
+        const { orgId } = req.params;
 
-        const schedule = await prisma.schedule.findUnique({
-            where: { id: scheduleId },
+        const organization = await prisma.organization.findUnique({
+            where: { id: orgId },
             include: {
-                organization: true
-            }
-        });
-
-        if (!schedule) {
-            return res.status(404).json({ error: 'Schedule not found' });
-        }
-
-        const isAdmin = await isOrgAdmin(userId, schedule.organizationId);
-        if (!isAdmin) {
-            return res.status(403).json({ error: 'Only admins can view all availability' });
-        }
-
-        const availability = await prisma.availability.findMany({
-            where: {
-                scheduleId: scheduleId
-            },
-            include: {
-                employee: {
+                employees: {
+                    where: { status: 'APPROVED' },
                     include: {
                         user: {
                             select: {
@@ -49,72 +73,91 @@ router.get('/schedules/:scheduleId/availability', authMiddleware, async (req: Re
                         }
                     }
                 }
-            },
-            orderBy: [
-                { employee: { user: { lastName: 'asc' } } },
-                { dayOfWeek: 'asc' }
-            ]
+            }
         });
 
-        res.json(availability);
+        if (!organization) {
+            return res.status(404).json({ error: 'Organization not found' });
+        }
+
+        const isAdmin = await isOrgAdmin(userId, orgId);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can view all availability' });
+        }
+
+        // Get availability for each employee (with fallback)
+        const allAvailability = await Promise.all(
+            organization.employees.map(async (employee) => {
+                const availability = await getAvailabilityWithFallback(
+                    employee.id,
+                    employee.userId
+                );
+
+                // Attach employee info to each availability entry
+                return availability.map(avail => ({
+                    ...avail,
+                    employee: {
+                        id: employee.id,
+                        user: employee.user
+                    }
+                }));
+            })
+        );
+
+        // Flatten and sort
+        const flattenedAvailability = allAvailability.flat().sort((a, b) => {
+            // Sort by last name, then by day
+            const lastNameCompare = a.employee.user.lastName.localeCompare(b.employee.user.lastName);
+            if (lastNameCompare !== 0) return lastNameCompare;
+
+            const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            return DAYS.indexOf(a.dayOfWeek) - DAYS.indexOf(b.dayOfWeek);
+        });
+
+        res.json(flattenedAvailability);
     } catch (error) {
         console.error('Error fetching availability:', error);
-        res.status(500).json({ error: 'Failed to fetch availbility' });
+        res.status(500).json({ error: 'Failed to fetch availability' });
     }
 });
 
 /**
  * GET Method
- * Purpose -> View my own availability
- * Access -> Any Approved employee
- * Returns -> My Availability entries for this week
+ * Purpose -> View my own availability for an organization (with fallback to general)
+ * Access -> Any approved employee
+ * Returns -> My availability entries for this organization (org-specific + general fallback)
  */
-router.get('/schedules/:scheduleId/availability/me', authMiddleware, async (req: Request, res: Response) => {
+router.get('/organizations/:orgId/availability/me', authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.userId!;
-        const { scheduleId } = req.params;
-
-        const schedule = await prisma.schedule.findUnique({
-            where: { id: scheduleId }
-        });
-
-        if (!schedule) {
-            return res.status(404).json({ error: 'Schedule not found' });
-        }
+        const { orgId } = req.params;
 
         const employee = await prisma.employee.findUnique({
             where: {
                 userId_organizationId: {
                     userId,
-                    organizationId: schedule.organizationId
+                    organizationId: orgId
                 }
             }
         });
 
         if (!employee || employee.status !== 'APPROVED') {
-            return res.status(403).json({ error: 'Access Denied' });
+            return res.status(403).json({ error: 'Access denied' });
         }
 
-        const availability = await prisma.availability.findMany({
-            where: {
-                scheduleId: scheduleId,
-                employeeId: employee.id
-            },
-            orderBy: {
-                dayOfWeek: 'asc'
-            }
-        });
+        // Get availability with fallback to general
+        const availability = await getAvailabilityWithFallback(employee.id, userId);
 
         res.json(availability);
     } catch (error) {
         console.error('Error fetching my availability', error);
-        res.status(500).json({ error: 'Failed to fetch availabity' });
+        res.status(500).json({ error: 'Failed to fetch availability' });
     }
 });
 
 /**
- * POST Method 
- * Purpose -> Submit/Update my availability for the week
+ * PUT Method
+ * Purpose -> Submit/Update my availability for an organization
  * Access -> Any APPROVED Employee
  * Body -> {
  *  availability: [
@@ -124,10 +167,10 @@ router.get('/schedules/:scheduleId/availability/me', authMiddleware, async (req:
  *   ]
  * }
  */
-router.post('/schedules/:scheduleId/availability', authMiddleware, async (req: Request, res: Response) => {
+router.put('/organizations/:orgId/availability', authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.userId!;
-        const { scheduleId } = req.params;
+        const { orgId } = req.params;
         const { availability } = req.body;
 
         if (!availability || !Array.isArray(availability) || availability.length === 0) {
@@ -136,34 +179,17 @@ router.post('/schedules/:scheduleId/availability', authMiddleware, async (req: R
             });
         }
 
-        const schedule = await prisma.schedule.findUnique({
-            where: { id: scheduleId }
-        });
-
-        if (!schedule) {
-            return res.status(404).json({ error: 'Schedule not found' });
-        }
-
-        const now = new Date();
-
-        if (now > schedule.availabilityDeadline) {
-            return res.status(400).json({
-                error: 'Availability deadline has passed',
-                deadline: schedule.availabilityDeadline
-            });
-        }
-
         const employee = await prisma.employee.findUnique({
             where: {
                 userId_organizationId: {
                     userId,
-                    organizationId: schedule.organizationId
+                    organizationId: orgId
                 }
             }
         });
 
         if (!employee || employee.status !== 'APPROVED') {
-            return res.status(403).json({ error: 'Access Denied' });
+            return res.status(403).json({ error: 'Access denied' });
         }
 
         const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -214,9 +240,8 @@ router.post('/schedules/:scheduleId/availability', authMiddleware, async (req: R
 
                 return prisma.availability.upsert({
                     where: {
-                        employeeId_scheduleId_dayOfWeek: {
+                        employeeId_dayOfWeek: {
                             employeeId: employee.id,
-                            scheduleId: scheduleId,
                             dayOfWeek: entry.dayOfWeek
                         }
                     },
@@ -227,7 +252,6 @@ router.post('/schedules/:scheduleId/availability', authMiddleware, async (req: R
                     },
                     create: {
                         employeeId: employee.id,
-                        scheduleId: scheduleId,
                         dayOfWeek: entry.dayOfWeek,
                         status: entry.status,
                         startTime: startDateTime,
@@ -236,8 +260,8 @@ router.post('/schedules/:scheduleId/availability', authMiddleware, async (req: R
                 })
             })
         )
-        res.status(201).json({
-            message: 'Availability submitted successfully',
+        res.status(200).json({
+            message: 'Availability updated successfully',
             availability: results
         });
     } catch (error) {
@@ -247,146 +271,51 @@ router.post('/schedules/:scheduleId/availability', authMiddleware, async (req: R
 });
 
 /**
- * PATCH Method
- * Purpose -> Update a single availability entry
- * Access -> Employee who owns it OR admin
- * Body -> { status?: "AVAILABLE", startTime?: "09:00", endTime?: "17:00" }
- *
- * IMPORTANT: Can't update after deadline (unless admin)
+ * GET Method
+ * Purpose -> View a specific employee's availability (admin only)
+ * Access -> Admin/Owner only
+ * Returns -> Employee's availability (org-specific + general fallback)
  */
-router.patch('/availability/:id', authMiddleware, async (req: Request, res: Response) => {
+router.get('/organizations/:orgId/availability/:employeeId', authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.userId!;
-        const { id } = req.params;
-        const { status, startTime, endTime } = req.body;
+        const { orgId, employeeId } = req.params;
 
-        const availability = await prisma.availability.findUnique({
-            where: { id },
-            include: {
-                employee: true,
-                schedule: true
-            }
-        });
-
-        if (!availability) {
-            return res.status(404).json({ error: 'Availability entry not found' });
-        }
-
-        const isAdmin = await isOrgAdmin(userId, availability.schedule.organizationId);
-        const isOwner = availability.employee.userId === userId;
-
-        if (!isOwner && !isAdmin) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        // Check deadline (only for non-admins)
+        const isAdmin = await isOrgAdmin(userId, orgId);
         if (!isAdmin) {
-            const now = new Date();
-            if (now > availability.schedule.availabilityDeadline) {
-                return res.status(400).json({
-                    error: 'Availability deadline has passed'
-                });
-            }
+            return res.status(403).json({ error: 'Only admins can view employee availability' });
         }
 
-        // Validate status if provided
-        if (status && !['AVAILABLE', 'UNAVAILABLE', 'PREFERRED'].includes(status)) {
-            return res.status(400).json({
-                error: 'Invalid status. Must be AVAILABLE, UNAVAILABLE, or PREFERRED'
-            });
-        }
-
-        // Validate times if provided
-        const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (startTime && !timeRegex.test(startTime)) {
-            return res.status(400).json({ error: 'Invalid startTime format. Use HH:MM' });
-        }
-        if (endTime && !timeRegex.test(endTime)) {
-            return res.status(400).json({ error: 'Invalid endTime format. Use HH:MM' });
-        }
-
-        // Build update data
-        const updateData: any = {};
-        if (status) updateData.status = status;
-        if (startTime !== undefined) {
-            updateData.startTime = startTime ? new Date(`1970-01-01T${startTime}:00Z`) : null;
-        }
-        if (endTime !== undefined) {
-            updateData.endTime = endTime ? new Date(`1970-01-01T${endTime}:00Z`) : null;
-        }
-
-        // Validate times
-        const finalStartTime = updateData.startTime !== undefined ? updateData.startTime : availability.startTime;
-        const finalEndTime = updateData.endTime !== undefined ? updateData.endTime : availability.endTime;
-
-        if (finalStartTime && finalEndTime && finalEndTime <= finalStartTime) {
-            return res.status(400).json({
-                error: 'End time must be after start time'
-            });
-        }
-
-        // Update the entry
-        const updated = await prisma.availability.update({
-            where: { id },
-            data: updateData
-        });
-
-        res.json(updated);
-    } catch (error) {
-        console.error('Error updating availability:', error);
-        res.status(500).json({ error: 'Failed to update availability' });
-    }
-});
-
-/**
- * DELETE Method
- * Purpose -> Delete an availability entry
- * Access -> Employee who owns it OR admin
- *
- * IMPORTANT: Can't delete after deadline (unless admin)
- */
-router.delete('/availability/:id', authMiddleware, async (req: Request, res: Response) => {
-    try {
-        const userId = req.userId!;
-        const { id } = req.params;
-
-        const availability = await prisma.availability.findUnique({
-            where: { id },
+        const employee = await prisma.employee.findUnique({
+            where: { id: employeeId },
             include: {
-                employee: true,
-                schedule: true
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true
+                    }
+                }
             }
         });
 
-        if (!availability) {
-            return res.status(404).json({ error: 'Availability entry not found' });
+        if (!employee || employee.organizationId !== orgId) {
+            return res.status(404).json({ error: 'Employee not found in this organization' });
         }
 
-        const isAdmin = await isOrgAdmin(userId, availability.schedule.organizationId);
-        const isOwner = availability.employee.userId === userId;
+        const availability = await getAvailabilityWithFallback(employee.id, employee.userId);
 
-        if (!isOwner && !isAdmin) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        // Check deadline (only for non-admins)
-        if (!isAdmin) {
-            const now = new Date();
-            if (now > availability.schedule.availabilityDeadline) {
-                return res.status(400).json({
-                    error: 'Availability deadline has passed'
-                });
-            }
-        }
-
-        await prisma.availability.delete({
-            where: { id }
+        res.json({
+            employee: {
+                id: employee.id,
+                user: employee.user
+            },
+            availability
         });
-
-        res.json({ message: 'Availability deleted successfully' });
     } catch (error) {
-        console.error('Error deleting availability:', error);
-        res.status(500).json({ error: 'Failed to delete availability' });
+        console.error('Error fetching employee availability:', error);
+        res.status(500).json({ error: 'Failed to fetch employee availability' });
     }
 });
 

@@ -27,6 +27,7 @@ export type AggregateSchedule = {
 export type ScheduleMinAggregateOutputType = {
   id: string | null
   organizationId: string | null
+  name: string | null
   weekStartDate: Date | null
   availabilityDeadline: Date | null
   isPublished: boolean | null
@@ -38,6 +39,7 @@ export type ScheduleMinAggregateOutputType = {
 export type ScheduleMaxAggregateOutputType = {
   id: string | null
   organizationId: string | null
+  name: string | null
   weekStartDate: Date | null
   availabilityDeadline: Date | null
   isPublished: boolean | null
@@ -49,6 +51,7 @@ export type ScheduleMaxAggregateOutputType = {
 export type ScheduleCountAggregateOutputType = {
   id: number
   organizationId: number
+  name: number
   weekStartDate: number
   availabilityDeadline: number
   isPublished: number
@@ -62,6 +65,7 @@ export type ScheduleCountAggregateOutputType = {
 export type ScheduleMinAggregateInputType = {
   id?: true
   organizationId?: true
+  name?: true
   weekStartDate?: true
   availabilityDeadline?: true
   isPublished?: true
@@ -73,6 +77,7 @@ export type ScheduleMinAggregateInputType = {
 export type ScheduleMaxAggregateInputType = {
   id?: true
   organizationId?: true
+  name?: true
   weekStartDate?: true
   availabilityDeadline?: true
   isPublished?: true
@@ -84,6 +89,7 @@ export type ScheduleMaxAggregateInputType = {
 export type ScheduleCountAggregateInputType = {
   id?: true
   organizationId?: true
+  name?: true
   weekStartDate?: true
   availabilityDeadline?: true
   isPublished?: true
@@ -168,6 +174,7 @@ export type ScheduleGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type ScheduleGroupByOutputType = {
   id: string
   organizationId: string
+  name: string | null
   weekStartDate: Date
   availabilityDeadline: Date
   isPublished: boolean
@@ -200,13 +207,13 @@ export type ScheduleWhereInput = {
   NOT?: Prisma.ScheduleWhereInput | Prisma.ScheduleWhereInput[]
   id?: Prisma.UuidFilter<"Schedule"> | string
   organizationId?: Prisma.UuidFilter<"Schedule"> | string
+  name?: Prisma.StringNullableFilter<"Schedule"> | string | null
   weekStartDate?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   availabilityDeadline?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   isPublished?: Prisma.BoolFilter<"Schedule"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Schedule"> | Date | string
-  availability?: Prisma.AvailabilityListRelationFilter
   scheduleDays?: Prisma.ScheduleDayListRelationFilter
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }
@@ -214,13 +221,13 @@ export type ScheduleWhereInput = {
 export type ScheduleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   weekStartDate?: Prisma.SortOrder
   availabilityDeadline?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  availability?: Prisma.AvailabilityOrderByRelationAggregateInput
   scheduleDays?: Prisma.ScheduleDayOrderByRelationAggregateInput
   organization?: Prisma.OrganizationOrderByWithRelationInput
 }
@@ -232,13 +239,13 @@ export type ScheduleWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ScheduleWhereInput[]
   NOT?: Prisma.ScheduleWhereInput | Prisma.ScheduleWhereInput[]
   organizationId?: Prisma.UuidFilter<"Schedule"> | string
+  name?: Prisma.StringNullableFilter<"Schedule"> | string | null
   weekStartDate?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   availabilityDeadline?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   isPublished?: Prisma.BoolFilter<"Schedule"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Schedule"> | Date | string
-  availability?: Prisma.AvailabilityListRelationFilter
   scheduleDays?: Prisma.ScheduleDayListRelationFilter
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }, "id" | "organizationId_weekStartDate">
@@ -246,6 +253,7 @@ export type ScheduleWhereUniqueInput = Prisma.AtLeast<{
 export type ScheduleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   weekStartDate?: Prisma.SortOrder
   availabilityDeadline?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -263,6 +271,7 @@ export type ScheduleScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ScheduleScalarWhereWithAggregatesInput | Prisma.ScheduleScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Schedule"> | string
   organizationId?: Prisma.UuidWithAggregatesFilter<"Schedule"> | string
+  name?: Prisma.StringNullableWithAggregatesFilter<"Schedule"> | string | null
   weekStartDate?: Prisma.DateTimeWithAggregatesFilter<"Schedule"> | Date | string
   availabilityDeadline?: Prisma.DateTimeWithAggregatesFilter<"Schedule"> | Date | string
   isPublished?: Prisma.BoolWithAggregatesFilter<"Schedule"> | boolean
@@ -273,13 +282,13 @@ export type ScheduleScalarWhereWithAggregatesInput = {
 
 export type ScheduleCreateInput = {
   id?: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  availability?: Prisma.AvailabilityCreateNestedManyWithoutScheduleInput
   scheduleDays?: Prisma.ScheduleDayCreateNestedManyWithoutScheduleInput
   organization: Prisma.OrganizationCreateNestedOneWithoutSchedulesInput
 }
@@ -287,25 +296,25 @@ export type ScheduleCreateInput = {
 export type ScheduleUncheckedCreateInput = {
   id?: string
   organizationId: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutScheduleInput
   scheduleDays?: Prisma.ScheduleDayUncheckedCreateNestedManyWithoutScheduleInput
 }
 
 export type ScheduleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availability?: Prisma.AvailabilityUpdateManyWithoutScheduleNestedInput
   scheduleDays?: Prisma.ScheduleDayUpdateManyWithoutScheduleNestedInput
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutSchedulesNestedInput
 }
@@ -313,19 +322,20 @@ export type ScheduleUpdateInput = {
 export type ScheduleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutScheduleNestedInput
   scheduleDays?: Prisma.ScheduleDayUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
 export type ScheduleCreateManyInput = {
   id?: string
   organizationId: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
@@ -336,6 +346,7 @@ export type ScheduleCreateManyInput = {
 
 export type ScheduleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -347,6 +358,7 @@ export type ScheduleUpdateManyMutationInput = {
 export type ScheduleUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -373,6 +385,7 @@ export type ScheduleOrganizationIdWeekStartDateCompoundUniqueInput = {
 export type ScheduleCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   weekStartDate?: Prisma.SortOrder
   availabilityDeadline?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -384,6 +397,7 @@ export type ScheduleCountOrderByAggregateInput = {
 export type ScheduleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   weekStartDate?: Prisma.SortOrder
   availabilityDeadline?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -395,6 +409,7 @@ export type ScheduleMaxOrderByAggregateInput = {
 export type ScheduleMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   weekStartDate?: Prisma.SortOrder
   availabilityDeadline?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -468,41 +483,27 @@ export type ScheduleUpdateOneRequiredWithoutScheduleDaysNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ScheduleUpdateToOneWithWhereWithoutScheduleDaysInput, Prisma.ScheduleUpdateWithoutScheduleDaysInput>, Prisma.ScheduleUncheckedUpdateWithoutScheduleDaysInput>
 }
 
-export type ScheduleCreateNestedOneWithoutAvailabilityInput = {
-  create?: Prisma.XOR<Prisma.ScheduleCreateWithoutAvailabilityInput, Prisma.ScheduleUncheckedCreateWithoutAvailabilityInput>
-  connectOrCreate?: Prisma.ScheduleCreateOrConnectWithoutAvailabilityInput
-  connect?: Prisma.ScheduleWhereUniqueInput
-}
-
-export type ScheduleUpdateOneRequiredWithoutAvailabilityNestedInput = {
-  create?: Prisma.XOR<Prisma.ScheduleCreateWithoutAvailabilityInput, Prisma.ScheduleUncheckedCreateWithoutAvailabilityInput>
-  connectOrCreate?: Prisma.ScheduleCreateOrConnectWithoutAvailabilityInput
-  upsert?: Prisma.ScheduleUpsertWithoutAvailabilityInput
-  connect?: Prisma.ScheduleWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ScheduleUpdateToOneWithWhereWithoutAvailabilityInput, Prisma.ScheduleUpdateWithoutAvailabilityInput>, Prisma.ScheduleUncheckedUpdateWithoutAvailabilityInput>
-}
-
 export type ScheduleCreateWithoutOrganizationInput = {
   id?: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  availability?: Prisma.AvailabilityCreateNestedManyWithoutScheduleInput
   scheduleDays?: Prisma.ScheduleDayCreateNestedManyWithoutScheduleInput
 }
 
 export type ScheduleUncheckedCreateWithoutOrganizationInput = {
   id?: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutScheduleInput
   scheduleDays?: Prisma.ScheduleDayUncheckedCreateNestedManyWithoutScheduleInput
 }
 
@@ -538,6 +539,7 @@ export type ScheduleScalarWhereInput = {
   NOT?: Prisma.ScheduleScalarWhereInput | Prisma.ScheduleScalarWhereInput[]
   id?: Prisma.UuidFilter<"Schedule"> | string
   organizationId?: Prisma.UuidFilter<"Schedule"> | string
+  name?: Prisma.StringNullableFilter<"Schedule"> | string | null
   weekStartDate?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   availabilityDeadline?: Prisma.DateTimeFilter<"Schedule"> | Date | string
   isPublished?: Prisma.BoolFilter<"Schedule"> | boolean
@@ -548,26 +550,26 @@ export type ScheduleScalarWhereInput = {
 
 export type ScheduleCreateWithoutScheduleDaysInput = {
   id?: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  availability?: Prisma.AvailabilityCreateNestedManyWithoutScheduleInput
   organization: Prisma.OrganizationCreateNestedOneWithoutSchedulesInput
 }
 
 export type ScheduleUncheckedCreateWithoutScheduleDaysInput = {
   id?: string
   organizationId: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutScheduleInput
 }
 
 export type ScheduleCreateOrConnectWithoutScheduleDaysInput = {
@@ -588,94 +590,31 @@ export type ScheduleUpdateToOneWithWhereWithoutScheduleDaysInput = {
 
 export type ScheduleUpdateWithoutScheduleDaysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availability?: Prisma.AvailabilityUpdateManyWithoutScheduleNestedInput
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutSchedulesNestedInput
 }
 
 export type ScheduleUncheckedUpdateWithoutScheduleDaysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutScheduleNestedInput
-}
-
-export type ScheduleCreateWithoutAvailabilityInput = {
-  id?: string
-  weekStartDate: Date | string
-  availabilityDeadline: Date | string
-  isPublished?: boolean
-  publishedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  scheduleDays?: Prisma.ScheduleDayCreateNestedManyWithoutScheduleInput
-  organization: Prisma.OrganizationCreateNestedOneWithoutSchedulesInput
-}
-
-export type ScheduleUncheckedCreateWithoutAvailabilityInput = {
-  id?: string
-  organizationId: string
-  weekStartDate: Date | string
-  availabilityDeadline: Date | string
-  isPublished?: boolean
-  publishedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  scheduleDays?: Prisma.ScheduleDayUncheckedCreateNestedManyWithoutScheduleInput
-}
-
-export type ScheduleCreateOrConnectWithoutAvailabilityInput = {
-  where: Prisma.ScheduleWhereUniqueInput
-  create: Prisma.XOR<Prisma.ScheduleCreateWithoutAvailabilityInput, Prisma.ScheduleUncheckedCreateWithoutAvailabilityInput>
-}
-
-export type ScheduleUpsertWithoutAvailabilityInput = {
-  update: Prisma.XOR<Prisma.ScheduleUpdateWithoutAvailabilityInput, Prisma.ScheduleUncheckedUpdateWithoutAvailabilityInput>
-  create: Prisma.XOR<Prisma.ScheduleCreateWithoutAvailabilityInput, Prisma.ScheduleUncheckedCreateWithoutAvailabilityInput>
-  where?: Prisma.ScheduleWhereInput
-}
-
-export type ScheduleUpdateToOneWithWhereWithoutAvailabilityInput = {
-  where?: Prisma.ScheduleWhereInput
-  data: Prisma.XOR<Prisma.ScheduleUpdateWithoutAvailabilityInput, Prisma.ScheduleUncheckedUpdateWithoutAvailabilityInput>
-}
-
-export type ScheduleUpdateWithoutAvailabilityInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  scheduleDays?: Prisma.ScheduleDayUpdateManyWithoutScheduleNestedInput
-  organization?: Prisma.OrganizationUpdateOneRequiredWithoutSchedulesNestedInput
-}
-
-export type ScheduleUncheckedUpdateWithoutAvailabilityInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  scheduleDays?: Prisma.ScheduleDayUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
 export type ScheduleCreateManyOrganizationInput = {
   id?: string
+  name?: string | null
   weekStartDate: Date | string
   availabilityDeadline: Date | string
   isPublished?: boolean
@@ -686,30 +625,31 @@ export type ScheduleCreateManyOrganizationInput = {
 
 export type ScheduleUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availability?: Prisma.AvailabilityUpdateManyWithoutScheduleNestedInput
   scheduleDays?: Prisma.ScheduleDayUpdateManyWithoutScheduleNestedInput
 }
 
 export type ScheduleUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutScheduleNestedInput
   scheduleDays?: Prisma.ScheduleDayUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
 export type ScheduleUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   availabilityDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -724,12 +664,10 @@ export type ScheduleUncheckedUpdateManyWithoutOrganizationInput = {
  */
 
 export type ScheduleCountOutputType = {
-  availability: number
   scheduleDays: number
 }
 
 export type ScheduleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  availability?: boolean | ScheduleCountOutputTypeCountAvailabilityArgs
   scheduleDays?: boolean | ScheduleCountOutputTypeCountScheduleDaysArgs
 }
 
@@ -746,13 +684,6 @@ export type ScheduleCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ext
 /**
  * ScheduleCountOutputType without action
  */
-export type ScheduleCountOutputTypeCountAvailabilityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AvailabilityWhereInput
-}
-
-/**
- * ScheduleCountOutputType without action
- */
 export type ScheduleCountOutputTypeCountScheduleDaysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ScheduleDayWhereInput
 }
@@ -761,13 +692,13 @@ export type ScheduleCountOutputTypeCountScheduleDaysArgs<ExtArgs extends runtime
 export type ScheduleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   organizationId?: boolean
+  name?: boolean
   weekStartDate?: boolean
   availabilityDeadline?: boolean
   isPublished?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  availability?: boolean | Prisma.Schedule$availabilityArgs<ExtArgs>
   scheduleDays?: boolean | Prisma.Schedule$scheduleDaysArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.ScheduleCountOutputTypeDefaultArgs<ExtArgs>
@@ -776,6 +707,7 @@ export type ScheduleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type ScheduleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   organizationId?: boolean
+  name?: boolean
   weekStartDate?: boolean
   availabilityDeadline?: boolean
   isPublished?: boolean
@@ -788,6 +720,7 @@ export type ScheduleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type ScheduleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   organizationId?: boolean
+  name?: boolean
   weekStartDate?: boolean
   availabilityDeadline?: boolean
   isPublished?: boolean
@@ -800,6 +733,7 @@ export type ScheduleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type ScheduleSelectScalar = {
   id?: boolean
   organizationId?: boolean
+  name?: boolean
   weekStartDate?: boolean
   availabilityDeadline?: boolean
   isPublished?: boolean
@@ -808,9 +742,8 @@ export type ScheduleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "weekStartDate" | "availabilityDeadline" | "isPublished" | "publishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["schedule"]>
+export type ScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "name" | "weekStartDate" | "availabilityDeadline" | "isPublished" | "publishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["schedule"]>
 export type ScheduleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  availability?: boolean | Prisma.Schedule$availabilityArgs<ExtArgs>
   scheduleDays?: boolean | Prisma.Schedule$scheduleDaysArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.ScheduleCountOutputTypeDefaultArgs<ExtArgs>
@@ -825,13 +758,13 @@ export type ScheduleIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type $SchedulePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Schedule"
   objects: {
-    availability: Prisma.$AvailabilityPayload<ExtArgs>[]
     scheduleDays: Prisma.$ScheduleDayPayload<ExtArgs>[]
     organization: Prisma.$OrganizationPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     organizationId: string
+    name: string | null
     weekStartDate: Date
     availabilityDeadline: Date
     isPublished: boolean
@@ -1232,7 +1165,6 @@ readonly fields: ScheduleFieldRefs;
  */
 export interface Prisma__ScheduleClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  availability<T extends Prisma.Schedule$availabilityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Schedule$availabilityArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AvailabilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scheduleDays<T extends Prisma.Schedule$scheduleDaysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Schedule$scheduleDaysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleDayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1266,6 +1198,7 @@ export interface Prisma__ScheduleClient<T, Null = never, ExtArgs extends runtime
 export interface ScheduleFieldRefs {
   readonly id: Prisma.FieldRef<"Schedule", 'String'>
   readonly organizationId: Prisma.FieldRef<"Schedule", 'String'>
+  readonly name: Prisma.FieldRef<"Schedule", 'String'>
   readonly weekStartDate: Prisma.FieldRef<"Schedule", 'DateTime'>
   readonly availabilityDeadline: Prisma.FieldRef<"Schedule", 'DateTime'>
   readonly isPublished: Prisma.FieldRef<"Schedule", 'Boolean'>
@@ -1665,30 +1598,6 @@ export type ScheduleDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Schedules to delete.
    */
   limit?: number
-}
-
-/**
- * Schedule.availability
- */
-export type Schedule$availabilityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Availability
-   */
-  select?: Prisma.AvailabilitySelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Availability
-   */
-  omit?: Prisma.AvailabilityOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AvailabilityInclude<ExtArgs> | null
-  where?: Prisma.AvailabilityWhereInput
-  orderBy?: Prisma.AvailabilityOrderByWithRelationInput | Prisma.AvailabilityOrderByWithRelationInput[]
-  cursor?: Prisma.AvailabilityWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AvailabilityScalarFieldEnum | Prisma.AvailabilityScalarFieldEnum[]
 }
 
 /**

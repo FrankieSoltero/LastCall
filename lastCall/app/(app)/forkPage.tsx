@@ -122,7 +122,7 @@ export default function DashboardOrFork() {
                     <TouchableOpacity
                         style={styles.addOrgCard}
                         activeOpacity={0.8}
-                        onPress={() => console.log('Set general availability')}
+                        onPress={() => router.push('/(app)/generalAvailability')}
                     >
                         <View style={[styles.addOrgIconBubble, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
                             <Calendar size={28} color="#a855f7" />

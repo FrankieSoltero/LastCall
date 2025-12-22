@@ -35,8 +35,7 @@ router.get('/:orgId/schedules', authMiddleware, async (req: Request, res: Respon
             include: {
                 _count: {
                     select: {
-                        scheduleDays: true,
-                        availability: true
+                        scheduleDays: true
                     }
                 }
             },
@@ -98,21 +97,6 @@ router.get('/schedules/:id', authMiddleware, async (req: Request, res: Response)
                     orderBy: {
                         date: 'asc'
                     }
-                },
-                availability: {
-                    include: {
-                        employee: {
-                            include: {
-                                user: {
-                                    select: {
-                                        firstName: true,
-                                        lastName: true,
-                                        id: true
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         });
@@ -120,7 +104,7 @@ router.get('/schedules/:id', authMiddleware, async (req: Request, res: Response)
         if (!schedule) {
             return res.status(404).json({ error: 'Schedule not found' });
         }
-        
+
         const employee = await prisma.employee.findUnique({
             where: {
                 userId_organizationId: {
@@ -133,13 +117,113 @@ router.get('/schedules/:id', authMiddleware, async (req: Request, res: Response)
         if (!employee || employee.status !== 'APPROVED') {
             return res.status(403).json({ error: 'Access Denied' });
         }
-        res.json(schedule);
+        // Add computed operatingDays field (day names of existing scheduleDays)
+        const operatingDays = schedule.scheduleDays.map(sd => {
+            const date = new Date(sd.date);
+            console.log(date);
+            console.log(date.getUTCDate())
+            const dayOfWeek = date.getUTCDay(); // 0=Sunday, 1=Monday, etc.
+            console.log(dayOfWeek);
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return days[dayOfWeek];
+        });
+
+        res.json({ ...schedule, operatingDays });
     } catch (error) {
         console.error('Error fetching schedule:', error);
         res.status(500).json({ error: 'Failed to fetch schedule' });
     }
 });
 
+/**
+ * GET Method
+ * Purpose -> Get the most recent published schedule for an organization
+ * Access -> Any approved employee
+ * Returns -> Most recent published schedule with full details
+ */
+router.get('/:orgId/active-schedule', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId!;
+        const { orgId } = req.params;
+
+        const employee = await prisma.employee.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId,
+                    organizationId: orgId
+                }
+            }
+        });
+
+        if (!employee || employee.status !== 'APPROVED') {
+            return res.status(403).json({ error: 'Access Denied' });
+        }
+
+        // Find the most recent published schedule
+        const activeSchedule = await prisma.schedule.findFirst({
+            where: {
+                organizationId: orgId,
+                isPublished: true
+            },
+            include: {
+                organization: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ownerId: true
+                    }
+                },
+                scheduleDays: {
+                    include: {
+                        shifts: {
+                            include: {
+                                role: true,
+                                employee: {
+                                    include: {
+                                        user: {
+                                            select: {
+                                                id: true,
+                                                firstName: true,
+                                                lastName: true,
+                                                email: true
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            orderBy: {
+                                startTime: 'asc'
+                            }
+                        }
+                    },
+                    orderBy: {
+                        date: 'asc'
+                    }
+                }
+            },
+            orderBy: {
+                publishedAt: 'desc' // Most recently published
+            }
+        });
+
+        if (!activeSchedule) {
+            return res.status(404).json({ error: 'No published schedule found' });
+        }
+
+        // Add computed operatingDays field
+        const operatingDays = activeSchedule.scheduleDays.map(sd => {
+            const date = new Date(sd.date);
+            const dayOfWeek = date.getUTCDay();
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return days[dayOfWeek];
+        });
+
+        res.json({ ...activeSchedule, operatingDays });
+    } catch (error) {
+        console.error('Failed to fetch the active schedule:', error);
+        res.status(500).json({ error: 'Failed to fetch active schedule' });
+    }
+});
 /**
  * POST Method
  * Purpose -> Create a new weekly schedule
@@ -149,7 +233,7 @@ router.post('/:orgId/schedules', authMiddleware, async (req: Request, res: Respo
     try {
         const userId = req.userId!;
         const { orgId } = req.params;
-        const { weekStartDate, availabilityDeadline, operatingDays } = req.body;
+        const { weekStartDate, availabilityDeadline, operatingDays, name } = req.body;
 
         const isAdmin = await isOrgAdmin(userId, orgId);
         if (!isAdmin) {
@@ -163,7 +247,10 @@ router.post('/:orgId/schedules', authMiddleware, async (req: Request, res: Respo
         }
 
         const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-        const daysToCreate = operatingDays && Array.isArray(operatingDays) && operatingDays.length > 0 ? operatingDays : validDays;
+        // If operatingDays is explicitly provided (even if empty), use it. Otherwise default to all days.
+        const daysToCreate = operatingDays !== undefined && operatingDays !== null
+            ? operatingDays as string[]
+            : validDays;
 
         const invalidDays = daysToCreate.filter(day => !validDays.includes(day));
 
@@ -194,7 +281,8 @@ router.post('/:orgId/schedules', authMiddleware, async (req: Request, res: Respo
 
         const scheduleDaysData = daysToCreate.map(dayName => {
             const offset = dayNameToOffset[dayName];
-            const date = new Date(startDate.getTime() + offset * 24 * 60 * 60 * 1000);
+            const date = new Date(startDate);
+            date.setDate(date.getDate() + offset);
 
             return { date }
         });
@@ -202,6 +290,7 @@ router.post('/:orgId/schedules', authMiddleware, async (req: Request, res: Respo
         const schedule = await prisma.schedule.create({
             data: {
                 organizationId: orgId,
+                name: name || null,
                 weekStartDate: startDate,
                 availabilityDeadline: deadline,
                 isPublished: false,
@@ -286,7 +375,7 @@ router.patch('/schedules/:id', authMiddleware, async (req: Request, res: Respons
             });
         }
         console.error('Failed to update the schedule details:', error);
-        res.status(500).json({ error: 'Failed to update the schedule '});
+        res.status(500).json({ error: 'Failed to update the schedule ' });
     }
 });
 
@@ -353,7 +442,8 @@ router.patch('/schedules/:id/days', authMiddleware, async (req: Request, res: Re
             // Calculate which dates to remove
             const datesToRemove = removeDays.map(dayName => {
                 const offset = dayNameToOffset[dayName];
-                const date = new Date(schedule.weekStartDate.getTime() + offset * 24 * 60 * 60 * 1000);
+                const date = new Date(schedule.weekStartDate);
+                date.setDate(date.getDate() + offset);
                 return date.toISOString().split('T')[0];  // Format as "YYYY-MM-DD"
             });
 
@@ -398,7 +488,8 @@ router.patch('/schedules/:id/days', authMiddleware, async (req: Request, res: Re
             // Calculate which dates to add
             const datesToAdd = addDays.map(dayName => {
                 const offset = dayNameToOffset[dayName];
-                const date = new Date(schedule.weekStartDate.getTime() + offset * 24 * 60 * 60 * 1000);
+                const date = new Date(schedule.weekStartDate);
+                date.setDate(date.getDate() + offset);
                 return { date };
             });
 
@@ -406,10 +497,12 @@ router.patch('/schedules/:id/days', authMiddleware, async (req: Request, res: Re
             const existingDates = schedule.scheduleDays.map(sd =>
                 new Date(sd.date).toISOString().split('T')[0]
             );
+            console.log(existingDates);
             const duplicates = datesToAdd.filter(({ date }) => {
                 const dateStr = new Date(date).toISOString().split('T')[0];
                 return existingDates.includes(dateStr);
             });
+
 
             if (duplicates.length > 0) {
                 return res.status(400).json({
@@ -458,7 +551,7 @@ router.post('/schedules/:id/publish', authMiddleware, async (req: Request, res: 
         const { id } = req.params;
 
         const schedule = await prisma.schedule.findUnique({
-            where: { id } 
+            where: { id }
         });
 
         if (!schedule) {
@@ -496,6 +589,96 @@ router.post('/schedules/:id/publish', authMiddleware, async (req: Request, res: 
 });
 
 /**
+ * POST Method
+ * Purpose -> Bulk update shifts (delete and create in one transaction)
+ * Access -> Only Admin/Owner
+ * Body -> { delete: string[], create: Array<{ scheduleDayId, roleId, startTime, endTime?, employeeId?, isOnCall? }> }
+ */
+// Type definition for bulk shift creation request
+interface BulkShiftCreateData {
+    scheduleDayId: string;
+    roleId: string;
+    startTime: string;
+    endTime?: string;
+    employeeId?: string;
+    isOnCall?: boolean;
+}
+
+interface BulkShiftUpdateRequest {
+    delete?: string[];
+    create?: BulkShiftCreateData[];
+}
+
+router.post('/schedules/:scheduleId/shifts/bulk', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId!;
+        const { scheduleId } = req.params;
+        const { delete: shiftIdsToDelete = [], create: shiftsToCreate = [] } = req.body as BulkShiftUpdateRequest;
+
+        // Get the schedule to verify it exists and check permissions
+        const schedule = await prisma.schedule.findUnique({
+            where: { id: scheduleId }
+        });
+
+        if (!schedule) {
+            return res.status(404).json({ error: 'Schedule not found' });
+        }
+
+        const isAdmin = await isOrgAdmin(userId, schedule.organizationId);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can update shifts' });
+        }
+
+        // Perform bulk operation in a transaction for atomicity
+        const result = await prisma.$transaction(async (tx) => {
+            // Delete shifts (bulk delete is fast)
+            if (shiftIdsToDelete.length > 0) {
+                await tx.shift.deleteMany({
+                    where: {
+                        id: {
+                            in: shiftIdsToDelete
+                        }
+                    }
+                });
+            }
+
+            // Create new shifts using createMany (MUCH faster than individual creates)
+            let createdCount = 0;
+            if (shiftsToCreate.length > 0) {
+                const createData = shiftsToCreate.map(shiftData => ({
+                    scheduleDayId: shiftData.scheduleDayId,
+                    roleId: shiftData.roleId,
+                    startTime: new Date(`1970-01-01T${shiftData.startTime}:00Z`),
+                    endTime: shiftData.endTime ? new Date(`1970-01-01T${shiftData.endTime}:00Z`) : null,
+                    employeeId: shiftData.employeeId || null,
+                    isOnCall: shiftData.isOnCall || false
+                }));
+
+                const result = await tx.shift.createMany({
+                    data: createData
+                });
+                createdCount = result.count;
+            }
+
+            return {
+                deleted: shiftIdsToDelete.length,
+                created: createdCount
+            };
+        }, {
+            timeout: 10000 // Increase timeout to 10 seconds as safety measure
+        });
+
+        res.json({
+            message: 'Shifts updated successfully',
+            ...result
+        });
+    } catch (error) {
+        console.log('Error bulk updating shifts:', error);
+        res.status(500).json({ error: 'Failed to bulk update shifts' });
+    }
+});
+
+/**
  * Delet Method
  * Purpose -> Delete a schedule
  * Access -> Only Admin/Owner
@@ -509,7 +692,7 @@ router.delete('/schedules/:id', authMiddleware, async (req: Request, res: Respon
         const schedule = await prisma.schedule.findUnique({
             where: { id }
         });
-        
+
         if (!schedule) {
             return res.status(404).json({ error: 'Schedule not found' })
         }

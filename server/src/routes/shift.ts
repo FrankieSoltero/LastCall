@@ -96,7 +96,6 @@ router.get('/schedules/:scheduleId/shifts', authMiddleware, async (req: Request,
  *  employeeId?: uuid
  * }
  */
-
 router.post('/schedule-days/:scheduleDayId/shifts', authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.userId!;
@@ -147,7 +146,6 @@ router.post('/schedule-days/:scheduleDayId/shifts', authMiddleware, async (req: 
                 error: 'Role not found in this organization'
             })
         }
-
         if (employeeId) {
             const employee = await prisma.employee.findFirst({
                 where: {
@@ -193,7 +191,6 @@ router.post('/schedule-days/:scheduleDayId/shifts', authMiddleware, async (req: 
 
         const startDateTime = new Date(`1970-01-01T${startTime}:00Z`);
         const endDateTime = endTime ? new Date(`1970-01-01T${endTime}:00Z`) : null;
-
         if (endDateTime && endDateTime <= startDateTime) {
             return res.status(400).json({
                 error: 'End time must be after start time'

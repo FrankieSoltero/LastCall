@@ -60,6 +60,7 @@ export const ModelName = {
   Role: 'Role',
   Shift: 'Shift',
   Availability: 'Availability',
+  GeneralAvailability: 'GeneralAvailability',
   EmployeeRoleAssignment: 'EmployeeRoleAssignment'
 } as const
 
@@ -132,6 +133,7 @@ export type InviteLinkScalarFieldEnum = (typeof InviteLinkScalarFieldEnum)[keyof
 export const ScheduleScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
+  name: 'name',
   weekStartDate: 'weekStartDate',
   availabilityDeadline: 'availabilityDeadline',
   isPublished: 'isPublished',
@@ -170,6 +172,7 @@ export const ShiftScalarFieldEnum = {
   employeeId: 'employeeId',
   startTime: 'startTime',
   endTime: 'endTime',
+  isOnCall: 'isOnCall',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -180,7 +183,6 @@ export type ShiftScalarFieldEnum = (typeof ShiftScalarFieldEnum)[keyof typeof Sh
 export const AvailabilityScalarFieldEnum = {
   id: 'id',
   employeeId: 'employeeId',
-  scheduleId: 'scheduleId',
   dayOfWeek: 'dayOfWeek',
   status: 'status',
   startTime: 'startTime',
@@ -190,6 +192,20 @@ export const AvailabilityScalarFieldEnum = {
 } as const
 
 export type AvailabilityScalarFieldEnum = (typeof AvailabilityScalarFieldEnum)[keyof typeof AvailabilityScalarFieldEnum]
+
+
+export const GeneralAvailabilityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  dayOfWeek: 'dayOfWeek',
+  status: 'status',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GeneralAvailabilityScalarFieldEnum = (typeof GeneralAvailabilityScalarFieldEnum)[keyof typeof GeneralAvailabilityScalarFieldEnum]
 
 
 export const EmployeeRoleAssignmentScalarFieldEnum = {

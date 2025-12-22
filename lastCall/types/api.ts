@@ -56,6 +56,7 @@ export interface InviteLink {
 export interface Schedule {
   id: string;
   organizationId: string;
+  name: string | null;
   weekStartDate: string;
   availabilityDeadline: string;
   isPublished: boolean;
@@ -85,6 +86,7 @@ export interface Shift {
   employeeId: string | null;
   startTime: string;
   endTime: string | null;
+  isOnCall: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -92,7 +94,17 @@ export interface Shift {
 export interface Availability {
   id: string;
   employeeId: string;
-  scheduleId: string;
+  dayOfWeek: string;
+  status: AvailabilityStatus;
+  startTime: string | null;
+  endTime: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GeneralAvailability {
+  id: string;
+  userId: string;
   dayOfWeek: string;
   status: AvailabilityStatus;
   startTime: string | null;
@@ -174,9 +186,17 @@ export interface InviteLinkWithOrg extends InviteLink {
 export interface ScheduleWithCounts extends Schedule {
   _count: {
     scheduleDays: number;
-    availability: number;
   };
 }
+/**
+ * The Day schedule
+ */
+export interface DaySchedule {
+  dayOfWeek: string;
+  status: AvailabilityStatus;
+  startTime: string; // "HH:MM"
+  endTime: string;   // "HH:MM"
+};
 
 /**
  * Shift with full details
@@ -194,7 +214,7 @@ export interface ShiftDetail extends Shift {
 }
 
 /**
- * Schedule with full details (days, shifts, availability)
+ * Schedule with full details (days, shifts)
  */
 export interface ScheduleDetail extends Schedule {
   organization: {
@@ -203,7 +223,7 @@ export interface ScheduleDetail extends Schedule {
     ownerId: string;
   };
   scheduleDays: ScheduleDayWithShifts[];
-  availability: AvailabilityWithEmployee[];
+  operatingDays: string[]; // Computed: day names like ['Monday', 'Friday']
 }
 
 /**
@@ -218,6 +238,20 @@ export interface ScheduleDayWithShifts extends ScheduleDay {
  */
 export interface AvailabilityWithEmployee extends Availability {
   employee: EmployeeWithUser;
+}
+
+/**
+ * Availability with fallback flag (returned when general availability is used)
+ */
+export interface AvailabilityWithFallback extends Availability {
+  isGeneral?: boolean; // true if this came from general availability
+}
+
+/**
+ * Availability with employee info and fallback flag
+ */
+export interface AvailabilityWithEmployeeAndFallback extends AvailabilityWithEmployee {
+  isGeneral?: boolean;
 }
 
 /**
@@ -261,6 +295,7 @@ export interface UpdateEmployeeRequest {
 }
 
 export interface CreateScheduleRequest {
+  name?: string;
   weekStartDate: string;
   availabilityDeadline: string;
   operatingDays?: string[];
@@ -276,6 +311,7 @@ export interface CreateShiftRequest {
   startTime: string;
   endTime?: string;
   employeeId?: string;
+  isOnCall?: boolean;
 }
 
 export interface UpdateShiftRequest {
@@ -283,9 +319,10 @@ export interface UpdateShiftRequest {
   endTime?: string;
   roleId?: string;
   employeeId?: string | null;
+  isOnCall?: boolean;
 }
 
-export interface SubmitAvailabilityRequest {
+export interface UpdateOrgAvailabilityRequest {
   availability: Array<{
     dayOfWeek: string;
     status: AvailabilityStatus;
@@ -298,6 +335,15 @@ export interface UpdateAvailabilityRequest {
   status?: AvailabilityStatus;
   startTime?: string | null;
   endTime?: string | null;
+}
+
+export interface UpdateGeneralAvailabilityRequest {
+  availability: Array<{
+    dayOfWeek: string;
+    status: AvailabilityStatus;
+    startTime?: string;
+    endTime?: string;
+  }>;
 }
 
 export interface CreateRoleRequest {

@@ -193,6 +193,7 @@ export type UserWhereInput = {
   employees?: Prisma.EmployeeListRelationFilter
   inviteLinks?: Prisma.InviteLinkListRelationFilter
   ownedOrgs?: Prisma.OrganizationListRelationFilter
+  generalAvailability?: Prisma.GeneralAvailabilityListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -205,6 +206,7 @@ export type UserOrderByWithRelationInput = {
   employees?: Prisma.EmployeeOrderByRelationAggregateInput
   inviteLinks?: Prisma.InviteLinkOrderByRelationAggregateInput
   ownedOrgs?: Prisma.OrganizationOrderByRelationAggregateInput
+  generalAvailability?: Prisma.GeneralAvailabilityOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -220,6 +222,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   employees?: Prisma.EmployeeListRelationFilter
   inviteLinks?: Prisma.InviteLinkListRelationFilter
   ownedOrgs?: Prisma.OrganizationListRelationFilter
+  generalAvailability?: Prisma.GeneralAvailabilityListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -256,6 +259,7 @@ export type UserCreateInput = {
   employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
+  generalAvailability?: Prisma.GeneralAvailabilityCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -268,6 +272,7 @@ export type UserUncheckedCreateInput = {
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -280,6 +285,7 @@ export type UserUpdateInput = {
   employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -292,6 +298,7 @@ export type UserUncheckedUpdateInput = {
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -403,6 +410,20 @@ export type UserUpdateOneRequiredWithoutInviteLinksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInviteLinksInput, Prisma.UserUpdateWithoutInviteLinksInput>, Prisma.UserUncheckedUpdateWithoutInviteLinksInput>
 }
 
+export type UserCreateNestedOneWithoutGeneralAvailabilityInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGeneralAvailabilityInput, Prisma.UserUncheckedCreateWithoutGeneralAvailabilityInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGeneralAvailabilityInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutGeneralAvailabilityNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGeneralAvailabilityInput, Prisma.UserUncheckedCreateWithoutGeneralAvailabilityInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGeneralAvailabilityInput
+  upsert?: Prisma.UserUpsertWithoutGeneralAvailabilityInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutGeneralAvailabilityInput, Prisma.UserUpdateWithoutGeneralAvailabilityInput>, Prisma.UserUncheckedUpdateWithoutGeneralAvailabilityInput>
+}
+
 export type UserCreateWithoutOwnedOrgsInput = {
   id?: string
   email: string
@@ -412,6 +433,7 @@ export type UserCreateWithoutOwnedOrgsInput = {
   updatedAt?: Date | string
   employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
+  generalAvailability?: Prisma.GeneralAvailabilityCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedOrgsInput = {
@@ -423,6 +445,7 @@ export type UserUncheckedCreateWithoutOwnedOrgsInput = {
   updatedAt?: Date | string
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedOrgsInput = {
@@ -450,6 +473,7 @@ export type UserUpdateWithoutOwnedOrgsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedOrgsInput = {
@@ -461,6 +485,7 @@ export type UserUncheckedUpdateWithoutOwnedOrgsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmployeesInput = {
@@ -472,6 +497,7 @@ export type UserCreateWithoutEmployeesInput = {
   updatedAt?: Date | string
   inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
+  generalAvailability?: Prisma.GeneralAvailabilityCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmployeesInput = {
@@ -483,6 +509,7 @@ export type UserUncheckedCreateWithoutEmployeesInput = {
   updatedAt?: Date | string
   inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmployeesInput = {
@@ -510,6 +537,7 @@ export type UserUpdateWithoutEmployeesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmployeesInput = {
@@ -521,6 +549,7 @@ export type UserUncheckedUpdateWithoutEmployeesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInviteLinksInput = {
@@ -532,6 +561,7 @@ export type UserCreateWithoutInviteLinksInput = {
   updatedAt?: Date | string
   employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
   ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
+  generalAvailability?: Prisma.GeneralAvailabilityCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInviteLinksInput = {
@@ -543,6 +573,7 @@ export type UserUncheckedCreateWithoutInviteLinksInput = {
   updatedAt?: Date | string
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
   ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInviteLinksInput = {
@@ -570,6 +601,7 @@ export type UserUpdateWithoutInviteLinksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
   ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInviteLinksInput = {
@@ -580,6 +612,71 @@ export type UserUncheckedUpdateWithoutInviteLinksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
+  ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
+  generalAvailability?: Prisma.GeneralAvailabilityUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutGeneralAvailabilityInput = {
+  id?: string
+  email: string
+  firstName: string
+  lastName: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
+  inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
+  ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
+}
+
+export type UserUncheckedCreateWithoutGeneralAvailabilityInput = {
+  id?: string
+  email: string
+  firstName: string
+  lastName: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
+  inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+  ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type UserCreateOrConnectWithoutGeneralAvailabilityInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutGeneralAvailabilityInput, Prisma.UserUncheckedCreateWithoutGeneralAvailabilityInput>
+}
+
+export type UserUpsertWithoutGeneralAvailabilityInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutGeneralAvailabilityInput, Prisma.UserUncheckedUpdateWithoutGeneralAvailabilityInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGeneralAvailabilityInput, Prisma.UserUncheckedCreateWithoutGeneralAvailabilityInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutGeneralAvailabilityInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutGeneralAvailabilityInput, Prisma.UserUncheckedUpdateWithoutGeneralAvailabilityInput>
+}
+
+export type UserUpdateWithoutGeneralAvailabilityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
+  inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
+  ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutGeneralAvailabilityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
+  inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
@@ -592,12 +689,14 @@ export type UserCountOutputType = {
   employees: number
   inviteLinks: number
   ownedOrgs: number
+  generalAvailability: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employees?: boolean | UserCountOutputTypeCountEmployeesArgs
   inviteLinks?: boolean | UserCountOutputTypeCountInviteLinksArgs
   ownedOrgs?: boolean | UserCountOutputTypeCountOwnedOrgsArgs
+  generalAvailability?: boolean | UserCountOutputTypeCountGeneralAvailabilityArgs
 }
 
 /**
@@ -631,6 +730,13 @@ export type UserCountOutputTypeCountOwnedOrgsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.OrganizationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountGeneralAvailabilityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GeneralAvailabilityWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -642,6 +748,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   employees?: boolean | Prisma.User$employeesArgs<ExtArgs>
   inviteLinks?: boolean | Prisma.User$inviteLinksArgs<ExtArgs>
   ownedOrgs?: boolean | Prisma.User$ownedOrgsArgs<ExtArgs>
+  generalAvailability?: boolean | Prisma.User$generalAvailabilityArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -677,6 +784,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   employees?: boolean | Prisma.User$employeesArgs<ExtArgs>
   inviteLinks?: boolean | Prisma.User$inviteLinksArgs<ExtArgs>
   ownedOrgs?: boolean | Prisma.User$ownedOrgsArgs<ExtArgs>
+  generalAvailability?: boolean | Prisma.User$generalAvailabilityArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -688,6 +796,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     employees: Prisma.$EmployeePayload<ExtArgs>[]
     inviteLinks: Prisma.$InviteLinkPayload<ExtArgs>[]
     ownedOrgs: Prisma.$OrganizationPayload<ExtArgs>[]
+    generalAvailability: Prisma.$GeneralAvailabilityPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1093,6 +1202,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   employees<T extends Prisma.User$employeesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$employeesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inviteLinks<T extends Prisma.User$inviteLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$inviteLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InviteLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ownedOrgs<T extends Prisma.User$ownedOrgsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedOrgsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  generalAvailability<T extends Prisma.User$generalAvailabilityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$generalAvailabilityArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GeneralAvailabilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1585,6 +1695,30 @@ export type User$ownedOrgsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.OrganizationScalarFieldEnum | Prisma.OrganizationScalarFieldEnum[]
+}
+
+/**
+ * User.generalAvailability
+ */
+export type User$generalAvailabilityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GeneralAvailability
+   */
+  select?: Prisma.GeneralAvailabilitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GeneralAvailability
+   */
+  omit?: Prisma.GeneralAvailabilityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GeneralAvailabilityInclude<ExtArgs> | null
+  where?: Prisma.GeneralAvailabilityWhereInput
+  orderBy?: Prisma.GeneralAvailabilityOrderByWithRelationInput | Prisma.GeneralAvailabilityOrderByWithRelationInput[]
+  cursor?: Prisma.GeneralAvailabilityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GeneralAvailabilityScalarFieldEnum | Prisma.GeneralAvailabilityScalarFieldEnum[]
 }
 
 /**

@@ -10,6 +10,8 @@ import type {
     ShiftDetail,
     AvailabilityWithEmployee,
     Availability,
+    GeneralAvailability,
+    AvailabilityWithFallback,
     RoleWithCounts,
     EmployeeRoleAssignmentWithRole,
     CreateOrganizationRequest,
@@ -18,7 +20,8 @@ import type {
     CreateScheduleRequest,
     CreateShiftRequest,
     UpdateShiftRequest,
-    SubmitAvailabilityRequest,
+    UpdateOrgAvailabilityRequest,
+    UpdateGeneralAvailabilityRequest,
     CreateUserRequest,
     AssignEmployeeRoleRequest,
     Role,
@@ -96,6 +99,16 @@ class ApiClient {
     async patch<T>(endpoint: string, data?: any): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PATCH',
+            body: data ? JSON.stringify(data) : undefined
+        });
+    }
+    /**
+     * PUT Request
+     */
+    async put<T>(endpoint: string, data?: any): Promise<T> {
+        console.log(endpoint);
+        return this.request<T>(endpoint, {
+            method: 'PUT',
             body: data ? JSON.stringify(data) : undefined
         });
     }
@@ -202,6 +215,10 @@ class ApiClient {
         return this.get<ScheduleDetail>(`/schedules/${id}`);
     }
 
+    async getActiveSchedule(orgId: string) {
+        return this.get<ScheduleDetail>(`/organizations/${orgId}/active-schedule`);
+    }
+
     async createSchedule(orgId: string, data: CreateScheduleRequest) {
         return this.post<ScheduleDetail>(`/organizations/${orgId}/schedules`, data);
     }
@@ -210,14 +227,18 @@ class ApiClient {
         return this.post<{ message: string; schedule: ScheduleDetail }>(`/schedules/${id}/publish`);
     }
 
+    async updateScheduleDays(id: string, data: { addDays?: string[]; removeDays?: string[] }) {
+        return this.patch<ScheduleDetail>(`/schedules/${id}/days`, data);
+    }
+
     /**
      * Shift endpoints
      */
 
     async getShifts(scheduleId: string) {
-        return this.get<ShiftDetail[]>(`/schedules/${scheduleId}/shifts`);
+        return this.get<ShiftDetail[]>(`/schedule/${scheduleId}/shifts`);
     }
-
+    
     async createShift(scheduleDayId: string, data: CreateShiftRequest) {
         return this.post<ShiftDetail>(`/schedule-days/${scheduleDayId}/shifts`, data);
     }
@@ -230,20 +251,60 @@ class ApiClient {
         return this.delete<{ message: string }>(`/shifts/${id}`);
     }
 
+    async bulkUpdateShifts(
+        scheduleId: string,
+        data: {
+            delete: string[],
+            create: Array<{
+                scheduleDayId: string;
+                roleId: string;
+                startTime: string;
+                endTime?: string;
+                employeeId?: string;
+                isOnCall?: boolean;
+            }>
+        }
+    ) {
+        return this.post<{ message: string; deleted: number; created: number }>(
+            `/schedules/${scheduleId}/shifts/bulk`,
+            data
+        );
+    }
+
     /**
-     * Availability Endpoints
+     * Organization Availability Endpoints
      */
 
-    async getAllAvailability(scheduleId: string) {
-        return this.get<AvailabilityWithEmployee[]>(`/schedules/${scheduleId}/availability`);
+    async getAllOrgAvailability(orgId: string) {
+        return this.get<AvailabilityWithEmployee[]>(`/organizations/${orgId}/availability`);
     }
 
-    async getMyAvailability(scheduleId: string) {
-        return this.get<Availability[]>(`/schedules/${scheduleId}/availability/me`);
+    async getMyOrgAvailability(orgId: string) {
+        return this.get<AvailabilityWithFallback[]>(`/organizations/${orgId}/availability/me`);
     }
 
-    async submitAvailability(scheduleId: string, data: SubmitAvailabilityRequest) {
-        return this.post<Availability[]>(`/schedules/${scheduleId}/availability`, data);
+    async updateMyOrgAvailability(orgId: string, data: UpdateOrgAvailabilityRequest) {
+        return this.put<{ message: string; availability: Availability[] }>(`/organizations/${orgId}/availability`, data);
+    }
+
+    async getEmployeeOrgAvailability(orgId: string, employeeId: string) {
+        return this.get<{ employee: EmployeeWithUser; availability: AvailabilityWithFallback[] }>(`/organizations/${orgId}/availability/${employeeId}`);
+    }
+
+    /**
+     * General Availability Endpoints
+     */
+
+    async getMyGeneralAvailability() {
+        return this.get<GeneralAvailability[]>('/users/me/general-availability');
+    }
+
+    async updateMyGeneralAvailability(data: UpdateGeneralAvailabilityRequest) {
+        return this.put<{ message: string; availability: GeneralAvailability[] }>('/users/me/general-availability', data);
+    }
+
+    async getUserGeneralAvailability(userId: string) {
+        return this.get<GeneralAvailability[]>(`/users/${userId}/general-availability`);
     }
 
     /**
