@@ -736,7 +736,7 @@ router.post('/templates/:id/create-draft', authMiddleware, async (req: Request, 
         if (!weekStartDate || !availabilityDeadline) {
             return res.status(400).json({ error: 'weekStartDate and availabilityDeadline are required' });
         }
-        console.log("Made it to the template finding")
+
         // Fetch the template with all its data
         const template = await prisma.schedule.findUnique({
             where: { id },
@@ -768,7 +768,7 @@ router.post('/templates/:id/create-draft', authMiddleware, async (req: Request, 
         if (!isAdmin) {
             return res.status(403).json({ error: 'Only admins can create schedules' });
         }
-        console.log("Made it to the draft creation from a template")
+
         // Create the draft schedule
         const draft = await prisma.schedule.create({
             data: {
@@ -804,7 +804,7 @@ router.post('/templates/:id/create-draft', authMiddleware, async (req: Request, 
                     date: actualDate
                 }
             });
-            console.log("Made it to the shift creation");
+
             // Copy all shifts from template
             for (const shift of templateDay.shifts) {
                 await prisma.shift.create({
@@ -819,7 +819,7 @@ router.post('/templates/:id/create-draft', authMiddleware, async (req: Request, 
                 });
             }
         }
-        console.log("Made it to the final complete draft look up");
+
         // Fetch the complete draft to return
         const completeDraft = await prisma.schedule.findUnique({
             where: { id: draft.id },

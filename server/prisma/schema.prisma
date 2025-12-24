@@ -92,7 +92,7 @@ model Schedule {
   scheduleDays         ScheduleDay[]
   organization         Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@unique([organizationId, weekStartDate, type])
+  @@unique([organizationId, weekStartDate])
   @@map("schedules")
 }
 
@@ -131,8 +131,8 @@ model Shift {
   isOnCall      Boolean     @default(false) @map("is_on_call")
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
-  employee      Employee?   @relation(fields: [employeeId], references: [id])
-  role          Role        @relation(fields: [roleId], references: [id])
+  employee      Employee?   @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  role          Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
   scheduleDay   ScheduleDay @relation(fields: [scheduleDayId], references: [id], onDelete: Cascade)
 
   @@map("shifts")

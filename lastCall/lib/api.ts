@@ -94,7 +94,6 @@ class ApiClient {
      * POST request
      */
     async post<T>(endpoint: string, data?: any): Promise<T> {
-        console.log(endpoint);
         return this.request<T>(endpoint, {
             method: 'POST',
             body: data ? JSON.stringify(data) : undefined
@@ -113,7 +112,6 @@ class ApiClient {
      * PUT Request
      */
     async put<T>(endpoint: string, data?: any): Promise<T> {
-        console.log(endpoint);
         return this.request<T>(endpoint, {
             method: 'PUT',
             body: data ? JSON.stringify(data) : undefined
@@ -252,7 +250,7 @@ class ApiClient {
      */
 
     async getShifts(scheduleId: string) {
-        return this.get<ShiftDetail[]>(`/schedule/${scheduleId}/shifts`);
+        return this.get<ShiftDetail[]>(`/schedules/${scheduleId}/shifts`);
     }
 
     async createShift(scheduleDayId: string, data: CreateShiftRequest) {

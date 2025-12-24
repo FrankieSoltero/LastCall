@@ -339,6 +339,16 @@ export default function ScheduleEditor() {
             });
 
             setIsSaveModalOpen(false);
+        } catch (error) {
+            console.error('Failed to save schedule:', error);
+            Alert.alert('Error', 'Failed to save schedule. Please try again.');
+        }
+    };
+
+    const saveTemplateWithAlert = async () => {
+        try {
+            await saveTemplate();
+
             Alert.alert(
                 'Success',
                 `Schedule saved for week of ${weekStartDate.substring(0, 10)}`,
@@ -353,7 +363,7 @@ export default function ScheduleEditor() {
             console.error('Failed to save schedule:', error);
             Alert.alert('Error', 'Failed to save schedule. Please try again.');
         }
-    };
+    }
 
     // --- SAVE AS TEMPLATE LOGIC ---
     const saveAsTemplate = async () => {
@@ -721,7 +731,7 @@ export default function ScheduleEditor() {
                         {/* Action Buttons */}
                         <View style={styles.modalActions}>
                             <TouchableOpacity
-                                onPress={saveTemplate}
+                                onPress={saveTemplateWithAlert}
                                 style={[styles.confirmBtn, styles.draftBtn]}
                             >
                                 <Text style={styles.confirmText}>Save as Draft</Text>

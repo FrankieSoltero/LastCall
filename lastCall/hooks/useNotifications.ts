@@ -81,11 +81,11 @@ async function registerForPushNotifications() {
                 lightColor: '#FF231F7C',
             });
         }
-        console.log("Made it to status")
+
         // Request permission
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
-        console.log("Made it past status")
+
         if (existingStatus !== 'granted') {
             const { status } = await Notifications.requestPermissionsAsync();
             finalStatus = status;
