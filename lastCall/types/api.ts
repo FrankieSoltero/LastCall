@@ -10,6 +10,7 @@
 export type EmployeeRole = 'OWNER' | 'ADMIN' | 'EMPLOYEE';
 export type EmployeeStatus = 'PENDING' | 'APPROVED' | 'DENIED';
 export type AvailabilityStatus = 'AVAILABLE' | 'UNAVAILABLE' | 'PREFERRED';
+export type ScheduleType = 'TEMPLATE' | 'DRAFT' | 'PUBLISHED';
 
 // ============================================================================
 // Base Models (what's stored in database)
@@ -18,8 +19,14 @@ export type AvailabilityStatus = 'AVAILABLE' | 'UNAVAILABLE' | 'PREFERRED';
 export interface User {
   id: string;
   email: string;
+  phone: string;
   firstName: string;
   lastName: string;
+  shareEmail: boolean;
+  sharePhone: boolean;
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+  pushToken?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -56,9 +63,11 @@ export interface InviteLink {
 export interface Schedule {
   id: string;
   organizationId: string;
+  type: ScheduleType;
   name: string | null;
-  weekStartDate: string;
-  availabilityDeadline: string;
+  templateName: string | null;
+  weekStartDate: string | null;
+  availabilityDeadline: string | null;
   isPublished: boolean;
   publishedAt: string | null;
   createdAt: string;
@@ -130,10 +139,31 @@ export interface EmployeeRoleAssignment {
 export interface UserBasic {
   id: string;
   email: string;
+  phone: string;
   firstName: string;
   lastName: string;
 }
 
+export interface UpdateUserProfileRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface UpdatePrivacySettingsRequest {
+  shareEmail?: boolean;
+  sharePhone?: boolean;
+}
+
+export interface UpdatePushTokenRequest {
+  pushToken: string;
+}
+
+export interface UpdateNotificationPreferencesRequest {
+  pushEnabled?: boolean;
+  emailEnabled?: boolean;
+}
 /**
  * Organization with counts
  */
@@ -299,6 +329,22 @@ export interface CreateScheduleRequest {
   weekStartDate: string;
   availabilityDeadline: string;
   operatingDays?: string[];
+}
+
+export interface CreateTemplateRequest {
+  templateName: string;
+  name?: string;
+  operatingDays?: string[];
+}
+
+export interface SaveAsTemplateRequest {
+  templateName: string;
+}
+
+export interface CreateDraftFromTemplateRequest {
+  weekStartDate: string;
+  availabilityDeadline: string;
+  name?: string;
 }
 
 export interface UpdateScheduleDaysRequest {

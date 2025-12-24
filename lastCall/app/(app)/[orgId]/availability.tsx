@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Clock, Check, X, Star } from 'lucide-react-native';
+import { ArrowLeft, Check, X, Star } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { AvailabilityStatus, DaySchedule, UpdateOrgAvailabilityRequest } from '@/types/api';
+import { DaySchedule, UpdateOrgAvailabilityRequest } from '@/types/api';
 import { api } from '@/lib/api';
 
 

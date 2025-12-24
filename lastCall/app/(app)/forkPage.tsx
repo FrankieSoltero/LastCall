@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, StatusBar, ScrollView, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, StatusBar, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { QrCode, Building2, ChevronRight, LogOut, Calendar } from 'lucide-react-native';
+import { QrCode, Building2, ChevronRight, LogOut, Calendar, Settings } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { OrganizationWithCounts } from '@/types/api';
-
+import { useNotifications } from '@/hooks/useNotifications';
 
 export default function DashboardOrFork() {
     const router = useRouter();
-    const { user, signOut } = useAuth(); // Assuming signOut exists in your context
+    const { user, signOut } = useAuth();
     const [loading, setLoading] = useState(true);
-
-    // Changed from boolean to Array to store the actual data
     const [userOrgs, setUserOrgs] = useState<OrganizationWithCounts[]>([]);
 
     useEffect(() => {
         checkUserOrgs();
     }, []);
+    useNotifications();
 
     const checkUserOrgs = async () => {
         try {
@@ -36,7 +35,6 @@ export default function DashboardOrFork() {
     };
 
     const handleEnterOrg = (orgId: string) => {
-        // Navigate to the dynamic route for the specific organization
         router.push(`/(app)/${orgId}`);
     };
 
@@ -56,8 +54,22 @@ export default function DashboardOrFork() {
                 <StatusBar barStyle="light-content" />
 
                 <View style={styles.header}>
-                    <Text style={styles.welcomeText}>Welcome back,</Text>
-                    <Text style={styles.nameText}>{user?.firstName}</Text>
+                    {/* Header Top Row: Text Left, Settings Right */}
+                    <View style={styles.headerTopRow}>
+                        <View>
+                            <Text style={styles.welcomeText}>Welcome back,</Text>
+                            <Text style={styles.nameText}>{user?.firstName}</Text>
+                        </View>
+
+                        <TouchableOpacity
+                            style={styles.settingsButton}
+                            onPress={() => router.push('/(app)/settings')}
+                            activeOpacity={0.7}
+                        >
+                            <Settings size={24} color="#94a3b8" />
+                        </TouchableOpacity>
+                    </View>
+
                     <Text style={styles.subText}>Select a workspace to continue.</Text>
                 </View>
 
@@ -143,14 +155,25 @@ export default function DashboardOrFork() {
     }
 
     // 3. ONBOARDING STATE (No Orgs)
-    // This remains mostly the same as your original code
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" />
 
             <View style={styles.header}>
-                <Text style={styles.welcomeText}>Hello, {user?.firstName}.</Text>
-                <Text style={styles.subText}>You aren't part of any team yet.</Text>
+                {/* Added Settings Button here as well for consistency */}
+                <View style={styles.headerTopRow}>
+                    <View>
+                        <Text style={styles.welcomeText}>Hello, {user?.firstName}.</Text>
+                        <Text style={[styles.subText, { marginTop: 8 }]}>{`You aren't part of any team yet.`}</Text>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.settingsButton}
+                        onPress={() => router.push('/(app)/settings')}
+                        activeOpacity={0.7}
+                    >
+                        <Settings size={24} color="#94a3b8" />
+                    </TouchableOpacity>
+                </View>
                 <Text style={styles.subText}>How would you like to start?</Text>
             </View>
 
@@ -206,10 +229,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    // Typography
+    // Typography & Header
     header: {
         marginTop: 40,
         marginBottom: 32,
+    },
+    headerTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 8,
+    },
+    settingsButton: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        backgroundColor: '#1e293b', // Slate-800
+        borderWidth: 1,
+        borderColor: '#334155', // Slate-700
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     welcomeText: {
         fontSize: 20,
@@ -219,7 +258,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: '700',
         color: '#ffffff',
-        marginBottom: 8,
+        // Removed marginBottom here as spacing is handled by the container now
     },
     subText: {
         fontSize: 16,

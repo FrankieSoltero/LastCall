@@ -3,21 +3,25 @@ import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api';
 import { UserBasic } from '@/types/api';
+import { useNotifications } from '@/hooks/useNotifications';
 
 type User = {
     id: string;
     email: string;
     firstName: string;
     lastName: string;
+    phone: string;
 }
 
 interface AuthContextType {
     session: Session | null;
     user: User | null;
     loading: boolean;
-    signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+    signUp: (email: string, password: string, phone: string, firstName: string, lastName: string) => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
+    refreshUser: () => Promise<void>;
+    changePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const justSignedUp = useRef(false);
+    const justChangedPassword = useRef(false);
+
+    // Set up push notifications (only registers when user is authenticated)
+    useNotifications();
+
     const loadDbUser = async () => {
         try {
             const dbUser = await api.getCurrentUser();
@@ -52,13 +61,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signUp = async (
         email: string,
         password: string,
+        phone: string,  
         firstName: string,
         lastName: string
     ) => {
         justSignedUp.current = true;
         const { data, error } = await supabase.auth.signUp({
             email,
-            password
+            password,
+            phone: phone
         });
 
         if (error) {
@@ -71,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await api.post<UserBasic>('/users', {
                 id: data.user.id,
                 email,
+                phone,
                 firstName,
                 lastName
             });
@@ -87,6 +99,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
     }
 
+    const refreshUser = async () => {
+        await loadDbUser();
+    }
+
+    const changePassword = async (newPassword: string) => {
+        justChangedPassword.current = true;
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+            justChangedPassword.current = false;
+            throw error;
+        }
+        // No need to reload user data since DB didn't change
+    }
+
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session }}) => {
             setSession(session);
@@ -98,11 +124,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         const { data: { subscription }} = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            async (_event, session) => {
                 setSession(session);
                 if (session?.user) {
                     if (justSignedUp.current) {
                         justSignedUp.current = false;
+                    } else if (justChangedPassword.current) {
+                        justChangedPassword.current = false;
                     } else {
                         await loadDbUser();
                     }
@@ -117,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ session, user, loading, signIn, signOut, signUp}}>
+        <AuthContext.Provider value={{ session, user, loading, signIn, signOut, signUp, refreshUser, changePassword}}>
             {children}
         </AuthContext.Provider>
     )

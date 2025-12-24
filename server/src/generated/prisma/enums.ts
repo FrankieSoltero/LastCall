@@ -34,3 +34,12 @@ export const AvailabilityStatus = {
 } as const
 
 export type AvailabilityStatus = (typeof AvailabilityStatus)[keyof typeof AvailabilityStatus]
+
+
+export const ScheduleType = {
+  TEMPLATE: 'TEMPLATE',
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED'
+} as const
+
+export type ScheduleType = (typeof ScheduleType)[keyof typeof ScheduleType]

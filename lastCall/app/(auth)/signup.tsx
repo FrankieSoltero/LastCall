@@ -11,7 +11,7 @@ import {
   Alert,
   ScrollView
 } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,19 +24,20 @@ export default function SignUp() {
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    password: '',
+    phone: ''
   });
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (!form.firstName || !form.lastName || !form.email || !form.password) {
+    if (!form.firstName || !form.lastName || !form.email || !form.password || !form.phone) {
       Alert.alert('Missing Info', 'Please fill in all fields to create your identity.');
       return;
     }
 
     setLoading(true);
     try {
-      await signUp(form.email, form.password, form.firstName, form.lastName);
+      await signUp(form.email, form.password, form.phone, form.firstName, form.lastName);
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
     } finally {
@@ -105,6 +106,20 @@ export default function SignUp() {
                     onChangeText={(t) => setForm({...form, email: t})}
                     autoCapitalize="none"
                     keyboardType="email-address"
+                  />
+                </View>
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Phone Number</Text>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="111-111-1111"
+                    placeholderTextColor="#64748b"
+                    value={form.phone}
+                    onChangeText={(t) => setForm({...form, phone: t})}
+                    autoCapitalize="none"
+                    keyboardType="phone-pad"
                   />
                 </View>
               </View>

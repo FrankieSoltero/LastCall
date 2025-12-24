@@ -7,9 +7,7 @@ import {
     ScrollView,
     Modal,
     TextInput,
-    Switch,
     Alert,
-    FlatList,
     ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,26 +16,19 @@ import {
     ArrowLeft,
     Plus,
     Save,
-    Clock,
     User,
     AlertCircle,
-    CheckCircle2,
     Phone,
     Trash2,
-    MoreHorizontal,
-    Send // Added for Publish icon
+    Send, // Added for Publish icon
+    X
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
 import type {
     Role,
-    RoleWithCounts,
-    ScheduleDetail,
-    ShiftDetail,
-    EmployeeWithUser,
     AvailabilityWithFallback,
-    CreateScheduleRequest
 } from '@/types/api';
-import { dateToDay, dayToFullName, calculateDateForDay, isEmployeeAvailableForShift, formatWeekDate, getNextMonday } from '@/lib/helper';
+import { dateToDay, dayToFullName, calculateDateForDay, isEmployeeAvailableForShift, formatWeekDate } from '@/lib/helper';
 
 // --- Local Types (Extended from API types) ---
 
@@ -100,6 +91,10 @@ export default function ScheduleEditor() {
     // Publish State
     const [isPublishing, setIsPublishing] = useState(false);
 
+    // Template State
+    const [templateName, setTemplateName] = useState('');
+    const [savingTemplate, setSavingTemplate] = useState(false);
+
     // --- 1. Load Data ---
     useEffect(() => {
         fetchData();
@@ -155,7 +150,7 @@ export default function ScheduleEditor() {
             };
 
             const schedule = await api.getSchedule(scheduleId as string);
-            setWeekStartDate(schedule.weekStartDate);
+            setWeekStartDate(schedule.weekStartDate || "");
 
             // Track existing operating days (from backend)
             setExistingOperatingDays(schedule.operatingDays || []);
@@ -360,6 +355,43 @@ export default function ScheduleEditor() {
         }
     };
 
+    // --- SAVE AS TEMPLATE LOGIC ---
+    const saveAsTemplate = async () => {
+        if (!templateName.trim()) {
+            Alert.alert('Error', 'Please enter a template name');
+            return;
+        }
+
+        try {
+            setSavingTemplate(true);
+            // First save the draft
+            await saveTemplate();
+
+            // Then convert to template
+            await api.saveAsTemplate(scheduleId as string, {
+                templateName: templateName.trim()
+            });
+
+            setIsSaveModalOpen(false);
+            setTemplateName('');
+            Alert.alert(
+                'Success',
+                'Template created successfully!',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => router.push(`/(app)/${orgId}/schedulesList`)
+                    }
+                ]
+            );
+        } catch (error) {
+            console.error('Failed to save template:', error);
+            Alert.alert('Error', 'Failed to save template. Please try again.');
+        } finally {
+            setSavingTemplate(false);
+        }
+    };
+
     // --- PUBLISH LOGIC ---
     const handlePublish = async () => {
         Alert.alert(
@@ -450,7 +482,7 @@ export default function ScheduleEditor() {
                     {/* Publish Button (New) */}
                     <TouchableOpacity
                         style={styles.publishBtn}
-                        onPress={handlePublish}
+                        onPress={() => handlePublish()}
                         disabled={isPublishing}
                     >
                         {isPublishing ? (
@@ -488,7 +520,7 @@ export default function ScheduleEditor() {
             {/* Main Canvas */}
             {/* Day Header - Sticky */}
             <View style={styles.dayHeader}>
-                <Text style={styles.sectionTitle}>{dayToFullName(selectedDay)}'s Shifts</Text>
+                <Text style={styles.sectionTitle}>{`${dayToFullName(selectedDay)}'s Shifts`}</Text>
                 <TouchableOpacity
                     style={styles.addShiftBtn}
                     onPress={() => setIsShiftModalOpen(true)}
@@ -656,18 +688,54 @@ export default function ScheduleEditor() {
             <Modal visible={isSaveModalOpen} animationType="fade" transparent>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalCard}>
-                        <Text style={styles.modalTitle}>Save Schedule</Text>
+                        {/* Modal Header with X button */}
+                        <View style={styles.modalHeaderRow}>
+                            <Text style={styles.modalTitle}>Save Schedule</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setIsSaveModalOpen(false);
+                                    setTemplateName('');
+                                }}
+                                style={styles.closeBtn}
+                            >
+                                <X size={20} color="#94a3b8" />
+                            </TouchableOpacity>
+                        </View>
 
                         <Text style={styles.modalDesc}>
-                            This will save all shifts to the schedule for the week of {weekStartDate?.substring(0, 10)}.
+                            Save this schedule as a draft or create a reusable template.
                         </Text>
 
+                        {/* Template Name Input */}
+                        <View style={styles.inputSection}>
+                            <Text style={styles.label}>Template Name (for "Save as Template")</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="e.g., Regular Week, Holiday Schedule"
+                                placeholderTextColor="#64748b"
+                                value={templateName}
+                                onChangeText={setTemplateName}
+                            />
+                        </View>
+
+                        {/* Action Buttons */}
                         <View style={styles.modalActions}>
-                            <TouchableOpacity onPress={() => setIsSaveModalOpen(false)} style={styles.cancelBtn}>
-                                <Text style={styles.cancelText}>Cancel</Text>
+                            <TouchableOpacity
+                                onPress={saveTemplate}
+                                style={[styles.confirmBtn, styles.draftBtn]}
+                            >
+                                <Text style={styles.confirmText}>Save as Draft</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={saveTemplate} style={styles.confirmBtn}>
-                                <Text style={styles.confirmText}>Save</Text>
+                            <TouchableOpacity
+                                onPress={saveAsTemplate}
+                                style={[styles.confirmBtn, !templateName.trim() && styles.disabledBtn]}
+                                disabled={savingTemplate || !templateName.trim()}
+                            >
+                                {savingTemplate ? (
+                                    <ActivityIndicator size="small" color="#ffffff" />
+                                ) : (
+                                    <Text style={styles.confirmText}>Save as Template</Text>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -864,5 +932,21 @@ const styles = StyleSheet.create({
         backgroundColor: '#020617',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+
+    // Modal Header Row with X
+    modalHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    closeBtn: {
+        padding: 4,
+    },
+
+    // Draft Button Style
+    draftBtn: {
+        backgroundColor: '#64748b', // Gray for draft
     },
 });

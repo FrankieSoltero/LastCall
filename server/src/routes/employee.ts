@@ -36,7 +36,8 @@ router.get('/:orgId/employees', authMiddleware, async (req: Request, res: Respon
                         id: true,
                         email: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        phone: true
                     }
                 },
                 roleAssignments: {
@@ -87,7 +88,8 @@ router.get('/:orgId/employee', authMiddleware, async (req: Request, res: Respons
                         id: true,
                         email: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        phone: true
                     }
                 }
             }
@@ -129,11 +131,10 @@ router.post('/:orgId/employees/invite', authMiddleware, async (req: Request, res
             });
         }
 
-        // Clean up expired invite links for this organization
+        // Delete all existing invite links for this organization
         await prisma.inviteLink.deleteMany({
             where: {
-                organizationId: orgId,
-                expiresAt: { lt: new Date() }
+                organizationId: orgId
             }
         });
 
@@ -222,7 +223,8 @@ router.post('/invite/:token', authMiddleware, async (req: Request, res: Response
                         id: true,
                         email: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        phone: true
                     }
                 },
                 organization: {
@@ -354,7 +356,8 @@ router.patch('/:orgId/employees/:employeeId', authMiddleware, async (req: Reques
                         id: true,
                         email: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        phone: true
                     }
                 }
             }

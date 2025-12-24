@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Clock, Check, X, Star } from 'lucide-react-native';
+import { ArrowLeft, Check, X, Star } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { AvailabilityStatus, DaySchedule, GeneralAvailability, UpdateGeneralAvailabilityRequest } from '@/types/api';
+import { DaySchedule, UpdateGeneralAvailabilityRequest } from '@/types/api';
 import { api } from '@/lib/api';
 
 
@@ -21,7 +21,7 @@ import { api } from '@/lib/api';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-export default function generalAvailability() {
+export default function GeneralAvailabilityPage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
 

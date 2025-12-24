@@ -10,10 +10,17 @@ datasource db {
 model User {
   id                  String                @id @default(uuid()) @db.Uuid
   email               String                @unique
+  phone               String                @unique
   firstName           String                @map("first_name")
   lastName            String                @map("last_name")
   createdAt           DateTime              @default(now()) @map("created_at")
   updatedAt           DateTime              @updatedAt @map("updated_at")
+  shareEmail          Boolean               @default(true) @map("share_email")
+  sharePhone          Boolean               @default(false) @map("share_phone")
+  pushEnabled         Boolean               @default(true) @map("push_enabled")
+  emailEnabled        Boolean               @default(false) @map("email_enabled")
+
+  pushToken           String?               @map("push_token")
   employees           Employee[]
   inviteLinks         InviteLink[]
   ownedOrgs           Organization[]        @relation("OrgOwner")
@@ -64,7 +71,7 @@ model InviteLink {
   expiresAt      DateTime     @map("expires_at")
   createdById    String       @map("created_by_id") @db.Uuid
   createdAt      DateTime     @default(now()) @map("created_at")
-  createdBy      User         @relation(fields: [createdById], references: [id])
+  createdBy      User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("invite_links")
@@ -73,9 +80,11 @@ model InviteLink {
 model Schedule {
   id                   String         @id @default(uuid()) @db.Uuid
   organizationId       String         @map("organization_id") @db.Uuid
+  type                 ScheduleType   @default(DRAFT)
   name                 String?
-  weekStartDate        DateTime       @map("week_start_date") @db.Date
-  availabilityDeadline DateTime       @map("availability_deadline") @db.Date
+  templateName         String?        @map("template_name")
+  weekStartDate        DateTime?      @map("week_start_date") @db.Date
+  availabilityDeadline DateTime?      @map("availability_deadline") @db.Date
   isPublished          Boolean        @default(false) @map("is_published")
   publishedAt          DateTime?      @map("published_at")
   createdAt            DateTime       @default(now()) @map("created_at")
@@ -83,7 +92,7 @@ model Schedule {
   scheduleDays         ScheduleDay[]
   organization         Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@unique([organizationId, weekStartDate])
+  @@unique([organizationId, weekStartDate, type])
   @@map("schedules")
 }
 
@@ -188,4 +197,10 @@ enum AvailabilityStatus {
   AVAILABLE
   UNAVAILABLE
   PREFERRED
+}
+
+enum ScheduleType {
+  TEMPLATE
+  DRAFT
+  PUBLISHED
 }

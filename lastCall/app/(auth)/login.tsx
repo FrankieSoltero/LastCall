@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
   Alert
@@ -13,12 +13,12 @@ import {
 import { Link, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Mail, Lock } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext'; //
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignIn() {
   const router = useRouter();
   const { signIn } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,8 +32,6 @@ export default function SignIn() {
     setLoading(true);
     try {
       await signIn(email, password);
-      // Navigation is usually handled by a listener in _layout.tsx, 
-      // but you can force it if needed: router.replace('/');
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     } finally {
@@ -43,7 +41,7 @@ export default function SignIn() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
@@ -60,7 +58,7 @@ export default function SignIn() {
 
           {/* Form */}
           <View style={styles.form}>
-            
+
             {/* Email Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
@@ -94,9 +92,18 @@ export default function SignIn() {
               </View>
             </View>
 
+            {/* Forgot Password Link - NEW */}
+            <TouchableOpacity
+              style={styles.forgotPasswordContainer}
+              onPress={() => router.push('/(auth)/forgotPassword')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+            </TouchableOpacity>
+
             {/* Action Button */}
-            <TouchableOpacity 
-              style={[styles.button, loading && styles.buttonDisabled]} 
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleSignIn}
               disabled={loading}
             >
@@ -108,7 +115,7 @@ export default function SignIn() {
             </TouchableOpacity>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
+              <Text style={styles.footerText}>{`Don't have an account?`}</Text>
               <Link href="/(auth)/signup" asChild>
                 <TouchableOpacity>
                   <Text style={styles.linkText}>Create one</Text>
@@ -187,6 +194,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     height: '100%',
   },
+  // NEW STYLES
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginTop: -8, // Pull it closer to password input
+  },
+  forgotPasswordText: {
+    color: '#818cf8', // Indigo-400 (Brand Accent)
+    fontSize: 14,
+    fontWeight: '500',
+  },
   button: {
     backgroundColor: '#ffffff',
     height: 56,
@@ -207,6 +224,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 16,
+    gap: 4, // Added gap for better spacing between text and link
   },
   footerText: {
     color: '#64748b',

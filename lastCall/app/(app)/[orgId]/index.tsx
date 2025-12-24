@@ -8,7 +8,6 @@ import {
     ScrollView,
     RefreshControl,
     Modal,
-    TextInput,
     Alert,
     Share
 } from 'react-native';
@@ -25,7 +24,9 @@ import {
     X,
     Link as LinkIcon,
     Copy,
-    Check
+    Check,
+    CalendarClock,
+    Settings
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
 import { Employee, OrganizationDetail } from '@/types/api';
@@ -44,10 +45,9 @@ export default function OrganizationDashboard() {
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [inviteLoading, setInviteLoading] = useState(false);
     const [generatedLink, setGeneratedLink] = useState<string | null>(null);
-    const [expirationDays, setExpirationDays] = useState(7); // Default 7 days
+    const [expirationDays, setExpirationDays] = useState(7);
     const [copied, setCopied] = useState(false);
 
-    // Fetch both org and employee data together
     const fetchAllData = async () => {
         try {
             console.log('Fetching organization and employee data for:', orgId);
@@ -121,7 +121,6 @@ export default function OrganizationDashboard() {
         setCopied(false);
     };
 
-    // Loading state
     if (loading) {
         return (
             <View style={[styles.container, styles.centerContent]}>
@@ -130,12 +129,11 @@ export default function OrganizationDashboard() {
         );
     }
 
-    // Error: Organization not found
-    if (!org) {
+    if (!org || !employee) {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.centerContent}>
-                    <Text style={styles.errorText}>Organization not found.</Text>
+                    <Text style={styles.errorText}>{!org ? "Organization not found." : "You are not a member."}</Text>
                     <TouchableOpacity onPress={() => router.replace('/(app)/forkPage')} style={styles.backButtonSimple}>
                         <Text style={styles.backButtonText}>Back to Dashboard</Text>
                     </TouchableOpacity>
@@ -144,47 +142,11 @@ export default function OrganizationDashboard() {
         );
     }
 
-    // Error: Not a member
-    if (!employee) {
+    if (employee.status === 'PENDING' || employee.status === 'DENIED') {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.centerContent}>
-                    <Text style={styles.errorText}>You are not a member of this organization.</Text>
-                    <TouchableOpacity onPress={() => router.replace('/(app)/forkPage')} style={styles.backButtonSimple}>
-                        <Text style={styles.backButtonText}>Back to Dashboard</Text>
-                    </TouchableOpacity>
-                </View>
-            </SafeAreaView>
-        );
-    }
-
-    // Status: Pending approval
-    if (employee.status === 'PENDING') {
-        return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.centerContent}>
-                    <ActivityIndicator size="large" color="#f59e0b" style={{ marginBottom: 16 }} />
-                    <Text style={styles.title}>Awaiting Approval</Text>
-                    <Text style={styles.pendingSubtitle}>
-                        Your request to join {org.name} is pending admin approval.
-                    </Text>
-                    <TouchableOpacity onPress={() => router.replace('/(app)/forkPage')} style={styles.backButtonSimple}>
-                        <Text style={styles.backButtonText}>Back to Dashboard</Text>
-                    </TouchableOpacity>
-                </View>
-            </SafeAreaView>
-        );
-    }
-
-    // Status: Denied
-    if (employee.status === 'DENIED') {
-        return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.centerContent}>
-                    <Text style={styles.errorText}>Access Denied</Text>
-                    <Text style={styles.pendingSubtitle}>
-                        Your request to join {org.name} was denied.
-                    </Text>
+                    <Text style={styles.title}>{employee.status === 'PENDING' ? "Awaiting Approval" : "Access Denied"}</Text>
                     <TouchableOpacity onPress={() => router.replace('/(app)/forkPage')} style={styles.backButtonSimple}>
                         <Text style={styles.backButtonText}>Back to Dashboard</Text>
                     </TouchableOpacity>
@@ -203,7 +165,6 @@ export default function OrganizationDashboard() {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ffffff" />
                 }
             >
-
                 {/* Header Navigation */}
                 <TouchableOpacity
                     style={styles.backLink}
@@ -233,79 +194,68 @@ export default function OrganizationDashboard() {
 
                 <View style={styles.divider} />
 
-                {/* Action Grid */}
+                {/* Management Grid */}
                 <Text style={styles.sectionTitle}>Management</Text>
                 <View style={styles.grid}>
-
-                    {/* Schedules Card */}
                     {['OWNER', 'ADMIN'].includes(employee.role) && (
                         <DashboardCard
                             title="Schedules"
                             subtitle={`${org.schedules.length} Active`}
                             icon={CalendarDays}
-                            color="#818cf8" // Indigo-400
-                            onPress={() => {
-                                router.push(`/(app)/${orgId}/schedulesList`);
-                            }}
+                            color="#818cf8"
+                            onPress={() => router.push(`/(app)/${orgId}/schedulesList`)}
                         />
                     )}
-
                     {!['OWNER', 'ADMIN'].includes(employee.role) && (
                         <DashboardCard
                             title="Schedule"
                             subtitle={"Your weekly schedule"}
                             icon={CalendarDays}
-                            color="#818cf8" // Indigo-400
-                            onPress={() => {
-                                router.push(`/(app)/${orgId}/employeeSchedule`);
-                            }}
+                            color="#818cf8"
+                            onPress={() => router.push(`/(app)/${orgId}/employeeSchedule`)}
                         />
                     )}
-
-                    {/* Employees Card */}
                     <DashboardCard
                         title="Team"
                         subtitle={`${org.employees.length} Members`}
                         icon={Users}
-                        color="#34d399" // Emerald-400
+                        color="#34d399"
                         badge={['OWNER', 'ADMIN'].includes(employee?.role) ? pendingCount : undefined}
-                        onPress={() => {
-                            router.push(`/(app)/${orgId}/employees`);
-                        }}
+                        onPress={() => router.push(`/(app)/${orgId}/employees`)}
                     />
-
-                    {/* Roles Card (Admin/Owner Only) */}
                     {['OWNER', 'ADMIN'].includes(employee.role) && (
                         <DashboardCard
                             title="Job Roles"
                             subtitle="Manage positions"
                             icon={Briefcase}
-                            color="#e5b454" // Amber
-                            onPress={() => {
-                                router.push(`/(app)/${orgId}/jobRoles`);
-                            }}
+                            color="#e5b454"
+                            onPress={() => router.push(`/(app)/${orgId}/jobRoles`)}
                         />
                     )}
-
-                    {/* Availability (Everyone) */}
                     <DashboardCard
                         title="Availability"
                         subtitle="Set your hours"
                         icon={Clock}
-                        color="#f472b6" // Pink-400
-                        onPress={() => {
-                            router.push(`/(app)/${orgId}/availability`)
-                        }}
+                        color="#f472b6"
+                        onPress={() => router.push(`/(app)/${orgId}/availability`)}
                     />
-
+                    {!['OWNER', 'ADMIN'].includes(employee.role) && (
+                        <DashboardCard
+                            title="Shifts"
+                            subtitle={"Your shifts for this week"}
+                            icon={CalendarClock}
+                            color="#e5b454"
+                            onPress={() => router.push(`/(app)/${orgId}/personalSchedule`)}
+                        />
+                    )}
                 </View>
 
-                {/* Quick Actions */}
+                {/* Quick Actions (Admin Only) */}
                 {['OWNER', 'ADMIN'].includes(employee.role) && (
                     <>
                         <Text style={styles.sectionTitle}>Quick Actions</Text>
-                        <TouchableOpacity 
-                            style={styles.actionRow} 
+                        <TouchableOpacity
+                            style={styles.actionRow}
                             activeOpacity={0.7}
                             onPress={() => setIsInviteModalOpen(true)}
                         >
@@ -318,9 +268,25 @@ export default function OrganizationDashboard() {
                     </>
                 )}
 
+                {/* Account Settings (For Everyone) */}
+                {/* Added 'marginTop: 24' to separate if coming after Quick Actions */}
+                <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Account</Text>
+                
+                {/* SETTINGS BUTTON - Identical Style to Invite Button */}
+                <TouchableOpacity
+                    style={styles.actionRow}
+                    activeOpacity={0.7}
+                    onPress={() => router.push(`/(app)/${orgId}/organizationSettings`)}
+                >
+                    <View style={styles.actionRowContent}>
+                        <Text style={styles.actionRowTitle}>Settings</Text>
+                        <Text style={styles.actionRowSubtitle}>Preferences, notifications, and security</Text>
+                    </View>
+                    <ChevronRight size={20} color="#475569" />
+                </TouchableOpacity>
             </ScrollView>
 
-            {/* --- INVITE MODAL --- */}
+            {/* Invite Modal */}
             <Modal
                 visible={isInviteModalOpen}
                 animationType="fade"
@@ -329,8 +295,6 @@ export default function OrganizationDashboard() {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
-                        
-                        {/* Modal Header */}
                         <View style={styles.modalHeader}>
                             <View style={styles.modalHeaderIcon}>
                                 <LinkIcon size={20} color="#4f46e5" />
@@ -340,22 +304,19 @@ export default function OrganizationDashboard() {
                                 <X size={20} color="#94a3b8" />
                             </TouchableOpacity>
                         </View>
-
                         <View style={styles.modalContent}>
                             {!generatedLink ? (
-                                // --- STEP 1: CONFIGURATION ---
                                 <>
                                     <Text style={styles.modalText}>
                                         Create a temporary link to allow new staff members to join {org.name}.
                                     </Text>
-                                    
                                     <Text style={styles.inputLabel}>Link Expiration</Text>
                                     <View style={styles.expirationOptions}>
                                         {[1, 7, 30].map((days) => (
-                                            <TouchableOpacity 
+                                            <TouchableOpacity
                                                 key={days}
                                                 style={[
-                                                    styles.expirationOption, 
+                                                    styles.expirationOption,
                                                     expirationDays === days && styles.expirationOptionActive
                                                 ]}
                                                 onPress={() => setExpirationDays(days)}
@@ -369,8 +330,7 @@ export default function OrganizationDashboard() {
                                             </TouchableOpacity>
                                         ))}
                                     </View>
-
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                         style={styles.generateButton}
                                         onPress={handleGenerateInvite}
                                         disabled={inviteLoading}
@@ -383,36 +343,31 @@ export default function OrganizationDashboard() {
                                     </TouchableOpacity>
                                 </>
                             ) : (
-                                // --- STEP 2: RESULT ---
                                 <>
                                     <Text style={styles.modalText}>
                                         Share this link with your employees. They will be added to the pending list for approval.
                                     </Text>
-
                                     <View style={styles.linkContainer}>
                                         <Text style={styles.linkText} numberOfLines={1} ellipsizeMode="middle">
                                             {generatedLink}
                                         </Text>
                                     </View>
-
                                     <View style={styles.resultActions}>
-                                        <TouchableOpacity 
-                                            style={[styles.actionButton, styles.copyButton]} 
+                                        <TouchableOpacity
+                                            style={[styles.actionButton, styles.copyButton]}
                                             onPress={handleCopyLink}
                                         >
                                             {copied ? <Check size={18} color="#ffffff" /> : <Copy size={18} color="#ffffff" />}
                                             <Text style={styles.buttonText}>{copied ? "Copied!" : "Copy"}</Text>
                                         </TouchableOpacity>
-
-                                        <TouchableOpacity 
-                                            style={[styles.actionButton, styles.shareButton]} 
+                                        <TouchableOpacity
+                                            style={[styles.actionButton, styles.shareButton]}
                                             onPress={handleShareLink}
                                         >
                                             <Text style={styles.buttonText}>Share</Text>
                                         </TouchableOpacity>
                                     </View>
-
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                         style={styles.doneButton}
                                         onPress={resetInviteModal}
                                     >
@@ -428,7 +383,7 @@ export default function OrganizationDashboard() {
     );
 }
 
-// Helper Component for Grid Items (unchanged)
+// Helper Component for Grid Items
 function DashboardCard({
     title,
     subtitle,
@@ -465,11 +420,9 @@ function DashboardCard({
 }
 
 const styles = StyleSheet.create({
-    // ... (All previous styles remain exactly the same)
-    // Layout
     container: {
         flex: 1,
-        backgroundColor: '#020617', // App Background
+        backgroundColor: '#020617',
     },
     scrollContent: {
         padding: 24,
@@ -480,8 +433,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-
-    // Navigation
     backLink: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -493,8 +444,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '500',
     },
-
-    // Header
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -531,15 +480,6 @@ const styles = StyleSheet.create({
         color: '#94a3b8',
         marginTop: 2,
     },
-    pendingSubtitle: {
-        fontSize: 16,
-        color: '#94a3b8',
-        textAlign: 'center',
-        marginTop: 8,
-        marginBottom: 24,
-        paddingHorizontal: 32,
-        lineHeight: 24,
-    },
     badge: {
         backgroundColor: '#1e293b',
         paddingHorizontal: 12,
@@ -553,14 +493,11 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#cbd5e1',
     },
-
     divider: {
         height: 1,
         backgroundColor: '#1e293b',
         marginBottom: 32,
     },
-
-    // Grid
     sectionTitle: {
         fontSize: 18,
         fontWeight: '600',
@@ -573,10 +510,8 @@ const styles = StyleSheet.create({
         gap: 16,
         marginBottom: 32,
     },
-
-    // Cards
     card: {
-        width: '47%', // roughly half width minus gap
+        width: '47%',
         backgroundColor: '#0f172a',
         borderRadius: 16,
         padding: 16,
@@ -627,8 +562,6 @@ const styles = StyleSheet.create({
         fontSize: 11,
         fontWeight: '700',
     },
-
-    // Action Rows
     actionRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -651,8 +584,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#94a3b8',
     },
-
-    // Utilities
     errorText: {
         color: '#ef4444',
         fontSize: 16,
@@ -665,11 +596,9 @@ const styles = StyleSheet.create({
         color: '#4f46e5',
         fontWeight: '600',
     },
-
-    // --- MODAL STYLES (NEW) ---
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(2, 6, 23, 0.85)', // Darker overlay
+        backgroundColor: 'rgba(2, 6, 23, 0.85)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 24,
@@ -677,7 +606,7 @@ const styles = StyleSheet.create({
     modalContainer: {
         width: '100%',
         maxWidth: 400,
-        backgroundColor: '#0f172a', // Surface color
+        backgroundColor: '#0f172a',
         borderRadius: 24,
         borderWidth: 1,
         borderColor: '#1e293b',
@@ -717,8 +646,6 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         marginBottom: 24,
     },
-    
-    // Inputs
     inputLabel: {
         fontSize: 12,
         fontWeight: '600',
@@ -736,7 +663,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 12,
         borderRadius: 12,
-        backgroundColor: '#020617', // Darker than modal
+        backgroundColor: '#020617',
         borderWidth: 1,
         borderColor: '#334155',
         alignItems: 'center',
@@ -753,8 +680,6 @@ const styles = StyleSheet.create({
     expirationTextActive: {
         color: '#ffffff',
     },
-
-    // Buttons
     generateButton: {
         backgroundColor: '#4f46e5',
         height: 56,
@@ -767,8 +692,6 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         fontSize: 16,
     },
-    
-    // Result View
     linkContainer: {
         backgroundColor: '#020617',
         borderRadius: 12,
@@ -780,7 +703,7 @@ const styles = StyleSheet.create({
     linkText: {
         color: '#818cf8',
         fontSize: 14,
-        fontFamily: 'monospace', // Or just standard font
+        fontFamily: 'monospace',
     },
     resultActions: {
         flexDirection: 'row',

@@ -1270,10 +1270,16 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
+  phone: 'phone',
   firstName: 'firstName',
   lastName: 'lastName',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  shareEmail: 'shareEmail',
+  sharePhone: 'sharePhone',
+  pushEnabled: 'pushEnabled',
+  emailEnabled: 'emailEnabled',
+  pushToken: 'pushToken'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1320,7 +1326,9 @@ export type InviteLinkScalarFieldEnum = (typeof InviteLinkScalarFieldEnum)[keyof
 export const ScheduleScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
+  type: 'type',
   name: 'name',
+  templateName: 'templateName',
   weekStartDate: 'weekStartDate',
   availabilityDeadline: 'availabilityDeadline',
   isPublished: 'isPublished',
@@ -1464,6 +1472,13 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'EmployeeRole'
  */
 export type EnumEmployeeRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmployeeRole'>
@@ -1492,9 +1507,16 @@ export type ListEnumEmployeeStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
- * Reference to a field of type 'Boolean'
+ * Reference to a field of type 'ScheduleType'
  */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+export type EnumScheduleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleType'>
+    
+
+
+/**
+ * Reference to a field of type 'ScheduleType[]'
+ */
+export type ListEnumScheduleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleType[]'>
     
 
 

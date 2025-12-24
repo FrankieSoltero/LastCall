@@ -83,10 +83,16 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
+  phone: 'phone',
   firstName: 'firstName',
   lastName: 'lastName',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  shareEmail: 'shareEmail',
+  sharePhone: 'sharePhone',
+  pushEnabled: 'pushEnabled',
+  emailEnabled: 'emailEnabled',
+  pushToken: 'pushToken'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -133,7 +139,9 @@ export type InviteLinkScalarFieldEnum = (typeof InviteLinkScalarFieldEnum)[keyof
 export const ScheduleScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
+  type: 'type',
   name: 'name',
+  templateName: 'templateName',
   weekStartDate: 'weekStartDate',
   availabilityDeadline: 'availabilityDeadline',
   isPublished: 'isPublished',

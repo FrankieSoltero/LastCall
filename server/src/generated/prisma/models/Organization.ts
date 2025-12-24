@@ -414,10 +414,6 @@ export type OrganizationUncheckedUpdateManyWithoutOwnerNestedInput = {
   deleteMany?: Prisma.OrganizationScalarWhereInput | Prisma.OrganizationScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type OrganizationCreateNestedOneWithoutEmployeesInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutEmployeesInput, Prisma.OrganizationUncheckedCreateWithoutEmployeesInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutEmployeesInput

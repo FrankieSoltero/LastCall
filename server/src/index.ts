@@ -58,33 +58,27 @@ const limiter = rateLimit({
  * - Helmet adds security headers to protect against common vulnerabilities
  */
 app.use(express.json({ limit: '10mb' }));
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    hsts: { maxAge: 31536000, includeSubDomains: true }
+}));
 
 
 app.get('/health', (req: Request, res: Response) => {
     res.json({
         status: 'ok',
         message: 'Server is running',
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString()
     })
 });
 app.use('/api', limiter);
-app.use('/api/test-db', async (_req: Request, res: Response) => {
-    try {
-        const userCount = await prisma.user.count();
-        res.json({
-            status: 'success',
-            message: 'Database connected',
-            userCount
-        });
-    } catch (error) {
-        console.error('Database connection error:', error);
-        res.status(500).json({
-            status: 'error',
-            message: 'Database connection failed'
-        })
-    }
-})
 
 /**
  * Below is our api protected route
@@ -104,7 +98,8 @@ app.use('/api/protected', authMiddleware, async (req: Request, res: Response) =>
                 id: true,
                 email: true,
                 firstName: true,
-                lastName: true
+                lastName: true,
+                phone: true
             }
         });
         console.log(user);
@@ -115,7 +110,7 @@ app.use('/api/protected', authMiddleware, async (req: Request, res: Response) =>
         res.json(user);
     } catch (error) {
         console.error('Protected route error:', error);
-        res.status(500).json({ error: 'Failed to fetch user'})
+        res.status(500).json({ error: 'Failed to fetch user' })
     }
 })
 
@@ -153,7 +148,6 @@ app.use(errorHandler)
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Run a health check at: http://localhost:${PORT}/health`)
-    console.log(`Run a health check at: http://localhost:${PORT}/api/test-db`);
 
     process.on('SIGTERM', async () => {
         console.log("\nTermination Recieved");

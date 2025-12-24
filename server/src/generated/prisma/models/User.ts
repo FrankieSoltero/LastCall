@@ -27,28 +27,46 @@ export type AggregateUser = {
 export type UserMinAggregateOutputType = {
   id: string | null
   email: string | null
+  phone: string | null
   firstName: string | null
   lastName: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  shareEmail: boolean | null
+  sharePhone: boolean | null
+  pushEnabled: boolean | null
+  emailEnabled: boolean | null
+  pushToken: string | null
 }
 
 export type UserMaxAggregateOutputType = {
   id: string | null
   email: string | null
+  phone: string | null
   firstName: string | null
   lastName: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  shareEmail: boolean | null
+  sharePhone: boolean | null
+  pushEnabled: boolean | null
+  emailEnabled: boolean | null
+  pushToken: string | null
 }
 
 export type UserCountAggregateOutputType = {
   id: number
   email: number
+  phone: number
   firstName: number
   lastName: number
   createdAt: number
   updatedAt: number
+  shareEmail: number
+  sharePhone: number
+  pushEnabled: number
+  emailEnabled: number
+  pushToken: number
   _all: number
 }
 
@@ -56,28 +74,46 @@ export type UserCountAggregateOutputType = {
 export type UserMinAggregateInputType = {
   id?: true
   email?: true
+  phone?: true
   firstName?: true
   lastName?: true
   createdAt?: true
   updatedAt?: true
+  shareEmail?: true
+  sharePhone?: true
+  pushEnabled?: true
+  emailEnabled?: true
+  pushToken?: true
 }
 
 export type UserMaxAggregateInputType = {
   id?: true
   email?: true
+  phone?: true
   firstName?: true
   lastName?: true
   createdAt?: true
   updatedAt?: true
+  shareEmail?: true
+  sharePhone?: true
+  pushEnabled?: true
+  emailEnabled?: true
+  pushToken?: true
 }
 
 export type UserCountAggregateInputType = {
   id?: true
   email?: true
+  phone?: true
   firstName?: true
   lastName?: true
   createdAt?: true
   updatedAt?: true
+  shareEmail?: true
+  sharePhone?: true
+  pushEnabled?: true
+  emailEnabled?: true
+  pushToken?: true
   _all?: true
 }
 
@@ -156,10 +192,16 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type UserGroupByOutputType = {
   id: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt: Date
   updatedAt: Date
+  shareEmail: boolean
+  sharePhone: boolean
+  pushEnabled: boolean
+  emailEnabled: boolean
+  pushToken: string | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -186,10 +228,16 @@ export type UserWhereInput = {
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.UuidFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
+  phone?: Prisma.StringFilter<"User"> | string
   firstName?: Prisma.StringFilter<"User"> | string
   lastName?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  shareEmail?: Prisma.BoolFilter<"User"> | boolean
+  sharePhone?: Prisma.BoolFilter<"User"> | boolean
+  pushEnabled?: Prisma.BoolFilter<"User"> | boolean
+  emailEnabled?: Prisma.BoolFilter<"User"> | boolean
+  pushToken?: Prisma.StringNullableFilter<"User"> | string | null
   employees?: Prisma.EmployeeListRelationFilter
   inviteLinks?: Prisma.InviteLinkListRelationFilter
   ownedOrgs?: Prisma.OrganizationListRelationFilter
@@ -199,10 +247,16 @@ export type UserWhereInput = {
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  shareEmail?: Prisma.SortOrder
+  sharePhone?: Prisma.SortOrder
+  pushEnabled?: Prisma.SortOrder
+  emailEnabled?: Prisma.SortOrder
+  pushToken?: Prisma.SortOrderInput | Prisma.SortOrder
   employees?: Prisma.EmployeeOrderByRelationAggregateInput
   inviteLinks?: Prisma.InviteLinkOrderByRelationAggregateInput
   ownedOrgs?: Prisma.OrganizationOrderByRelationAggregateInput
@@ -212,6 +266,7 @@ export type UserOrderByWithRelationInput = {
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  phone?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
@@ -219,19 +274,30 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   lastName?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  shareEmail?: Prisma.BoolFilter<"User"> | boolean
+  sharePhone?: Prisma.BoolFilter<"User"> | boolean
+  pushEnabled?: Prisma.BoolFilter<"User"> | boolean
+  emailEnabled?: Prisma.BoolFilter<"User"> | boolean
+  pushToken?: Prisma.StringNullableFilter<"User"> | string | null
   employees?: Prisma.EmployeeListRelationFilter
   inviteLinks?: Prisma.InviteLinkListRelationFilter
   ownedOrgs?: Prisma.OrganizationListRelationFilter
   generalAvailability?: Prisma.GeneralAvailabilityListRelationFilter
-}, "id" | "email">
+}, "id" | "email" | "phone">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  shareEmail?: Prisma.SortOrder
+  sharePhone?: Prisma.SortOrder
+  pushEnabled?: Prisma.SortOrder
+  emailEnabled?: Prisma.SortOrder
+  pushToken?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -243,19 +309,31 @@ export type UserScalarWhereWithAggregatesInput = {
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
+  phone?: Prisma.StringWithAggregatesFilter<"User"> | string
   firstName?: Prisma.StringWithAggregatesFilter<"User"> | string
   lastName?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  shareEmail?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  sharePhone?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  pushEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  emailEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  pushToken?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
 export type UserCreateInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
@@ -265,10 +343,16 @@ export type UserCreateInput = {
 export type UserUncheckedCreateInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
@@ -278,10 +362,16 @@ export type UserUncheckedCreateInput = {
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
@@ -291,10 +381,16 @@ export type UserUpdateInput = {
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
@@ -304,55 +400,91 @@ export type UserUncheckedUpdateInput = {
 export type UserCreateManyInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
 }
 
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  shareEmail?: Prisma.SortOrder
+  sharePhone?: Prisma.SortOrder
+  pushEnabled?: Prisma.SortOrder
+  emailEnabled?: Prisma.SortOrder
+  pushToken?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  shareEmail?: Prisma.SortOrder
+  sharePhone?: Prisma.SortOrder
+  pushEnabled?: Prisma.SortOrder
+  emailEnabled?: Prisma.SortOrder
+  pushToken?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  shareEmail?: Prisma.SortOrder
+  sharePhone?: Prisma.SortOrder
+  pushEnabled?: Prisma.SortOrder
+  emailEnabled?: Prisma.SortOrder
+  pushToken?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -366,6 +498,14 @@ export type StringFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type UserCreateNestedOneWithoutOwnedOrgsInput = {
@@ -427,10 +567,16 @@ export type UserUpdateOneRequiredWithoutGeneralAvailabilityNestedInput = {
 export type UserCreateWithoutOwnedOrgsInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
   generalAvailability?: Prisma.GeneralAvailabilityCreateNestedManyWithoutUserInput
@@ -439,10 +585,16 @@ export type UserCreateWithoutOwnedOrgsInput = {
 export type UserUncheckedCreateWithoutOwnedOrgsInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   generalAvailability?: Prisma.GeneralAvailabilityUncheckedCreateNestedManyWithoutUserInput
@@ -467,10 +619,16 @@ export type UserUpdateToOneWithWhereWithoutOwnedOrgsInput = {
 export type UserUpdateWithoutOwnedOrgsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
   generalAvailability?: Prisma.GeneralAvailabilityUpdateManyWithoutUserNestedInput
@@ -479,10 +637,16 @@ export type UserUpdateWithoutOwnedOrgsInput = {
 export type UserUncheckedUpdateWithoutOwnedOrgsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   generalAvailability?: Prisma.GeneralAvailabilityUncheckedUpdateManyWithoutUserNestedInput
@@ -491,10 +655,16 @@ export type UserUncheckedUpdateWithoutOwnedOrgsInput = {
 export type UserCreateWithoutEmployeesInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
   generalAvailability?: Prisma.GeneralAvailabilityCreateNestedManyWithoutUserInput
@@ -503,10 +673,16 @@ export type UserCreateWithoutEmployeesInput = {
 export type UserUncheckedCreateWithoutEmployeesInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
   generalAvailability?: Prisma.GeneralAvailabilityUncheckedCreateNestedManyWithoutUserInput
@@ -531,10 +707,16 @@ export type UserUpdateToOneWithWhereWithoutEmployeesInput = {
 export type UserUpdateWithoutEmployeesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
   generalAvailability?: Prisma.GeneralAvailabilityUpdateManyWithoutUserNestedInput
@@ -543,10 +725,16 @@ export type UserUpdateWithoutEmployeesInput = {
 export type UserUncheckedUpdateWithoutEmployeesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
   generalAvailability?: Prisma.GeneralAvailabilityUncheckedUpdateManyWithoutUserNestedInput
@@ -555,10 +743,16 @@ export type UserUncheckedUpdateWithoutEmployeesInput = {
 export type UserCreateWithoutInviteLinksInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
   ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
   generalAvailability?: Prisma.GeneralAvailabilityCreateNestedManyWithoutUserInput
@@ -567,10 +761,16 @@ export type UserCreateWithoutInviteLinksInput = {
 export type UserUncheckedCreateWithoutInviteLinksInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
   ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
   generalAvailability?: Prisma.GeneralAvailabilityUncheckedCreateNestedManyWithoutUserInput
@@ -595,10 +795,16 @@ export type UserUpdateToOneWithWhereWithoutInviteLinksInput = {
 export type UserUpdateWithoutInviteLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
   ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
   generalAvailability?: Prisma.GeneralAvailabilityUpdateManyWithoutUserNestedInput
@@ -607,10 +813,16 @@ export type UserUpdateWithoutInviteLinksInput = {
 export type UserUncheckedUpdateWithoutInviteLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
   ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
   generalAvailability?: Prisma.GeneralAvailabilityUncheckedUpdateManyWithoutUserNestedInput
@@ -619,10 +831,16 @@ export type UserUncheckedUpdateWithoutInviteLinksInput = {
 export type UserCreateWithoutGeneralAvailabilityInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationCreateNestedManyWithoutOwnerInput
@@ -631,10 +849,16 @@ export type UserCreateWithoutGeneralAvailabilityInput = {
 export type UserUncheckedCreateWithoutGeneralAvailabilityInput = {
   id?: string
   email: string
+  phone: string
   firstName: string
   lastName: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: string | null
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutUserInput
   inviteLinks?: Prisma.InviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   ownedOrgs?: Prisma.OrganizationUncheckedCreateNestedManyWithoutOwnerInput
@@ -659,10 +883,16 @@ export type UserUpdateToOneWithWhereWithoutGeneralAvailabilityInput = {
 export type UserUpdateWithoutGeneralAvailabilityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUpdateManyWithoutOwnerNestedInput
@@ -671,10 +901,16 @@ export type UserUpdateWithoutGeneralAvailabilityInput = {
 export type UserUncheckedUpdateWithoutGeneralAvailabilityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shareEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sharePhone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutUserNestedInput
   inviteLinks?: Prisma.InviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedOrgs?: Prisma.OrganizationUncheckedUpdateManyWithoutOwnerNestedInput
@@ -741,10 +977,16 @@ export type UserCountOutputTypeCountGeneralAvailabilityArgs<ExtArgs extends runt
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  phone?: boolean
   firstName?: boolean
   lastName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: boolean
   employees?: boolean | Prisma.User$employeesArgs<ExtArgs>
   inviteLinks?: boolean | Prisma.User$inviteLinksArgs<ExtArgs>
   ownedOrgs?: boolean | Prisma.User$ownedOrgsArgs<ExtArgs>
@@ -755,31 +997,49 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  phone?: boolean
   firstName?: boolean
   lastName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  phone?: boolean
   firstName?: boolean
   lastName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
   id?: boolean
   email?: boolean
+  phone?: boolean
   firstName?: boolean
   lastName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  shareEmail?: boolean
+  sharePhone?: boolean
+  pushEnabled?: boolean
+  emailEnabled?: boolean
+  pushToken?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "firstName" | "lastName" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "firstName" | "lastName" | "createdAt" | "updatedAt" | "shareEmail" | "sharePhone" | "pushEnabled" | "emailEnabled" | "pushToken", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employees?: boolean | Prisma.User$employeesArgs<ExtArgs>
   inviteLinks?: boolean | Prisma.User$inviteLinksArgs<ExtArgs>
@@ -801,10 +1061,16 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     email: string
+    phone: string
     firstName: string
     lastName: string
     createdAt: Date
     updatedAt: Date
+    shareEmail: boolean
+    sharePhone: boolean
+    pushEnabled: boolean
+    emailEnabled: boolean
+    pushToken: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1234,10 +1500,16 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
+  readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly firstName: Prisma.FieldRef<"User", 'String'>
   readonly lastName: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly shareEmail: Prisma.FieldRef<"User", 'Boolean'>
+  readonly sharePhone: Prisma.FieldRef<"User", 'Boolean'>
+  readonly pushEnabled: Prisma.FieldRef<"User", 'Boolean'>
+  readonly emailEnabled: Prisma.FieldRef<"User", 'Boolean'>
+  readonly pushToken: Prisma.FieldRef<"User", 'String'>
 }
     
 

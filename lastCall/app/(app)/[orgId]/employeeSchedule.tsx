@@ -14,10 +14,7 @@ import {
     ArrowLeft,
     Calendar,
     User,
-    Clock,
-    Filter,
     Phone,
-    MapPin
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';

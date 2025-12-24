@@ -4,7 +4,6 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    FlatList,
     Modal,
     ActivityIndicator,
     Alert,
@@ -23,10 +22,10 @@ import {
     Mail,
     Trash2,
     Briefcase,
+    Phone,
 } from 'lucide-react-native';
 import { EmployeeRole, EmployeeStatus, Role } from '@/types/api';
 import { api } from '@/lib/api';
-import { useAuth } from '@/contexts/AuthContext';
 
 // --- Types ---
 
@@ -36,6 +35,7 @@ type EmployeeDisplay = {
     firstName: string;
     lastName: string;
     email: string;
+    phone: string;
     status: EmployeeStatus;
     systemRole: EmployeeRole; // The permission level (Admin vs Employee)
     roles: Role[]; // The job positions (Bartender, etc.)
@@ -63,44 +63,44 @@ export default function EmployeeManagement() {
         const loadUserRole = async () => {
             try {
                 const myEmployee = await api.getEmployee(orgId as string);
-                console.log(myEmployee.role);
                 setCurrentUserRole(myEmployee.role);
                 setCurrentEmployeeId(myEmployee.id);
             } catch (error) {
                 console.error('Failed to get user role:', error);
             }
         };
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [employeeData, rolesData] = await Promise.all([
+                    api.getEmployees(orgId as string),
+                    api.getRoles(orgId as string)
+                ]);
+
+                const transformedEmployees: EmployeeDisplay[] = employeeData.map(emp => ({
+                    id: emp.id,
+                    firstName: emp.user.firstName,
+                    lastName: emp.user.lastName,
+                    email: emp.user.email,
+                    phone: emp.user.phone,
+                    status: emp.status,
+                    systemRole: emp.role,
+                    roles: (emp as any).roleAssignments?.map((ra: any) => ra.role) || []
+                }));
+
+                setEmployees(transformedEmployees);
+                setAvailableRoles(rolesData);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                Alert.alert('Error', 'Failed to load employees');
+            } finally {
+                setLoading(false);
+            }
+        };
         loadUserRole();
         fetchData();
     }, [orgId]);
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const [employeeData, rolesData] = await Promise.all([
-                api.getEmployees(orgId as string),
-                api.getRoles(orgId as string)
-            ]);
-
-            const transformedEmployees: EmployeeDisplay[] = employeeData.map(emp => ({
-                id: emp.id,
-                firstName: emp.user.firstName,
-                lastName: emp.user.lastName,
-                email: emp.user.email,
-                status: emp.status,
-                systemRole: emp.role,
-                roles: (emp as any).roleAssignments?.map((ra: any) => ra.role) || []
-            }));
-
-            setEmployees(transformedEmployees);
-            setAvailableRoles(rolesData);
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
-            Alert.alert('Error', 'Failed to load employees');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // --- 2. Action Handlers (Admin Only) ---
 
@@ -247,12 +247,11 @@ export default function EmployeeManagement() {
         const newRole: EmployeeRole = selectedEmployee.systemRole === 'ADMIN' ? 'EMPLOYEE' : 'ADMIN';
 
         try {
-            await api.updateEmployee(orgId as string, selectedEmployee.id, { role: newRole });
-
             // Update local state
             const updated = { ...selectedEmployee, systemRole: newRole };
             setSelectedEmployee(updated);
             setEmployees(prev => prev.map(e => e.id === updated.id ? updated : e));
+            await api.updateEmployee(orgId as string, selectedEmployee.id, { role: newRole });
         } catch (error) {
             console.error('Failed to toggle admin status:', error);
             Alert.alert('Error', 'Failed to update admin status');
@@ -405,6 +404,10 @@ export default function EmployeeManagement() {
                                     <View style={styles.detailRow}>
                                         <Mail size={16} color="#94a3b8" />
                                         <Text style={styles.detailText}>{selectedEmployee.email}</Text>
+                                    </View>
+                                    <View style={styles.detailRow}>
+                                        <Phone size={16} color="#94a3b8" />
+                                        <Text style={styles.detailText}>{selectedEmployee.phone}</Text>
                                     </View>
                                     {/* Show System Role Label */}
                                     <View style={[styles.detailRow, { marginTop: 4 }]}>

@@ -7,6 +7,7 @@ import type {
     InviteLinkWithOrg,
     ScheduleWithCounts,
     ScheduleDetail,
+    ScheduleType,
     ShiftDetail,
     AvailabilityWithEmployee,
     Availability,
@@ -24,7 +25,13 @@ import type {
     UpdateGeneralAvailabilityRequest,
     CreateUserRequest,
     AssignEmployeeRoleRequest,
+    SaveAsTemplateRequest,
+    CreateDraftFromTemplateRequest,
     Role,
+    User,
+    UpdateUserProfileRequest,
+    UpdatePrivacySettingsRequest,
+    UpdateNotificationPreferencesRequest,
 } from '@/types/api';
 
 const API_URL = 'http://192.168.1.233:3000/api';
@@ -70,8 +77,8 @@ class ApiClient {
         });
 
         if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: 'Unknown error'}));
-            throw new Error(error.error || `HTTP ${response.status}`); 
+            const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(error.error || `HTTP ${response.status}`);
         }
 
         return response.json();
@@ -207,8 +214,9 @@ class ApiClient {
     // Schedule Endpoints
     // =============================================================================
 
-    async getSchedules(orgId: string) {
-        return this.get<ScheduleWithCounts[]>(`/organizations/${orgId}/schedules`);
+    async getSchedules(orgId: string, type?: ScheduleType) {
+        const params = type ? `?type=${type}` : '';
+        return this.get<ScheduleWithCounts[]>(`/organizations/${orgId}/schedules${params}`);
     }
 
     async getSchedule(id: string) {
@@ -227,6 +235,14 @@ class ApiClient {
         return this.post<{ message: string; schedule: ScheduleDetail }>(`/schedules/${id}/publish`);
     }
 
+    async saveAsTemplate(id: string, data: SaveAsTemplateRequest) {
+        return this.post<{ message: string; template: ScheduleDetail }>(`/schedules/${id}/save-as-template`, data);
+    }
+
+    async createDraftFromTemplate(templateId: string, data: CreateDraftFromTemplateRequest) {
+        return this.post<{ message: string; schedule: ScheduleDetail }>(`/templates/${templateId}/create-draft`, data);
+    }
+
     async updateScheduleDays(id: string, data: { addDays?: string[]; removeDays?: string[] }) {
         return this.patch<ScheduleDetail>(`/schedules/${id}/days`, data);
     }
@@ -238,7 +254,7 @@ class ApiClient {
     async getShifts(scheduleId: string) {
         return this.get<ShiftDetail[]>(`/schedule/${scheduleId}/shifts`);
     }
-    
+
     async createShift(scheduleDayId: string, data: CreateShiftRequest) {
         return this.post<ShiftDetail>(`/schedule-days/${scheduleDayId}/shifts`, data);
     }
@@ -334,6 +350,60 @@ class ApiClient {
      */
     async deleteRole(id: string) {
         return this.delete<{ message: string }>(`/roles/${id}`);
+    }
+
+    /**
+     * User Profile and Settings Endpoints
+     */
+    /**
+     * Gets user profile
+     * @returns User Profile
+     */
+    async getUserProfile() {
+        return this.get<User>('/users/me');
+    }
+    /**
+     * Update User Profile
+     * @param data The data to update the users profile
+     * @returns User after update
+     */
+    async updateUserProfile(data: UpdateUserProfileRequest) {
+        return this.patch<User>('/users/me', data);
+    }
+    /**
+     * Updates the privacy settings
+     * @param data Updated privacy settings
+     * @returns the updated privacy settings and the user id
+     */
+    async updatePrivacySettings(data: UpdatePrivacySettingsRequest) {
+        return this.patch<{ id: string; shareEmail: boolean; sharePhone: boolean }>('/users/me/privacy', data);
+    }
+    /**
+     * Update the notifications settings
+     * @param data the updated notification data
+     * @returns the updated notification data
+     */
+    async updateNotificationPreferences(data: UpdateNotificationPreferencesRequest) {
+        return this.patch<{ id: string; pushEnabled: boolean; emailEnabled: boolean }>(
+            '/users/me/notifications',
+            data
+        );
+    }
+    /**
+     * Deletes the user
+     * @returns a message that the user was deleted successfully
+     */
+    async deleteUser() {
+        return this.delete<{ message: string }>('/users/me');
+    }
+
+    /**
+     * Update user's push notification token
+     * @param pushToken The Expo push token
+     * @returns Updated user data
+     */
+    async updatePushToken(pushToken: string) {
+        return this.patch<{ id: string; pushToken: string }>('/users/me/push-token', { pushToken });
     }
 
 }

@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StatusBar, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Martini, ArrowRight } from 'lucide-react-native';
+import { ArrowRight } from 'lucide-react-native';
+import Logo from '@/components/logo';
 
 export default function LandingPage() {
 
@@ -21,11 +22,11 @@ export default function LandingPage() {
       <View style={styles.contentContainer}>
         {/* Logo Container */}
         <View style={styles.logoContainer}>
-          <Martini size={40} color="#818cf8" />
+          <Logo size={80} showText={false} />
         </View>
 
         {/* Typography */}
-        <Text style={styles.title}>LastCall</Text>
+        <Text style={styles.title}>LastCall.</Text>
         <Text style={styles.subtitle}>
           The operating system for{'\n'}service industry professionals.
         </Text>

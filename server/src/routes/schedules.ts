@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma';
 import { authMiddleware } from '../middleware/auth';
 import { error } from 'console';
 import { isOrgAdmin } from '../lib/helper';
+import { sendBulkPushNotifications } from '../services/notificationService';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.get('/:orgId/schedules', authMiddleware, async (req: Request, res: Respon
     try {
         const userId = req.userId!;
         const { orgId } = req.params;
+        const { type } = req.query;
 
         const employee = await prisma.employee.findUnique({
             where: {
@@ -30,8 +32,14 @@ router.get('/:orgId/schedules', authMiddleware, async (req: Request, res: Respon
             return res.status(403).json({ error: 'Access denied' })
         }
 
+        // Build where clause with optional type filter
+        const whereClause: any = { organizationId: orgId };
+        if (type && ['TEMPLATE', 'DRAFT', 'PUBLISHED'].includes(type as string)) {
+            whereClause.type = type;
+        }
+
         const schedules = await prisma.schedule.findMany({
-            where: { organizationId: orgId },
+            where: whereClause,
             include: {
                 _count: {
                     select: {
@@ -39,9 +47,10 @@ router.get('/:orgId/schedules', authMiddleware, async (req: Request, res: Respon
                     }
                 }
             },
-            orderBy: {
-                weekStartDate: 'desc'
-            }
+            orderBy: [
+                { type: 'asc' },
+                { weekStartDate: 'desc' }
+            ]
         });
         res.json(schedules);
     } catch (error) {
@@ -354,7 +363,8 @@ router.patch('/schedules/:id', authMiddleware, async (req: Request, res: Respons
         const newStartDate = weekStartDate ? new Date(weekStartDate) : schedule.weekStartDate;
         const newDeadline = availabilityDeadline ? new Date(availabilityDeadline) : schedule.availabilityDeadline;
 
-        if (newDeadline >= newStartDate) {
+        // Only validate dates if both exist (templates don't have dates)
+        if (newDeadline && newStartDate && newDeadline >= newStartDate) {
             return res.status(400).json({
                 error: 'Availability deadline must be before the week start date'
             });
@@ -440,9 +450,13 @@ router.patch('/schedules/:id/days', authMiddleware, async (req: Request, res: Re
             }
 
             // Calculate which dates to remove
+            if (!schedule.weekStartDate) {
+                return res.status(400).json({ error: 'Cannot update days for a template without a week start date' });
+            }
+
             const datesToRemove = removeDays.map(dayName => {
                 const offset = dayNameToOffset[dayName];
-                const date = new Date(schedule.weekStartDate);
+                const date = new Date(schedule.weekStartDate!);
                 date.setDate(date.getDate() + offset);
                 return date.toISOString().split('T')[0];  // Format as "YYYY-MM-DD"
             });
@@ -486,9 +500,13 @@ router.patch('/schedules/:id/days', authMiddleware, async (req: Request, res: Re
             }
 
             // Calculate which dates to add
+            if (!schedule.weekStartDate) {
+                return res.status(400).json({ error: 'Cannot add days to a template without a week start date' });
+            }
+
             const datesToAdd = addDays.map(dayName => {
                 const offset = dayNameToOffset[dayName];
-                const date = new Date(schedule.weekStartDate);
+                const date = new Date(schedule.weekStartDate!);
                 date.setDate(date.getDate() + offset);
                 return { date };
             });
@@ -497,7 +515,6 @@ router.patch('/schedules/:id/days', authMiddleware, async (req: Request, res: Re
             const existingDates = schedule.scheduleDays.map(sd =>
                 new Date(sd.date).toISOString().split('T')[0]
             );
-            console.log(existingDates);
             const duplicates = datesToAdd.filter(({ date }) => {
                 const dateStr = new Date(date).toISOString().split('T')[0];
                 return existingDates.includes(dateStr);
@@ -568,15 +585,58 @@ router.post('/schedules/:id/publish', authMiddleware, async (req: Request, res: 
             data: {
                 isPublished: true,
                 publishedAt: new Date()
+            },
+            include: {
+                organization: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         });
 
-        /**
-         * Email notifications 
-         * Push Notifications
-         * SMS Notifications 
-         * These all go here
-         */
+        // Send push notifications to all employees
+        try {
+            // Get all approved employees in this organization
+            const employees = await prisma.employee.findMany({
+                where: {
+                    organizationId: schedule.organizationId,
+                    status: 'APPROVED'
+                },
+                include: {
+                    user: {
+                        select: {
+                            pushToken: true,
+                            pushEnabled: true
+                        }
+                    }
+                }
+            });
+
+            // Filter employees who have push enabled and a valid token
+            const notifications = employees
+                .filter(emp => emp.user.pushEnabled && emp.user.pushToken)
+                .map(emp => ({
+                    pushToken: emp.user.pushToken!,
+                    title: 'New Schedule Published',
+                    body: `Your schedule for ${published.organization.name} is now available!`,
+                    data: {
+                        scheduleId: published.id,
+                        orgId: schedule.organizationId,
+                        type: 'schedule_published'
+                    }
+                }));
+
+            // Send notifications in background (don't await to avoid blocking response)
+            if (notifications.length > 0) {
+                sendBulkPushNotifications(notifications)
+                    .then(() => console.log(`Sent notifications to ${notifications.length} employees`))
+                    .catch(err => console.error('Error sending push notifications:', err));
+            }
+        } catch (notifError) {
+            // Log error but don't fail the request
+            console.error('Error preparing push notifications:', notifError);
+        }
 
         res.json({
             message: 'Schedule published successfully',
@@ -585,6 +645,225 @@ router.post('/schedules/:id/publish', authMiddleware, async (req: Request, res: 
     } catch (error) {
         console.error('Error publishing schedule:', error);
         res.status(500).json({ error: 'Failed to publish schedule' });
+    }
+});
+
+/**
+ * POST Method
+ * Purpose -> Convert a draft schedule to a template
+ * Access -> Admins only
+ * Returns -> The updated template
+ */
+router.post('/schedules/:id/save-as-template', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId!;
+        const { id } = req.params;
+        const { templateName } = req.body;
+
+        if (!templateName || typeof templateName !== 'string') {
+            return res.status(400).json({ error: 'templateName is required' });
+        }
+
+        // Fetch the schedule
+        const schedule = await prisma.schedule.findUnique({
+            where: { id }
+        });
+
+        if (!schedule) {
+            return res.status(404).json({ error: 'Schedule not found' });
+        }
+
+        // Verify user is admin
+        const isAdmin = await isOrgAdmin(userId, schedule.organizationId);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can create templates' });
+        }
+
+        // Only allow converting drafts to templates
+        if (schedule.type !== 'DRAFT') {
+            return res.status(400).json({ error: 'Only draft schedules can be saved as templates' });
+        }
+
+        // Update the schedule to be a template
+        const template = await prisma.schedule.update({
+            where: { id },
+            data: {
+                type: 'TEMPLATE',
+                templateName: templateName.trim(),
+                isPublished: false,
+                weekStartDate: null,
+                availabilityDeadline: null
+            },
+            include: {
+                scheduleDays: {
+                    include: {
+                        shifts: {
+                            include: {
+                                role: true
+                            }
+                        }
+                    },
+                    orderBy: { date: 'asc' }
+                }
+            }
+        });
+
+        res.json({
+            message: 'Template created successfully',
+            template
+        });
+
+    } catch (error) {
+        console.error('Error creating template:', error);
+        res.status(500).json({ error: 'Failed to create template' });
+    }
+});
+
+/**
+ * POST Method
+ * Purpose -> Create a draft schedule from a template
+ * Access -> Admins only
+ * Body -> { weekStartDate: string, availabilityDeadline: string, name?: string }
+ * Returns -> The newly created draft schedule
+ */
+router.post('/templates/:id/create-draft', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId!;
+        const { id } = req.params;
+        const { weekStartDate, availabilityDeadline, name } = req.body;
+
+        // Validate required fields
+        if (!weekStartDate || !availabilityDeadline) {
+            return res.status(400).json({ error: 'weekStartDate and availabilityDeadline are required' });
+        }
+        console.log("Made it to the template finding")
+        // Fetch the template with all its data
+        const template = await prisma.schedule.findUnique({
+            where: { id },
+            include: {
+                scheduleDays: {
+                    include: {
+                        shifts: {
+                            include: {
+                                role: true
+                            }
+                        }
+                    },
+                    orderBy: { date: 'asc' }
+                }
+            }
+        });
+
+        if (!template) {
+            return res.status(404).json({ error: 'Template not found' });
+        }
+
+        // Verify it's actually a template
+        if (template.type !== 'TEMPLATE') {
+            return res.status(400).json({ error: 'Can only create drafts from templates' });
+        }
+
+        // Verify user is admin
+        const isAdmin = await isOrgAdmin(userId, template.organizationId);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can create schedules' });
+        }
+        console.log("Made it to the draft creation from a template")
+        // Create the draft schedule
+        const draft = await prisma.schedule.create({
+            data: {
+                organizationId: template.organizationId,
+                type: 'DRAFT',
+                name: name || template.name,
+                weekStartDate: new Date(weekStartDate),
+                availabilityDeadline: new Date(availabilityDeadline),
+                isPublished: false
+            }
+        });
+
+        // Map template days to actual dates
+        const startDate = new Date(weekStartDate);
+        const startDayOfWeek = startDate.getUTCDay(); // 0=Sunday, 1=Monday, etc.
+
+        for (const templateDay of template.scheduleDays) {
+            const templateDate = new Date(templateDay.date);
+            const templateDayOfWeek = templateDate.getUTCDay();
+
+            // Calculate offset from start of week
+            let daysOffset = templateDayOfWeek - startDayOfWeek;
+            if (daysOffset < 0) daysOffset += 7;
+
+            // Calculate actual date for this day
+            const actualDate = new Date(startDate);
+            actualDate.setUTCDate(actualDate.getUTCDate() + daysOffset);
+
+            // Create schedule day with actual date
+            const scheduleDay = await prisma.scheduleDay.create({
+                data: {
+                    scheduleId: draft.id,
+                    date: actualDate
+                }
+            });
+            console.log("Made it to the shift creation");
+            // Copy all shifts from template
+            for (const shift of templateDay.shifts) {
+                await prisma.shift.create({
+                    data: {
+                        scheduleDayId: scheduleDay.id,
+                        roleId: shift.roleId,
+                        startTime: shift.startTime,
+                        endTime: shift.endTime,
+                        isOnCall: shift.isOnCall
+                        // employeeId is null - shifts start unassigned
+                    }
+                });
+            }
+        }
+        console.log("Made it to the final complete draft look up");
+        // Fetch the complete draft to return
+        const completeDraft = await prisma.schedule.findUnique({
+            where: { id: draft.id },
+            include: {
+                organization: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ownerId: true
+                    }
+                },
+                scheduleDays: {
+                    include: {
+                        shifts: {
+                            include: {
+                                role: true,
+                                employee: {
+                                    include: {
+                                        user: {
+                                            select: {
+                                                id: true,
+                                                firstName: true,
+                                                lastName: true,
+                                                email: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    orderBy: { date: 'asc' }
+                }
+            }
+        });
+
+        res.json({
+            message: 'Draft created from template successfully',
+            schedule: completeDraft
+        });
+
+    } catch (error) {
+        console.error('Error creating draft from template:', error);
+        res.status(500).json({ error: 'Failed to create draft from template' });
     }
 });
 

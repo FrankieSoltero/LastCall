@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  FlatList, 
-  Modal, 
-  TextInput, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Modal,
+  TextInput,
   ActivityIndicator,
-  Alert 
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -16,14 +16,12 @@ import {
   ArrowLeft,
   Briefcase,
   Plus,
-  Users,
   MoreVertical,
   Trash2,
   Check,
-  X
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
-import type { RoleWithCounts, EmployeeWithUser } from '@/types/api';
+import type { RoleWithCounts } from '@/types/api';
 
 // --- Types ---
 type EmployeeBasic = {
@@ -36,7 +34,7 @@ type EmployeeBasic = {
 export default function JobRoles() {
   const router = useRouter();
   const { orgId } = useLocalSearchParams();
-  
+
   // State
   const [roles, setRoles] = useState<RoleWithCounts[]>([]);
   const [employees, setEmployees] = useState<EmployeeBasic[]>([]);
@@ -200,8 +198,8 @@ export default function JobRoles() {
   // --- 3. Render ---
 
   const renderRoleItem = ({ item }: { item: RoleWithCounts }) => (
-    <TouchableOpacity 
-      style={styles.card} 
+    <TouchableOpacity
+      style={styles.card}
       onPress={() => openEditModal(item)}
       activeOpacity={0.7}
     >
@@ -247,8 +245,8 @@ export default function JobRoles() {
       )}
 
       {/* FAB: Create Button */}
-      <TouchableOpacity 
-        style={styles.fab} 
+      <TouchableOpacity
+        style={styles.fab}
         onPress={openCreateModal}
         activeOpacity={0.8}
       >
@@ -263,7 +261,7 @@ export default function JobRoles() {
         onRequestClose={() => setIsModalOpen(false)}
       >
         <View style={styles.modalContainer}>
-          
+
           {/* Modal Header */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
@@ -291,7 +289,7 @@ export default function JobRoles() {
           <View style={styles.listSection}>
             <Text style={styles.label}>Assigned Employees</Text>
             <Text style={styles.labelHint}>Select who can work this position.</Text>
-            
+
             <FlatList
               data={employees}
               keyExtractor={item => item.id}
@@ -358,7 +356,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#020617',
   },
-  
+
   // Header
   header: {
     flexDirection: 'row',
@@ -472,7 +470,7 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontSize: 16,
   },
-  
+
   inputSection: {
     padding: 24,
   },

@@ -22,7 +22,7 @@ import {
   X
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
-import type { ScheduleWithCounts } from '@/types/api';
+import type { ScheduleWithCounts, ScheduleType } from '@/types/api';
 import { formatWeekDate, getNextMonday, getNextMondays } from '@/lib/helper';
 
 export default function SchedulesList() {
@@ -33,6 +33,9 @@ export default function SchedulesList() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Tab state
+  const [selectedTab, setSelectedTab] = useState<'TEMPLATE' | 'DRAFT' | 'PUBLISHED'>('DRAFT');
+
   // Creation modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [scheduleName, setScheduleName] = useState('');
@@ -40,10 +43,17 @@ export default function SchedulesList() {
   const [isDatePickerExpanded, setIsDatePickerExpanded] = useState(false);
   const [availableMondays, setAvailableMondays] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
+  const [createMode, setCreateMode] = useState<'scratch' | 'template'>('scratch');
+  const [templates, setTemplates] = useState<ScheduleWithCounts[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSchedules();
   }, [orgId]);
+
+  useEffect(() => {
+    if (!loading) fetchSchedules();
+  }, [selectedTab]);
 
   useEffect(() => {
     setAvailableMondays(getNextMondays(8));
@@ -52,11 +62,14 @@ export default function SchedulesList() {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const data = await api.getSchedules(orgId as string);
+      const data = await api.getSchedules(orgId as string, selectedTab);
       // Sort by weekStartDate descending (most recent first)
-      const sorted = data.sort((a, b) =>
-        new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime()
-      );
+      // Templates won't have weekStartDate, so handle nulls
+      const sorted = data.sort((a, b) => {
+        if (!a.weekStartDate) return 1;
+        if (!b.weekStartDate) return -1;
+        return new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime();
+      });
       setSchedules(sorted);
     } catch (error) {
       console.error('Failed to fetch schedules:', error);
@@ -74,8 +87,15 @@ export default function SchedulesList() {
     router.push(`/(app)/${orgId}/schedules?scheduleId=${scheduleId}`);
   };
 
-  const handleCreateNew = () => {
+  const handleCreateNew = async () => {
     setIsCreateModalOpen(true);
+    // Fetch templates for selection
+    try {
+      const templateData = await api.getSchedules(orgId as string, 'TEMPLATE');
+      setTemplates(templateData);
+    } catch (error) {
+      console.error('Failed to fetch templates:', error);
+    }
   };
 
   const createSchedule = async () => {
@@ -87,18 +107,33 @@ export default function SchedulesList() {
       deadlineDate.setDate(deadlineDate.getDate() - 3);
       const availabilityDeadline = deadlineDate.toISOString().split('T')[0];
 
-      const newSchedule = await api.createSchedule(orgId as string, {
-        name: scheduleName || undefined,
-        weekStartDate: weekStart,
-        availabilityDeadline,
-        operatingDays: [] // Start with no days, user will add them in editor
-      });
+      let newSchedule;
+
+      if (createMode === 'template' && selectedTemplate) {
+        // Create from template
+        const response = await api.createDraftFromTemplate(selectedTemplate, {
+          weekStartDate: weekStart,
+          availabilityDeadline,
+          name: scheduleName || undefined
+        });
+        newSchedule = response.schedule; // API returns { message, schedule }
+      } else {
+        // Create from scratch
+        newSchedule = await api.createSchedule(orgId as string, {
+          name: scheduleName || undefined,
+          weekStartDate: weekStart,
+          availabilityDeadline,
+          operatingDays: [] // Start with no days, user will add them in editor
+        });
+      }
 
       // Reset modal state
       setIsCreateModalOpen(false);
       setScheduleName('');
       setSelectedWeekStart(null);
       setIsDatePickerExpanded(false);
+      setCreateMode('scratch');
+      setSelectedTemplate(null);
 
       // Navigate to editor
       router.push(`/(app)/${orgId}/schedules?scheduleId=${newSchedule.id}`);
@@ -121,13 +156,41 @@ export default function SchedulesList() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.replace(`/(app)/${orgId}/`)} style={styles.backButton}>
           <ArrowLeft size={24} color="#94a3b8" />
         </TouchableOpacity>
         <View>
           <Text style={styles.title}>Schedules</Text>
           <Text style={styles.subtitle}>Manage weekly schedules</Text>
         </View>
+      </View>
+
+      {/* Tab Navigation */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, selectedTab === 'TEMPLATE' && styles.tabActive]}
+          onPress={() => setSelectedTab('TEMPLATE')}
+        >
+          <Text style={[styles.tabText, selectedTab === 'TEMPLATE' && styles.tabTextActive]}>
+            Templates
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, selectedTab === 'DRAFT' && styles.tabActive]}
+          onPress={() => setSelectedTab('DRAFT')}
+        >
+          <Text style={[styles.tabText, selectedTab === 'DRAFT' && styles.tabTextActive]}>
+            Drafts
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, selectedTab === 'PUBLISHED' && styles.tabActive]}
+          onPress={() => setSelectedTab('PUBLISHED')}
+        >
+          <Text style={[styles.tabText, selectedTab === 'PUBLISHED' && styles.tabTextActive]}>
+            Published
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Schedules List */}
@@ -156,15 +219,22 @@ export default function SchedulesList() {
               </View>
               <View style={styles.scheduleCardContent}>
                 <Text style={styles.scheduleName}>
-                  {schedule.name || formatWeekDate(schedule.weekStartDate)}
+                  {schedule.type === 'TEMPLATE'
+                    ? schedule.templateName || 'Untitled Template'
+                    : (schedule.name || formatWeekDate(schedule.weekStartDate || ''))}
                 </Text>
-                {schedule.name && (
+                {schedule.name && schedule.type !== 'TEMPLATE' && (
                   <Text style={styles.scheduleDate}>
-                    {formatWeekDate(schedule.weekStartDate)}
+                    {formatWeekDate(schedule.weekStartDate || '')}
                   </Text>
                 )}
                 <View style={styles.scheduleMetaRow}>
-                  {schedule.isPublished ? (
+                  {schedule.type === 'TEMPLATE' ? (
+                    <View style={styles.templateBadge}>
+                      <CalendarDays size={12} color="#a78bfa" />
+                      <Text style={styles.templateText}>Template</Text>
+                    </View>
+                  ) : schedule.type === 'PUBLISHED' ? (
                     <View style={styles.publishedBadge}>
                       <CheckCircle2 size={12} color="#34d399" />
                       <Text style={styles.publishedText}>Published</Text>
@@ -207,6 +277,8 @@ export default function SchedulesList() {
                   setScheduleName('');
                   setSelectedWeekStart(null);
                   setIsDatePickerExpanded(false);
+                  setCreateMode('scratch');
+                  setSelectedTemplate(null);
                 }}
                 style={styles.closeButton}
               >
@@ -225,6 +297,62 @@ export default function SchedulesList() {
                   onChangeText={setScheduleName}
                 />
               </View>
+
+              {/* Create Mode Toggle */}
+              <View style={styles.inputSection}>
+                <Text style={styles.label}>Create From</Text>
+                <View style={styles.toggleContainer}>
+                  <TouchableOpacity
+                    style={[styles.toggleOption, createMode === 'scratch' && styles.toggleOptionActive]}
+                    onPress={() => setCreateMode('scratch')}
+                  >
+                    <Text style={[styles.toggleText, createMode === 'scratch' && styles.toggleTextActive]}>
+                      Scratch
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.toggleOption, createMode === 'template' && styles.toggleOptionActive]}
+                    onPress={() => setCreateMode('template')}
+                  >
+                    <Text style={[styles.toggleText, createMode === 'template' && styles.toggleTextActive]}>
+                      Template
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Template Selector - Only show if template mode */}
+              {createMode === 'template' && (
+                <View style={styles.inputSection}>
+                  <Text style={styles.label}>Select Template</Text>
+                  {templates.length === 0 ? (
+                    <Text style={styles.noTemplatesText}>No templates available. Create one first!</Text>
+                  ) : (
+                    <ScrollView style={styles.templateSelector}>
+                      {templates.map((template) => (
+                        <TouchableOpacity
+                          key={template.id}
+                          style={[
+                            styles.templateOption,
+                            selectedTemplate === template.id && styles.templateOptionSelected
+                          ]}
+                          onPress={() => setSelectedTemplate(template.id)}
+                        >
+                          <Text style={[
+                            styles.templateOptionText,
+                            selectedTemplate === template.id && styles.templateOptionTextSelected
+                          ]}>
+                            {template.templateName || 'Untitled Template'}
+                          </Text>
+                          {selectedTemplate === template.id && (
+                            <CheckCircle2 size={20} color="#34d399" />
+                          )}
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  )}
+                </View>
+              )}
 
               <View style={styles.inputSection}>
                 <Text style={styles.label}>Week Start Date</Text>
@@ -288,6 +416,8 @@ export default function SchedulesList() {
                   setScheduleName('');
                   setSelectedWeekStart(null);
                   setIsDatePickerExpanded(false);
+                  setCreateMode('scratch');
+                  setSelectedTemplate(null);
                 }}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -423,6 +553,20 @@ const styles = StyleSheet.create({
   draftText: {
     fontSize: 12,
     color: '#94a3b8',
+    fontWeight: '600',
+  },
+  templateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(167, 139, 250, 0.1)', // Purple tint
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  templateText: {
+    fontSize: 12,
+    color: '#a78bfa', // Purple color
     fontWeight: '600',
   },
   scheduleDays: {
@@ -595,5 +739,96 @@ const styles = StyleSheet.create({
   dateOptionTextSelected: {
     color: '#ffffff',
     fontWeight: '600',
+  },
+
+  // Tab Navigation
+  tabContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 24,
+    marginBottom: 16,
+    gap: 8,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#1e293b',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  tabActive: {
+    backgroundColor: '#4f46e5',
+    borderColor: '#4f46e5',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#94a3b8',
+  },
+  tabTextActive: {
+    color: '#ffffff',
+  },
+
+  // Mode Toggle
+  toggleContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  toggleOption: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#334155',
+    alignItems: 'center',
+  },
+  toggleOptionActive: {
+    backgroundColor: '#4f46e5',
+    borderColor: '#4f46e5',
+  },
+  toggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#94a3b8',
+  },
+  toggleTextActive: {
+    color: '#ffffff',
+  },
+
+  // Template Selector
+  templateSelector: {
+    maxHeight: 200,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+    backgroundColor: '#0f172a',
+  },
+  templateOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+  },
+  templateOptionSelected: {
+    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+  },
+  templateOptionText: {
+    fontSize: 16,
+    color: '#cbd5e1',
+  },
+  templateOptionTextSelected: {
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  noTemplatesText: {
+    color: '#64748b',
+    fontSize: 14,
+    fontStyle: 'italic',
+    padding: 16,
+    textAlign: 'center',
   },
 });

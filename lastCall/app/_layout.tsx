@@ -1,5 +1,5 @@
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { Slot, Stack, useRouter, useSegments } from "expo-router";
+import { Slot, useRouter, useSegments } from "expo-router";
 import { PortalHost } from '@rn-primitives/portal';
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -8,6 +8,8 @@ function InitialLayout() {
   const { session, loading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+
+  // Set up push notifications when user is logged in
 
   useEffect(() => {
     if (loading) return;
