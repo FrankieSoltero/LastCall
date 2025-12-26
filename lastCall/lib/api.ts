@@ -34,7 +34,7 @@ import type {
     UpdateNotificationPreferencesRequest,
 } from '@/types/api';
 
-const API_URL = 'http://192.168.1.238:3000/api';
+const API_URL = __DEV__ ? 'http://192.168.1.238:3000/api' : process.env.API_URL!;
 
 
 /**
