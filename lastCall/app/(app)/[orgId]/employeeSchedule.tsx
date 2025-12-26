@@ -62,6 +62,11 @@ export default function EmployeeSchedule() {
             // Fetch the most recent published schedule
             const activeSchedule = await api.getActiveSchedule(orgId as string);
 
+            // Handle template schedules (which don't have weekStartDate)
+            if (!activeSchedule.weekStartDate) {
+                throw new Error('No published schedule found for the current week');
+            }
+
             // Calculate week range for display (e.g., "Jan 22 - Jan 28")
             const startDate = new Date(activeSchedule.weekStartDate);
             const endDate = new Date(startDate);

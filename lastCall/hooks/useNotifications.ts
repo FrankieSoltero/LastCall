@@ -43,8 +43,8 @@ export function useNotifications() {
             };
 
             if (data?.scheduleId && data?.orgId) {
-                // Navigate to schedule page
-                router.push(`/(app)/${data.orgId}/schedules` as any);
+                // Navigate to employee schedule view (published schedules)
+                router.push(`/(app)/${data.orgId}/employeeSchedule?scheduleId=${data.scheduleId}` as any);
             } else if (data?.orgId) {
                 // Navigate to organization dashboard
                 router.push(`/(app)/${data.orgId}` as any);

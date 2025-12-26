@@ -42,6 +42,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+// CORS configuration - allows all origins for mobile app API
 app.use(cors({
     origin: '*',
     credentials: true

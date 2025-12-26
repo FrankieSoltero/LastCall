@@ -1,8 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { authMiddleware } from '../middleware/auth';
+import { createClient } from '@supabase/supabase-js';
 
 const router = Router();
+
+// Admin client for deleting auth users (requires service_role key)
+const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!
+);
 
 /**
  * POST Method
@@ -313,9 +320,20 @@ router.delete('/me', authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.userId!;
 
+        // Delete from database (cascades to all related data)
         await prisma.user.delete({
             where: { id: userId }
         });
+
+        // Delete from Supabase Auth
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+        if (authError) {
+            console.error('Error deleting Supabase Auth user:', authError);
+            // Don't fail the request - database is already deleted
+            // Log the error but continue
+        }
+
         res.json({
             message: 'User account deleted successfully'
         });

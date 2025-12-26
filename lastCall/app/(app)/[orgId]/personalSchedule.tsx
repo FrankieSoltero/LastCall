@@ -55,6 +55,12 @@ export default function MyShifts() {
                 await api.getActiveSchedule(orgId as string),
                 await api.getEmployee(orgId as string)
             ])
+
+            // Handle template schedules (which don't have weekStartDate)
+            if (!activeSchedule.weekStartDate) {
+                throw new Error('No published schedule found for the current week');
+            }
+
             // Calculate week range for display (e.g., "Jan 22 - Jan 28")
             // Extract date strings and format them to avoid timezone shifts
             const startDateStr = activeSchedule.weekStartDate.split('T')[0]; // "2025-01-22"

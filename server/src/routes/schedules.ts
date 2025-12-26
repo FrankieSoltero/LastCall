@@ -583,6 +583,7 @@ router.post('/schedules/:id/publish', authMiddleware, async (req: Request, res: 
         const published = await prisma.schedule.update({
             where: { id },
             data: {
+                type: 'PUBLISHED',
                 isPublished: true,
                 publishedAt: new Date()
             },
@@ -990,6 +991,115 @@ router.delete('/schedules/:id', authMiddleware, async (req: Request, res: Respon
     } catch (error) {
         console.error('Error deleting schedule:', error);
         res.status(500).json({ error: 'Failed to delete schedule' });
+    }
+});
+
+/**
+ * GET Method
+ * Purpose -> Get shift conflicts for employees in an organization
+ * Access -> Admins only (when editing schedules)
+ * Query params -> startDate, endDate (ISO date strings)
+ * Returns -> Map of employeeId to array of conflict dates
+ *
+ * This checks if employees have shifts at OTHER organizations during the specified date range
+ */
+router.get('/:orgId/shift-conflicts', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId!;
+        const { orgId } = req.params;
+        const { startDate, endDate } = req.query;
+
+        // Verify admin access
+        const isAdmin = await isOrgAdmin(userId, orgId);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can check shift conflicts' });
+        }
+
+        if (!startDate || !endDate) {
+            return res.status(400).json({ error: 'startDate and endDate are required' });
+        }
+
+        // Get all employees in this organization
+        const employees = await prisma.employee.findMany({
+            where: {
+                organizationId: orgId,
+                status: 'APPROVED'
+            },
+            select: {
+                id: true,
+                userId: true
+            }
+        });
+
+        const employeeIds = employees.map(e => e.id);
+        const userIds = employees.map(e => e.userId);
+
+        if (employeeIds.length === 0) {
+            return res.json({});
+        }
+
+        // Find all published schedules in the date range across ALL organizations
+        // where these employees might have shifts
+        const conflictingShifts = await prisma.shift.findMany({
+            where: {
+                scheduleDay: {
+                    date: {
+                        gte: new Date(startDate as string),
+                        lte: new Date(endDate as string)
+                    },
+                    schedule: {
+                        isPublished: true,
+                        organizationId: {
+                            not: orgId  // Exclude current organization
+                        }
+                    }
+                },
+                employee: {
+                    userId: {
+                        in: userIds
+                    }
+                }
+            },
+            include: {
+                employee: {
+                    select: {
+                        userId: true
+                    }
+                },
+                scheduleDay: {
+                    select: {
+                        date: true
+                    }
+                }
+            }
+        });
+
+        // Build a map of employeeId -> array of conflict dates
+        const conflictMap: Record<string, string[]> = {};
+
+        for (const shift of conflictingShifts) {
+            // Skip if shift has no employee assigned
+            if (!shift.employee) continue;
+
+            // Find the employee ID in the current organization
+            const employee = employees.find(e => e.userId === shift.employee!.userId);
+            if (!employee) continue;
+
+            const dateStr = shift.scheduleDay.date.toISOString().split('T')[0];
+
+            if (!conflictMap[employee.id]) {
+                conflictMap[employee.id] = [];
+            }
+
+            if (!conflictMap[employee.id].includes(dateStr)) {
+                conflictMap[employee.id].push(dateStr);
+            }
+        }
+
+        res.json(conflictMap);
+    } catch (error) {
+        console.error('Error fetching shift conflicts:', error);
+        res.status(500).json({ error: 'Failed to fetch shift conflicts' });
     }
 });
 

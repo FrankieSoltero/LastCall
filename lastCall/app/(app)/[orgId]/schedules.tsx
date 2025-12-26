@@ -8,7 +8,8 @@ import {
     Modal,
     TextInput,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
+    Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -79,6 +80,7 @@ export default function ScheduleEditor() {
     const [roles, setRoles] = useState<Role[]>([]);
     const [employees, setEmployees] = useState<EmployeeDisplay[]>([]);
     const [availabilityMap, setAvailabilityMap] = useState<Map<string, AvailabilityWithFallback[]>>(new Map());
+    const [conflictMap, setConflictMap] = useState<Record<string, string[]>>({}); // employeeId -> array of conflict dates
     const [loading, setLoading] = useState(true);
     const [weekStartDate, setWeekStartDate] = useState<string>("");
     const [existingOperatingDays, setExistingOperatingDays] = useState<string[]>([]); // Track which days already exist
@@ -154,6 +156,20 @@ export default function ScheduleEditor() {
 
             // Track existing operating days (from backend)
             setExistingOperatingDays(schedule.operatingDays || []);
+
+            // Fetch shift conflicts if we have a week start date
+            if (schedule.weekStartDate) {
+                const startDate = new Date(schedule.weekStartDate);
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6); // End of week
+
+                const conflicts = await api.getShiftConflicts(
+                    orgId as string,
+                    startDate.toISOString().split('T')[0],
+                    endDate.toISOString().split('T')[0]
+                );
+                setConflictMap(conflicts);
+            }
 
             // Transform ScheduleDetail to WeeklySchedule format
             schedule.scheduleDays.forEach(day => {
@@ -404,32 +420,58 @@ export default function ScheduleEditor() {
 
     // --- PUBLISH LOGIC ---
     const handlePublish = async () => {
-        Alert.alert(
-            "Publish Schedule",
-            "Are you sure you want to publish this schedule? All assigned employees will be notified.",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Publish Now",
-                    style: "default",
-                    onPress: async () => {
-                        setIsPublishing(true);
-                        try {
-                            await api.publishSchedule(scheduleId as string);
+        if (Platform.OS === 'web') {
+            // Web: use window.confirm
+            const confirmed = window.confirm(
+                "Are you sure you want to publish this schedule? All assigned employees will be notified."
+            );
 
-                            Alert.alert("Published", "Schedule is now live!", [
-                                { text: "OK", onPress: () => router.push(`/(app)/${orgId}/schedulesList`) }
-                            ]);
-                        } catch (error) {
-                            console.error("Publish failed", error);
-                            Alert.alert("Error", "Failed to publish schedule.");
-                        } finally {
-                            setIsPublishing(false);
+            if (confirmed) {
+                setIsPublishing(true);
+                try {
+                    // Save changes before publishing
+                    await saveTemplate();
+                    await api.publishSchedule(scheduleId as string);
+                    window.alert("Schedule is now live!");
+                    router.push(`/(app)/${orgId}/schedulesList`);
+                } catch (error) {
+                    console.error("Publish failed", error);
+                    window.alert("Failed to publish schedule.");
+                } finally {
+                    setIsPublishing(false);
+                }
+            }
+        } else {
+            // Native: use Alert.alert
+            Alert.alert(
+                "Publish Schedule",
+                "Are you sure you want to publish this schedule? All assigned employees will be notified.",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                        text: "Publish Now",
+                        style: "default",
+                        onPress: async () => {
+                            setIsPublishing(true);
+                            try {
+                                // Save changes before publishing
+                                await saveTemplate();
+                                await api.publishSchedule(scheduleId as string);
+
+                                Alert.alert("Published", "Schedule is now live!", [
+                                    { text: "OK", onPress: () => router.push(`/(app)/${orgId}/schedulesList`) }
+                                ]);
+                            } catch (error) {
+                                console.error("Publish failed", error);
+                                Alert.alert("Error", "Failed to publish schedule.");
+                            } finally {
+                                setIsPublishing(false);
+                            }
                         }
                     }
-                }
-            ]
-        );
+                ]
+            );
+        }
     };
 
     // --- 3. Sorting Logic ---
@@ -442,18 +484,32 @@ export default function ScheduleEditor() {
         // 1. Filter by Role
         const qualified = employees.filter(e => e.roleIds.includes(shift.roleId));
 
-        // 2. Split by Availability - check dynamically based on day and shift time
+        // 2. Filter out employees with conflicts at other organizations
+        // Calculate the actual date for this day
+        let shiftDate = '';
+        if (weekStartDate) {
+            const fullShiftDate = calculateDateForDay(weekStartDate, selectedDay);
+            shiftDate = fullShiftDate.split('T')[0]; // "2025-01-22"
+        }
+
+        const notConflicted = qualified.filter(emp => {
+            // If employee has conflicts on this date, exclude them completely
+            const conflicts = conflictMap[emp.id] || [];
+            return !conflicts.includes(shiftDate);
+        });
+
+        // 3. Split by Availability - check dynamically based on day and shift time
         const fullDayName = dayToFullName(selectedDay);
-        const available = qualified.filter(emp => {
+        const available = notConflicted.filter(emp => {
             const empAvail = availabilityMap.get(emp.id) || [];
             return isEmployeeAvailableForShift(empAvail, fullDayName, shift.startTime, shift.endTime);
         });
-        const fallback = qualified.filter(emp => {
+        const fallback = notConflicted.filter(emp => {
             const empAvail = availabilityMap.get(emp.id) || [];
             return !isEmployeeAvailableForShift(empAvail, fullDayName, shift.startTime, shift.endTime);
         });
 
-        // 3. Sort Fallback by Least Shifts (Requirement #5)
+        // 4. Sort Fallback by Least Shifts (Requirement #5)
         fallback.sort((a, b) => a.shiftsThisWeek - b.shiftsThisWeek);
 
         return { available, fallback };
@@ -474,7 +530,7 @@ export default function ScheduleEditor() {
                 <View style={styles.headerText}>
                     <Text style={styles.title}>Edit Schedule</Text>
                     <Text style={styles.subtitle}>
-                        {formatWeekDate(weekStartDate)}
+                        {weekStartDate ? formatWeekDate(weekStartDate) : 'Template'}
                     </Text>
                 </View>
                 

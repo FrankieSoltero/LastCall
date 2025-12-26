@@ -34,7 +34,7 @@ import type {
     UpdateNotificationPreferencesRequest,
 } from '@/types/api';
 
-const API_URL = 'http://192.168.1.233:3000/api';
+const API_URL = 'http://192.168.1.238:3000/api';
 
 
 /**
@@ -223,6 +223,10 @@ class ApiClient {
 
     async getActiveSchedule(orgId: string) {
         return this.get<ScheduleDetail>(`/organizations/${orgId}/active-schedule`);
+    }
+
+    async getShiftConflicts(orgId: string, startDate: string, endDate: string) {
+        return this.get<Record<string, string[]>>(`/organizations/${orgId}/shift-conflicts?startDate=${startDate}&endDate=${endDate}`);
     }
 
     async createSchedule(orgId: string, data: CreateScheduleRequest) {
