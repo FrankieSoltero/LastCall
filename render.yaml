@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: starter
     buildCommand: cd server && npm install --include=dev && npm run build
-    startCommand: cd server && node dist/index.js
+    startCommand: pwd && ls -la && ls -la server && ls -la server/dist && cd server && node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
