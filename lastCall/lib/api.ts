@@ -40,6 +40,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL!;
 /**
  * API Client class 
  * This handles all backend requests
+ * We have updated this
  */
 
 class ApiClient {
