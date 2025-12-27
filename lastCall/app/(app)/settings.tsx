@@ -26,14 +26,25 @@ import {
 } from 'lucide-react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '@/lib/api';
+import { useUserProfile } from '@/lib/queries';
 
 export default function SettingsPage() {
     const router = useRouter();
     const { signOut, user, refreshUser } = useAuth();
 
-    const [loading, setLoading] = useState(true);
-    const [pushEnabled, setPushEnabled] = useState(true);
-    const [emailEnabled, setEmailEnabled] = useState(false);
+    // React Query hook
+    const { data: userProfile, isLoading: loading } = useUserProfile();
+
+    const [pushEnabled, setPushEnabled] = useState(userProfile?.pushEnabled ?? true);
+    const [emailEnabled, setEmailEnabled] = useState(userProfile?.emailEnabled ?? false);
+
+    // Sync with fetched data
+    useEffect(() => {
+        if (userProfile) {
+            setPushEnabled(userProfile.pushEnabled);
+            setEmailEnabled(userProfile.emailEnabled);
+        }
+    }, [userProfile]);
 
     // Edit Profile Modal state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -42,23 +53,6 @@ export default function SettingsPage() {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [profileLoading, setProfileLoading] = useState(false);
-
-    useEffect(() => {
-        loadNotificationSettings();
-    }, []);
-
-    const loadNotificationSettings = async () => {
-        try {
-            const userProfile = await api.getUserProfile();
-            setPushEnabled(userProfile.pushEnabled);
-            setEmailEnabled(userProfile.emailEnabled);
-        } catch (error) {
-            console.error('Failed to load notification settings:', error);
-            Alert.alert('Error', 'Failed to load notification settings');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handlePushToggle = async (value: boolean) => {
         setPushEnabled(value);

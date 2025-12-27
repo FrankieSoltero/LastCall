@@ -21,60 +21,45 @@ import { api } from '@/lib/api';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+import { useMyGeneralAvailability } from '@/lib/queries';
 export default function GeneralAvailabilityPage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
 
+    // React Query hook - automatic caching
+    const { data: availabilityData = [], isLoading: loading } = useMyGeneralAvailability();
+
     // Initial State: Default to 9-5 M-F, Unavailable Sat-Sun
     const [schedule, setSchedule] = useState<DaySchedule[]>([]);
-    const [loading, setLoading] = useState(true);
 
+    // Process availability data when it loads
     useEffect(() => {
-        const fetchAvailability = async () => {
-            try {
-                const data = await api.getMyGeneralAvailability();
+        if (availabilityData.length > 0) {
+            const transformed = availabilityData.map(item => ({
+                dayOfWeek: item.dayOfWeek,
+                status: item.status,
+                startTime: item.startTime ? item.startTime.substring(11,16) : '09:00',
+                endTime: item.endTime ? item.endTime.substring(11,16) : '17:00'
+            }));
 
-                if (data.length > 0) {
-                    const transformed = data.map(item => ({
-                        dayOfWeek: item.dayOfWeek,
-                        status: item.status,
-                        startTime: item.startTime ? item.startTime.substring(11,16) : '09:00',
-                        endTime: item.endTime ? item.endTime.substring(11,16) : '17:00'
-                    }));
+            // Sort by the DAYS_OF_WEEK order
+            const sorted = transformed.sort((a, b) => {
+                return DAYS_OF_WEEK.indexOf(a.dayOfWeek) - DAYS_OF_WEEK.indexOf(b.dayOfWeek);
+            });
 
-                    // Sort by the DAYS_OF_WEEK order
-                    const sorted = transformed.sort((a, b) => {
-                        return DAYS_OF_WEEK.indexOf(a.dayOfWeek) - DAYS_OF_WEEK.indexOf(b.dayOfWeek);
-                    });
-
-                    setSchedule(sorted);
-                } else {
-                    setSchedule(
-                        DAYS_OF_WEEK.map((day) => ({
-                            dayOfWeek: day,
-                            status: (day === 'Saturday' || day === 'Sunday') ? 'UNAVAILABLE' : 'AVAILABLE',
-                            startTime: '09:00',
-                            endTime: '17:00'
-                        }))
-                    )
-                }
-            } catch (error) {
-                console.error('Failed to fetch availability:', error);
-                setSchedule(
-                    DAYS_OF_WEEK.map((day) => ({
-                        dayOfWeek: day,
-                        status: (day === 'Saturday' || day === 'Sunday') ? 'UNAVAILABLE' : 'AVAILABLE',
-                        startTime: '09:00',
-                        endTime: '17:00'
-                    }))
-                )
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchAvailability();
-    }, [])
+            setSchedule(sorted);
+        } else if (!loading) {
+            // Only set defaults if not loading and no data
+            setSchedule(
+                DAYS_OF_WEEK.map((day) => ({
+                    dayOfWeek: day,
+                    status: (day === 'Saturday' || day === 'Sunday') ? 'UNAVAILABLE' : 'AVAILABLE',
+                    startTime: '09:00',
+                    endTime: '17:00'
+                }))
+            );
+        }
+    }, [availabilityData, loading])
 
     const updateDay = (index: number, updates: Partial<DaySchedule>) => {
         const newSchedule = [...schedule];

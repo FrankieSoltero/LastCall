@@ -25,6 +25,19 @@ import {
     X
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
+import {
+    useRoles,
+    useEmployees,
+    useAvailability,
+    useSchedule,
+    useShiftConflicts,
+    useBulkUpdateShifts,
+    useUpdateScheduleDays,
+    usePublishSchedule as usePublishScheduleMutation,
+    useSaveTemplate as useSaveTemplateMutation,
+    queryKeys
+} from '@/lib/queries';
+import { useQueryClient } from '@tanstack/react-query';
 import type {
     Role,
     AvailabilityWithFallback,
@@ -76,14 +89,50 @@ export default function ScheduleEditor() {
     // Selection Tracking
     const [activeShiftId, setActiveShiftId] = useState<string | null>(null);
 
-    // Data State
-    const [roles, setRoles] = useState<Role[]>([]);
+    // React Query hooks - automatic caching and deduplication
+    const queryClient = useQueryClient();
+    const { data: roles = [], isLoading: rolesLoading } = useRoles(orgId as string);
+    const { data: employeesRaw = [], isLoading: employeesLoading } = useEmployees(orgId as string);
+    const { data: availabilityRaw = [], isLoading: availabilityLoading } = useAvailability(orgId as string);
+    const { data: schedule, isLoading: scheduleLoading } = useSchedule(scheduleId as string);
+
+    // Derived state from schedule
+    const weekStartDate = schedule?.weekStartDate || "";
+    const existingOperatingDays = schedule?.operatingDays || [];
+
+    // Calculate date range for conflicts
+    const conflictDateRange = weekStartDate ? {
+        start: new Date(weekStartDate).toISOString().split('T')[0],
+        end: (() => {
+            const end = new Date(weekStartDate);
+            end.setDate(end.getDate() + 6);
+            return end.toISOString().split('T')[0];
+        })()
+    } : null;
+
+    const { data: conflictMap = {} } = useShiftConflicts(
+        orgId as string,
+        conflictDateRange?.start || '',
+        conflictDateRange?.end || ''
+    );
+
+    // Build availability map from raw data
+    const availabilityMap = React.useMemo(() => {
+        const map = new Map<string, AvailabilityWithFallback[]>();
+        availabilityRaw.forEach(avail => {
+            if (!map.has(avail.employee.id)) {
+                map.set(avail.employee.id, []);
+            }
+            map.get(avail.employee.id)!.push(avail);
+        });
+        return map;
+    }, [availabilityRaw]);
+
+    // Transform employees with shift counts
     const [employees, setEmployees] = useState<EmployeeDisplay[]>([]);
-    const [availabilityMap, setAvailabilityMap] = useState<Map<string, AvailabilityWithFallback[]>>(new Map());
-    const [conflictMap, setConflictMap] = useState<Record<string, string[]>>({}); // employeeId -> array of conflict dates
-    const [loading, setLoading] = useState(true);
-    const [weekStartDate, setWeekStartDate] = useState<string>("");
-    const [existingOperatingDays, setExistingOperatingDays] = useState<string[]>([]); // Track which days already exist
+
+    // Loading state - true if any query is loading
+    const loading = rolesLoading || employeesLoading || availabilityLoading || scheduleLoading;
 
     // Form State for "New Shift"
     const [newShiftRole, setNewShiftRole] = useState<Role | null>(null);
@@ -97,16 +146,53 @@ export default function ScheduleEditor() {
     const [templateName, setTemplateName] = useState('');
     const [savingTemplate, setSavingTemplate] = useState(false);
 
-    // --- 1. Load Data ---
+    // --- 1. Initialize employees when raw data loads ---
     useEffect(() => {
-        fetchData();
-    }, [orgId]);
+        if (employeesRaw.length > 0) {
+            const transformedEmployees: EmployeeDisplay[] = employeesRaw.map(emp => {
+                const roleIds = (emp as any).roleAssignments?.map((ra: any) => ra.roleId) || [];
 
-    // --- 2. Update shift counts in real-time when schedule changes ---
+                return {
+                    id: emp.id,
+                    name: `${emp.user.firstName} ${emp.user.lastName}`,
+                    roleIds,
+                    shiftsThisWeek: 0,
+                    isAvailable: true
+                };
+            });
+            setEmployees(transformedEmployees);
+        }
+    }, [employeesRaw]);
+
+    // --- 2. Load schedule data when schedule loads ---
+    useEffect(() => {
+        if (!schedule) return;
+
+        const loadedScheduleData: WeeklySchedule = {
+            Mon: [], Tue: [], Wed: [], Thu: [], Fri: [], Sat: [], Sun: []
+        };
+
+        // Transform ScheduleDetail to WeeklySchedule format
+        schedule.scheduleDays.forEach(day => {
+            const dayKey = dateToDay(day.date);
+            loadedScheduleData[dayKey] = day.shifts.map(shift => ({
+                id: shift.id,
+                roleId: shift.role.id,
+                roleName: shift.role.name,
+                startTime: shift.startTime.substring(11, 16),
+                endTime: shift.endTime?.substring(11, 16) || '',
+                assignedEmployeeId: shift.employee?.id || null,
+                isOnCall: shift.isOnCall
+            }));
+        });
+
+        setScheduleData(loadedScheduleData);
+    }, [schedule]);
+
+    // --- 3. Update shift counts in real-time when schedule changes ---
     useEffect(() => {
         if (employees.length === 0) return;
 
-        // Recalculate shift counts for all employees
         const updatedEmployees = employees.map(emp => ({
             ...emp,
             shiftsThisWeek: Object.values(scheduleData)
@@ -115,7 +201,6 @@ export default function ScheduleEditor() {
                 .length
         }));
 
-        // Only update if counts actually changed to avoid infinite loop
         const countsChanged = updatedEmployees.some((emp, idx) =>
             emp.shiftsThisWeek !== employees[idx].shiftsThisWeek
         );
@@ -124,99 +209,6 @@ export default function ScheduleEditor() {
             setEmployees(updatedEmployees);
         }
     }, [scheduleData]);
-
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-
-            // Fetch roles, employees, and availability in parallel
-            const [rolesData, employeesData, allAvailability] = await Promise.all([
-                api.getRoles(orgId as string),
-                api.getEmployees(orgId as string),
-                api.getAllOrgAvailability(orgId as string)
-            ]);
-
-            // Build availability map: employeeId -> AvailabilityWithFallback[]
-            const availMap = new Map<string, AvailabilityWithFallback[]>();
-            allAvailability.forEach(avail => {
-                if (!availMap.has(avail.employee.id)) {
-                    availMap.set(avail.employee.id, []);
-                }
-                availMap.get(avail.employee.id)!.push(avail);
-            });
-            setAvailabilityMap(availMap);
-
-            // If editing an existing schedule, load it
-            let loadedScheduleData: WeeklySchedule = {
-                Mon: [], Tue: [], Wed: [], Thu: [], Fri: [], Sat: [], Sun: []
-            };
-
-            const schedule = await api.getSchedule(scheduleId as string);
-            setWeekStartDate(schedule.weekStartDate || "");
-
-            // Track existing operating days (from backend)
-            setExistingOperatingDays(schedule.operatingDays || []);
-
-            // Fetch shift conflicts if we have a week start date
-            if (schedule.weekStartDate) {
-                const startDate = new Date(schedule.weekStartDate);
-                const endDate = new Date(startDate);
-                endDate.setDate(startDate.getDate() + 6); // End of week
-
-                const conflicts = await api.getShiftConflicts(
-                    orgId as string,
-                    startDate.toISOString().split('T')[0],
-                    endDate.toISOString().split('T')[0]
-                );
-                setConflictMap(conflicts);
-            }
-
-            // Transform ScheduleDetail to WeeklySchedule format
-            schedule.scheduleDays.forEach(day => {
-                // Convert date to day abbreviation (e.g., "2025-01-06" -> "Mon")
-                const dayKey = dateToDay(day.date);
-                loadedScheduleData[dayKey] = day.shifts.map(shift => ({
-                    id: shift.id,
-                    roleId: shift.role.id,
-                    roleName: shift.role.name,
-                    startTime: shift.startTime.substring(11,16),
-                    endTime: shift.endTime?.substring(11,16) || '',
-                    assignedEmployeeId: shift.employee?.id || null,
-                    isOnCall: shift.isOnCall
-                }));
-            });
-
-            setScheduleData(loadedScheduleData);
-
-            // Transform employees to include roleIds and calculated fields
-            const transformedEmployees: EmployeeDisplay[] = employeesData.map(emp => {
-                const roleIds = (emp as any).roleAssignments?.map((ra: any) => ra.roleId) || [];
-
-                // Calculate shifts for this week from current local schedule state
-                const currentSchedule = scheduleId ? loadedScheduleData : scheduleData;
-                const shiftsThisWeek = Object.values(currentSchedule)
-                    .flat()
-                    .filter(shift => shift.assignedEmployeeId === emp.id)
-                    .length;
-
-                return {
-                    id: emp.id,
-                    name: `${emp.user.firstName} ${emp.user.lastName}`,
-                    roleIds,
-                    shiftsThisWeek,
-                    isAvailable: true // Will be checked dynamically per shift
-                };
-            });
-
-            setRoles(rolesData);
-            setEmployees(transformedEmployees);
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
-            Alert.alert('Error', 'Failed to load schedule data');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (loading) {
         return (
@@ -354,6 +346,10 @@ export default function ScheduleEditor() {
                 create: shiftsToCreate
             });
 
+            // Step 7: Invalidate React Query cache so it refetches updated data
+            queryClient.invalidateQueries({ queryKey: queryKeys.schedule(scheduleId as string) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.schedules(orgId as string) });
+
             setIsSaveModalOpen(false);
         } catch (error) {
             console.error('Failed to save schedule:', error);
@@ -432,6 +428,11 @@ export default function ScheduleEditor() {
                     // Save changes before publishing
                     await saveTemplate();
                     await api.publishSchedule(scheduleId as string);
+
+                    // Invalidate cache after publishing
+                    queryClient.invalidateQueries({ queryKey: queryKeys.schedule(scheduleId as string) });
+                    queryClient.invalidateQueries({ queryKey: queryKeys.schedules(orgId as string) });
+
                     window.alert("Schedule is now live!");
                     router.push(`/(app)/${orgId}/schedulesList`);
                 } catch (error) {
@@ -457,6 +458,10 @@ export default function ScheduleEditor() {
                                 // Save changes before publishing
                                 await saveTemplate();
                                 await api.publishSchedule(scheduleId as string);
+
+                                // Invalidate cache after publishing
+                                queryClient.invalidateQueries({ queryKey: queryKeys.schedule(scheduleId as string) });
+                                queryClient.invalidateQueries({ queryKey: queryKeys.schedules(orgId as string) });
 
                                 Alert.alert("Published", "Schedule is now live!", [
                                     { text: "OK", onPress: () => router.push(`/(app)/${orgId}/schedulesList`) }

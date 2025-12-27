@@ -40,6 +40,8 @@ for (const envVar of requiredEnvVars) {
 
 const app = express();
 
+
+
 const PORT = process.env.PORT || 3000;
 
 // CORS configuration - allows all origins for mobile app API
@@ -50,7 +52,7 @@ app.use(cors({
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100
+    max: 500  // Increased for development - TODO: optimize frontend requests
 })
 
 /**

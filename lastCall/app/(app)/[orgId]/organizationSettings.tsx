@@ -22,6 +22,7 @@ import {
 } from 'lucide-react-native';
 import { useAuth } from '../../../contexts/AuthContext';
 import { api } from '@/lib/api';
+import { useOrganization } from '@/lib/queries';
 import type { OrganizationDetail } from '@/types/api';
 
 export default function OrganizationSettingsPage() {
@@ -29,30 +30,14 @@ export default function OrganizationSettingsPage() {
     const { orgId } = useLocalSearchParams<{ orgId: string }>();
     const { user } = useAuth();
 
-    const [loading, setLoading] = useState(true);
-    const [organization, setOrganization] = useState<OrganizationDetail | null>(null);
+    // React Query hook
+    const { data: organization = null, isLoading: loading } = useOrganization(orgId);
 
     // Edit Organization Modal state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [orgName, setOrgName] = useState('');
     const [orgDescription, setOrgDescription] = useState('');
     const [editLoading, setEditLoading] = useState(false);
-
-    useEffect(() => {
-        loadOrganization();
-    }, []);
-
-    const loadOrganization = async () => {
-        try {
-            const org = await api.getOrganization(orgId);
-            setOrganization(org);
-        } catch (error) {
-            console.error('Failed to load organization:', error);
-            Alert.alert('Error', 'Failed to load organization details');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleEditOrganization = () => {
         setOrgName(organization?.name || '');

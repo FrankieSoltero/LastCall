@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "lastCall",
+    "name": "LastCall",
     "slug": "lastCall",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,11 +8,17 @@
     "scheme": "lastcall",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "description": "Employee scheduling for bars, restaurants, and service businesses",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lastcal.lastCall",
+      "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "We respect your privacy. This identifier helps us provide a better experience.",
+        "NSLocationWhenInUseUsageDescription": "Location is never collected or used by this app.",
+        "NSCameraUsageDescription": "Camera access is never requested by this app.",
+        "NSPhotoLibraryUsageDescription": "Photo library access is never requested by this app."
       }
     },
     "android": {

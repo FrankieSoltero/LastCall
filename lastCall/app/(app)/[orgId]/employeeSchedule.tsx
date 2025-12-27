@@ -17,6 +17,7 @@ import {
     Phone,
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
+import { useActiveSchedule } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
 import { dateToDay } from '@/lib/helper';
 
@@ -43,9 +44,10 @@ export default function EmployeeSchedule() {
 
     const currentUserId = user?.id || '';
 
+    // React Query hook - automatic caching
+    const { data: activeSchedule, isLoading: loading, refetch, isRefetching: refreshing } = useActiveSchedule(orgId as string);
+
     // --- State ---
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const [scheduleData, setScheduleData] = useState<WeeklySchedule>({});
     const [availableRoles, setAvailableRoles] = useState<string[]>([]);
     const [weekRange, setWeekRange] = useState("Jan 22 - Jan 28");
@@ -54,14 +56,11 @@ export default function EmployeeSchedule() {
     const [selectedDay, setSelectedDay] = useState('Mon');
     const [selectedRole, setSelectedRole] = useState<string | null>(null); // null = All Roles
 
-    // --- 1. Load Data ---
-    const fetchSchedule = async () => {
+    // --- Process schedule data when it loads ---
+    useEffect(() => {
+        if (!activeSchedule) return;
+
         try {
-            console.log(`Fetching latest published schedule for org: ${orgId}`);
-
-            // Fetch the most recent published schedule
-            const activeSchedule = await api.getActiveSchedule(orgId as string);
-
             // Handle template schedules (which don't have weekStartDate)
             if (!activeSchedule.weekStartDate) {
                 throw new Error('No published schedule found for the current week');
@@ -119,19 +118,11 @@ export default function EmployeeSchedule() {
             } else {
                 console.error("Failed to load schedule", error);
             }
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
         }
-    };
+    }, [activeSchedule]);
 
-    useEffect(() => {
-        fetchSchedule();
-    }, []);
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchSchedule();
+    const onRefresh = async () => {
+        await refetch();
     };
 
     // --- 2. Filter Logic ---

@@ -21,6 +21,7 @@ import {
   Check,
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
+import { useRoles, useEmployees } from '@/lib/queries';
 import type { RoleWithCounts } from '@/types/api';
 
 // --- Types ---
@@ -35,51 +36,28 @@ export default function JobRoles() {
   const router = useRouter();
   const { orgId } = useLocalSearchParams();
 
-  // State
-  const [roles, setRoles] = useState<RoleWithCounts[]>([]);
-  const [employees, setEmployees] = useState<EmployeeBasic[]>([]);
-  const [loading, setLoading] = useState(true);
+  // React Query hooks
+  const { data: roles = [], isLoading: rolesLoading } = useRoles(orgId as string);
+  const { data: employeesRaw = [], isLoading: employeesLoading } = useEmployees(orgId as string);
+
+  const loading = rolesLoading || employeesLoading;
+
+  // Transform employees
+  const employees: EmployeeBasic[] = React.useMemo(() => {
+    return employeesRaw.map(emp => ({
+      id: emp.id,
+      firstName: emp.user.firstName,
+      lastName: emp.user.lastName,
+      roleIds: (emp as any).roleAssignments?.map((ra: any) => ra.roleId) || []
+    }));
+  }, [employeesRaw]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingRole, setEditingRole] = useState<RoleWithCounts | null>(null); // null = Creating new
+  const [editingRole, setEditingRole] = useState<RoleWithCounts | null>(null);
   const [modalName, setModalName] = useState('');
   const [modalEmployeeIds, setModalEmployeeIds] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
-
-  // --- 1. Load Data ---
-  useEffect(() => {
-    fetchData();
-  }, [orgId]);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch roles and employees from backend
-      const [rolesData, employeesData] = await Promise.all([
-        api.getRoles(orgId as string),
-        api.getEmployees(orgId as string)
-      ]);
-
-      // Transform employees to include roleIds for easier UI handling
-      // Backend returns employees with user.firstName/lastName and roleAssignments
-      const transformedEmployees: EmployeeBasic[] = employeesData.map(emp => ({
-        id: emp.id,
-        firstName: emp.user.firstName,
-        lastName: emp.user.lastName,
-        roleIds: (emp as any).roleAssignments?.map((ra: any) => ra.roleId) || []
-      }));
-
-      setRoles(rolesData);
-      setEmployees(transformedEmployees);
-    } catch (e) {
-      console.error('Failed to fetch roles/employees:', e);
-      Alert.alert('Error', 'Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // --- 2. Handlers ---
 

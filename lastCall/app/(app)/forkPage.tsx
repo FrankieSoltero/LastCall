@@ -3,36 +3,18 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, StatusBar,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { QrCode, Building2, ChevronRight, LogOut, Calendar, Settings } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { api } from '@/lib/api';
+import { useOrganizations } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
-import { OrganizationWithCounts } from '@/types/api';
 import { useNotifications } from '@/hooks/useNotifications';
 
 export default function DashboardOrFork() {
     const router = useRouter();
     const { user, signOut } = useAuth();
-    const [loading, setLoading] = useState(true);
-    const [userOrgs, setUserOrgs] = useState<OrganizationWithCounts[]>([]);
 
-    useEffect(() => {
-        checkUserOrgs();
-    }, []);
+    // React Query hook - automatic caching
+    const { data: userOrgs = [], isLoading: loading } = useOrganizations();
+
     useNotifications();
-
-    const checkUserOrgs = async () => {
-        try {
-            const orgs = await api.getOrganizations();
-            if (orgs && orgs.length > 0) {
-                setUserOrgs(orgs);
-            } else {
-                setUserOrgs([]);
-            }
-        } catch (error) {
-            console.error('Failed to check orgs', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleEnterOrg = (orgId: string) => {
         router.push(`/(app)/${orgId}`);

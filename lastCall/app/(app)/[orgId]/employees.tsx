@@ -26,6 +26,9 @@ import {
 } from 'lucide-react-native';
 import { EmployeeRole, EmployeeStatus, Role } from '@/types/api';
 import { api } from '@/lib/api';
+import { useEmployee, useEmployees, useRoles } from '@/lib/queries';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queries';
 
 // --- Types ---
 
@@ -44,62 +47,39 @@ type EmployeeDisplay = {
 export default function EmployeeManagement() {
     const router = useRouter();
     const { orgId } = useLocalSearchParams();
-    // State
-    const [employees, setEmployees] = useState<EmployeeDisplay[]>([]);
-    const [currentEmployeeId, setCurrentEmployeeId] = useState("");
-    const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [currentUserRole, setCurrentUserRole] = useState<EmployeeRole>('EMPLOYEE');
+    const queryClient = useQueryClient();
+
+    // React Query hooks
+    const { data: currentEmployee, isLoading: currentEmployeeLoading } = useEmployee(orgId as string);
+    const { data: employeesRaw = [], isLoading: employeesLoading } = useEmployees(orgId as string);
+    const { data: availableRoles = [], isLoading: rolesLoading } = useRoles(orgId as string);
+
+    const loading = currentEmployeeLoading || employeesLoading || rolesLoading;
+
+    // Derived state
+    const currentUserRole = currentEmployee?.role || 'EMPLOYEE';
+    const currentEmployeeId = currentEmployee?.id || '';
     const isManager = ['OWNER', 'ADMIN'].includes(currentUserRole);
+
+    // Transform employees
+    const employees: EmployeeDisplay[] = React.useMemo(() => {
+        return employeesRaw.map(emp => ({
+            id: emp.id,
+            firstName: emp.user.firstName,
+            lastName: emp.user.lastName,
+            email: emp.user.email,
+            phone: emp.user.phone,
+            status: emp.status,
+            systemRole: emp.role,
+            roles: (emp as any).roleAssignments?.map((ra: any) => ra.role) || []
+        }));
+    }, [employeesRaw]);
 
     // Modal State
     const [selectedEmployee, setSelectedEmployee] = useState<EmployeeDisplay | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]); // Track job role selections
+    const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
     const [hasChanges, setHasChanges] = useState(false);
-
-    // --- 1. Load Data ---
-    useEffect(() => {
-        const loadUserRole = async () => {
-            try {
-                const myEmployee = await api.getEmployee(orgId as string);
-                setCurrentUserRole(myEmployee.role);
-                setCurrentEmployeeId(myEmployee.id);
-            } catch (error) {
-                console.error('Failed to get user role:', error);
-            }
-        };
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const [employeeData, rolesData] = await Promise.all([
-                    api.getEmployees(orgId as string),
-                    api.getRoles(orgId as string)
-                ]);
-
-                const transformedEmployees: EmployeeDisplay[] = employeeData.map(emp => ({
-                    id: emp.id,
-                    firstName: emp.user.firstName,
-                    lastName: emp.user.lastName,
-                    email: emp.user.email,
-                    phone: emp.user.phone,
-                    status: emp.status,
-                    systemRole: emp.role,
-                    roles: (emp as any).roleAssignments?.map((ra: any) => ra.role) || []
-                }));
-
-                setEmployees(transformedEmployees);
-                setAvailableRoles(rolesData);
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-                Alert.alert('Error', 'Failed to load employees');
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadUserRole();
-        fetchData();
-    }, [orgId]);
 
 
     // --- 2. Action Handlers (Admin Only) ---
@@ -107,8 +87,7 @@ export default function EmployeeManagement() {
     const handleApprove = async (empId: string) => {
         try {
             await api.updateEmployee(orgId as string, empId, { status: 'APPROVED' });
-
-            setEmployees(prev => prev.map(e => e.id === empId ? { ...e, status: 'APPROVED' as EmployeeStatus } : e));
+            queryClient.invalidateQueries({ queryKey: queryKeys.employees(orgId as string) });
         } catch (error) {
             console.error('Failed to approve employee:', error);
             Alert.alert('Error', 'Failed to approve employee');

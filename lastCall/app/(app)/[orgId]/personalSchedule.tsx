@@ -18,6 +18,7 @@ import {
     Sun
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
+import { useActiveSchedule, useEmployee } from '@/lib/queries';
 import { dateToDay, dayToFullName } from '@/lib/helper';
 
 // --- Types ---
@@ -40,22 +41,23 @@ export default function MyShifts() {
     const router = useRouter();
     const { orgId } = useLocalSearchParams();
 
+    // React Query hooks - automatic caching
+    const { data: activeSchedule, isLoading: scheduleLoading, refetch: refetchSchedule, isRefetching: scheduleRefetching } = useActiveSchedule(orgId as string);
+    const { data: currentEmployee, isLoading: employeeLoading, refetch: refetchEmployee, isRefetching: employeeRefetching } = useEmployee(orgId as string);
+
+    const loading = scheduleLoading || employeeLoading;
+    const refreshing = scheduleRefetching || employeeRefetching;
+
     // --- State ---
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const [weekData, setWeekData] = useState<DaySchedule[]>([]);
     const [totalShifts, setTotalShifts] = useState(0);
     const [weekRange, setWeekRange] = useState("");
 
-    // --- Data Fetching ---
-    const fetchMyShifts = async () => {
+    // --- Process schedule data when it loads ---
+    useEffect(() => {
+        if (!activeSchedule || !currentEmployee) return;
+
         try {
-
-            const [activeSchedule, currentEmployee] = await Promise.all([
-                await api.getActiveSchedule(orgId as string),
-                await api.getEmployee(orgId as string)
-            ])
-
             // Handle template schedules (which don't have weekStartDate)
             if (!activeSchedule.weekStartDate) {
                 throw new Error('No published schedule found for the current week');
@@ -130,19 +132,11 @@ export default function MyShifts() {
             } else {
                 console.error("Failed to load schedule", error);
             }
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
         }
-    };
+    }, [activeSchedule, currentEmployee]);
 
-    useEffect(() => {
-        fetchMyShifts();
-    }, []);
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchMyShifts();
+    const onRefresh = async () => {
+        await Promise.all([refetchSchedule(), refetchEmployee()]);
     };
 
     // Helper to determine greeting based on time of day (just for flair)

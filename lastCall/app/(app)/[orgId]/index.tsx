@@ -29,6 +29,7 @@ import {
     Settings
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
+import { useOrganization, useEmployee } from '@/lib/queries';
 import { Employee, OrganizationDetail } from '@/types/api';
 import * as Clipboard from 'expo-clipboard';
 
@@ -36,10 +37,12 @@ export default function OrganizationDashboard() {
     const router = useRouter();
     const { orgId } = useLocalSearchParams();
 
-    const [org, setOrg] = useState<OrganizationDetail | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [employee, setEmployee] = useState<Employee | null>(null);
+    // React Query hooks - automatic caching
+    const { data: org = null, isLoading: orgLoading, refetch: refetchOrg, isRefetching: orgRefetching } = useOrganization(orgId as string);
+    const { data: employee = null, isLoading: employeeLoading, refetch: refetchEmployee, isRefetching: employeeRefetching } = useEmployee(orgId as string);
+
+    const loading = orgLoading || employeeLoading;
+    const refreshing = orgRefetching || employeeRefetching;
 
     // --- INVITE MODAL STATE ---
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -48,32 +51,8 @@ export default function OrganizationDashboard() {
     const [expirationDays, setExpirationDays] = useState(7);
     const [copied, setCopied] = useState(false);
 
-    const fetchAllData = async () => {
-        try {
-            console.log('Fetching organization and employee data for:', orgId);
-
-            const [orgData, employeeData] = await Promise.all([
-                api.getOrganization(orgId as string),
-                api.getEmployee(orgId as string)
-            ]);
-
-            setOrg(orgData);
-            setEmployee(employeeData);
-        } catch (error: any) {
-            console.error('Failed to fetch data:', error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchAllData();
-    }, [orgId]);
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchAllData();
+    const onRefresh = async () => {
+        await Promise.all([refetchOrg(), refetchEmployee()]);
     };
 
     // --- INVITE LOGIC ---

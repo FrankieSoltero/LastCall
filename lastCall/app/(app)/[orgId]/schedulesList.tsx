@@ -22,19 +22,34 @@ import {
   X
 } from 'lucide-react-native';
 import { api } from '@/lib/api';
+import { useSchedules } from '@/lib/queries';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queries';
 import type { ScheduleWithCounts, ScheduleType } from '@/types/api';
 import { formatWeekDate, getNextMonday, getNextMondays } from '@/lib/helper';
 
 export default function SchedulesList() {
   const router = useRouter();
   const { orgId } = useLocalSearchParams();
-
-  const [schedules, setSchedules] = useState<ScheduleWithCounts[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
   // Tab state
   const [selectedTab, setSelectedTab] = useState<'TEMPLATE' | 'DRAFT' | 'PUBLISHED'>('DRAFT');
+
+  // React Query hook - automatically caches and deduplicates
+  const { data: schedulesRaw = [], isLoading, refetch, isRefetching } = useSchedules(
+    orgId as string,
+    selectedTab
+  );
+
+  // Sort schedules
+  const schedules = React.useMemo(() => {
+    return [...schedulesRaw].sort((a, b) => {
+      if (!a.weekStartDate) return 1;
+      if (!b.weekStartDate) return -1;
+      return new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime();
+    });
+  }, [schedulesRaw]);
 
   // Creation modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -48,39 +63,11 @@ export default function SchedulesList() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchSchedules();
-  }, [orgId]);
-
-  useEffect(() => {
-    if (!loading) fetchSchedules();
-  }, [selectedTab]);
-
-  useEffect(() => {
     setAvailableMondays(getNextMondays(8));
   }, []);
 
-  const fetchSchedules = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getSchedules(orgId as string, selectedTab);
-      // Sort by weekStartDate descending (most recent first)
-      // Templates won't have weekStartDate, so handle nulls
-      const sorted = data.sort((a, b) => {
-        if (!a.weekStartDate) return 1;
-        if (!b.weekStartDate) return -1;
-        return new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime();
-      });
-      setSchedules(sorted);
-    } catch (error) {
-      console.error('Failed to fetch schedules:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchSchedules();
+  const onRefresh = async () => {
+    await refetch();
   };
 
   const handleSchedulePress = (scheduleId: string) => {
@@ -89,12 +76,18 @@ export default function SchedulesList() {
 
   const handleCreateNew = async () => {
     setIsCreateModalOpen(true);
-    // Fetch templates for selection
-    try {
-      const templateData = await api.getSchedules(orgId as string, 'TEMPLATE');
-      setTemplates(templateData);
-    } catch (error) {
-      console.error('Failed to fetch templates:', error);
+    // Get templates from cache or fetch
+    const cachedTemplates = queryClient.getQueryData(queryKeys.schedules(orgId as string, 'TEMPLATE'));
+    if (cachedTemplates) {
+      setTemplates(cachedTemplates as ScheduleWithCounts[]);
+    } else {
+      try {
+        const templateData = await api.getSchedules(orgId as string, 'TEMPLATE');
+        setTemplates(templateData);
+        queryClient.setQueryData(queryKeys.schedules(orgId as string, 'TEMPLATE'), templateData);
+      } catch (error) {
+        console.error('Failed to fetch templates:', error);
+      }
     }
   };
 
@@ -127,6 +120,9 @@ export default function SchedulesList() {
         });
       }
 
+      // Invalidate schedules cache to show the new schedule
+      queryClient.invalidateQueries({ queryKey: queryKeys.schedules(orgId as string) });
+
       // Reset modal state
       setIsCreateModalOpen(false);
       setScheduleName('');
@@ -144,7 +140,7 @@ export default function SchedulesList() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#4f46e5" />
@@ -197,7 +193,7 @@ export default function SchedulesList() {
       <ScrollView
         contentContainerStyle={styles.listContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ffffff" />
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} tintColor="#ffffff" />
         }
       >
         {schedules.length === 0 ? (
